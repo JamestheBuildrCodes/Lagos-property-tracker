@@ -1,0 +1,295 @@
+{
+  "generated_at": "2026-09-09T14:04:22.916010+00:00",
+  "summary": {
+    "listings_tracked": 260,
+    "areas_monitored": 9,
+    "sources": 3,
+    "source_names": [
+      "Estate Intel",
+      "Nigeria Property Centre",
+      "PropertyPro.ng"
+    ],
+    "median_apartment_sale": 700000000.0,
+    "median_annual_rent": 20000000.0,
+    "median_land_ppsqm": 1879964.695,
+    "changes": {
+      "new_listings": 74,
+      "price_reductions": 7,
+      "price_increases": 7,
+      "delisted": 85
+    },
+    "scorecard": [
+      {
+        "market_node": "Banana Island",
+        "listing_count": 38,
+        "sale_3br_median": 720000000.0,
+        "rent_3br_median": 35000000.0,
+        "sale_ppsqm_median": 120000.0,
+        "rent_ppsqm_median": null,
+        "land_ppsqm_median": 7140000000.0,
+        "gross_rent_yield_proxy_pct": 4.86,
+        "sale_count": 10,
+        "rent_count": 13,
+        "land_count": 15
+      },
+      {
+        "market_node": "Old Ikoyi",
+        "listing_count": 47,
+        "sale_3br_median": 1000000000.0,
+        "rent_3br_median": 35000000.0,
+        "sale_ppsqm_median": 1502145.92,
+        "rent_ppsqm_median": 33228.225,
+        "land_ppsqm_median": 4400000.0,
+        "gross_rent_yield_proxy_pct": 3.5,
+        "sale_count": 16,
+        "rent_count": 11,
+        "land_count": 20
+      },
+      {
+        "market_node": "Lekki Phase 1",
+        "listing_count": 38,
+        "sale_3br_median": 550000000.0,
+        "rent_3br_median": 20000000.0,
+        "sale_ppsqm_median": null,
+        "rent_ppsqm_median": null,
+        "land_ppsqm_median": 1971326.16,
+        "gross_rent_yield_proxy_pct": 3.64,
+        "sale_count": 8,
+        "rent_count": 13,
+        "land_count": 17
+      },
+      {
+        "market_node": "Victoria Island",
+        "listing_count": 22,
+        "sale_3br_median": 700000000.0,
+        "rent_3br_median": 22500000.0,
+        "sale_ppsqm_median": null,
+        "rent_ppsqm_median": null,
+        "land_ppsqm_median": 2671739.13,
+        "gross_rent_yield_proxy_pct": 3.21,
+        "sale_count": 4,
+        "rent_count": 8,
+        "land_count": 10
+      },
+      {
+        "market_node": "Eko Atlantic",
+        "listing_count": 17,
+        "sale_3br_median": 600000000.0,
+        "rent_3br_median": 48500000.0,
+        "sale_ppsqm_median": null,
+        "rent_ppsqm_median": null,
+        "land_ppsqm_median": null,
+        "gross_rent_yield_proxy_pct": 8.08,
+        "sale_count": 5,
+        "rent_count": 12,
+        "land_count": 0
+      },
+      {
+        "market_node": "Ikeja GRA",
+        "listing_count": 39,
+        "sale_3br_median": 420000000.0,
+        "rent_3br_median": 27500000.0,
+        "sale_ppsqm_median": null,
+        "rent_ppsqm_median": null,
+        "land_ppsqm_median": 1300000.0,
+        "gross_rent_yield_proxy_pct": 6.55,
+        "sale_count": 4,
+        "rent_count": 19,
+        "land_count": 16
+      },
+      {
+        "market_node": "Asokoro",
+        "listing_count": 21,
+        "sale_3br_median": 205000000.0,
+        "rent_3br_median": 9000000.0,
+        "sale_ppsqm_median": null,
+        "rent_ppsqm_median": null,
+        "land_ppsqm_median": 792857.14,
+        "gross_rent_yield_proxy_pct": 4.39,
+        "sale_count": 2,
+        "rent_count": 3,
+        "land_count": 16
+      },
+      {
+        "market_node": "Maitama",
+        "listing_count": 34,
+        "sale_3br_median": 525000000.0,
+        "rent_3br_median": 25000000.0,
+        "sale_ppsqm_median": null,
+        "rent_ppsqm_median": null,
+        "land_ppsqm_median": 1818181.82,
+        "gross_rent_yield_proxy_pct": 4.76,
+        "sale_count": 5,
+        "rent_count": 13,
+        "land_count": 16
+      },
+      {
+        "market_node": "Wuse",
+        "listing_count": 4,
+        "sale_3br_median": 135000000.0,
+        "rent_3br_median": 6500000.0,
+        "sale_ppsqm_median": 112500.0,
+        "rent_ppsqm_median": null,
+        "land_ppsqm_median": null,
+        "gross_rent_yield_proxy_pct": 4.81,
+        "sale_count": 2,
+        "rent_count": 2,
+        "land_count": 0
+      }
+    ],
+    "signals": {
+      "most_expensive": {
+        "market_node": "Old Ikoyi",
+        "listing_count": 47,
+        "sale_3br_median": 1000000000.0,
+        "rent_3br_median": 35000000.0,
+        "sale_ppsqm_median": 1502145.92,
+        "rent_ppsqm_median": 33228.225,
+        "land_ppsqm_median": 4400000.0,
+        "gross_rent_yield_proxy_pct": 3.5,
+        "sale_count": 16,
+        "rent_count": 11,
+        "land_count": 20
+      },
+      "strongest_rental": {
+        "market_node": "Eko Atlantic",
+        "listing_count": 17,
+        "sale_3br_median": 600000000.0,
+        "rent_3br_median": 48500000.0,
+        "sale_ppsqm_median": null,
+        "rent_ppsqm_median": null,
+        "land_ppsqm_median": null,
+        "gross_rent_yield_proxy_pct": 8.08,
+        "sale_count": 5,
+        "rent_count": 12,
+        "land_count": 0
+      },
+      "best_relative_value": {
+        "market_node": "Wuse",
+        "listing_count": 4,
+        "sale_3br_median": 135000000.0,
+        "rent_3br_median": 6500000.0,
+        "sale_ppsqm_median": 112500.0,
+        "rent_ppsqm_median": null,
+        "land_ppsqm_median": null,
+        "gross_rent_yield_proxy_pct": 4.81,
+        "sale_count": 2,
+        "rent_count": 2,
+        "land_count": 0
+      },
+      "land_opportunity": {
+        "market_node": "Asokoro",
+        "listing_count": 21,
+        "sale_3br_median": 205000000.0,
+        "rent_3br_median": 9000000.0,
+        "sale_ppsqm_median": null,
+        "rent_ppsqm_median": null,
+        "land_ppsqm_median": 792857.14,
+        "gross_rent_yield_proxy_pct": 4.39,
+        "sale_count": 2,
+        "rent_count": 3,
+        "land_count": 16
+      },
+      "strongest_rental_activity": {
+        "market_node": "Ikeja GRA",
+        "listing_count": 39,
+        "sale_3br_median": 420000000.0,
+        "rent_3br_median": 27500000.0,
+        "sale_ppsqm_median": null,
+        "rent_ppsqm_median": null,
+        "land_ppsqm_median": 1300000.0,
+        "gross_rent_yield_proxy_pct": 6.55,
+        "sale_count": 4,
+        "rent_count": 19,
+        "land_count": 16
+      },
+      "monitoring": [
+        {
+          "market_node": "Wuse",
+          "listing_count": 4,
+          "sale_3br_median": 135000000.0,
+          "rent_3br_median": 6500000.0,
+          "sale_ppsqm_median": 112500.0,
+          "rent_ppsqm_median": null,
+          "land_ppsqm_median": null,
+          "gross_rent_yield_proxy_pct": 4.81,
+          "sale_count": 2,
+          "rent_count": 2,
+          "land_count": 0
+        },
+        {
+          "market_node": "Eko Atlantic",
+          "listing_count": 17,
+          "sale_3br_median": 600000000.0,
+          "rent_3br_median": 48500000.0,
+          "sale_ppsqm_median": null,
+          "rent_ppsqm_median": null,
+          "land_ppsqm_median": null,
+          "gross_rent_yield_proxy_pct": 8.08,
+          "sale_count": 5,
+          "rent_count": 12,
+          "land_count": 0
+        },
+        {
+          "market_node": "Asokoro",
+          "listing_count": 21,
+          "sale_3br_median": 205000000.0,
+          "rent_3br_median": 9000000.0,
+          "sale_ppsqm_median": null,
+          "rent_ppsqm_median": null,
+          "land_ppsqm_median": 792857.14,
+          "gross_rent_yield_proxy_pct": 4.39,
+          "sale_count": 2,
+          "rent_count": 3,
+          "land_count": 16
+        }
+      ],
+      "investment": {
+        "market_node": "Eko Atlantic",
+        "listing_count": 17,
+        "sale_3br_median": 600000000.0,
+        "rent_3br_median": 48500000.0,
+        "sale_ppsqm_median": null,
+        "rent_ppsqm_median": null,
+        "land_ppsqm_median": null,
+        "gross_rent_yield_proxy_pct": 8.08,
+        "sale_count": 5,
+        "rent_count": 12,
+        "land_count": 0
+      },
+      "buyer_value": {
+        "market_node": "Wuse",
+        "listing_count": 4,
+        "sale_3br_median": 135000000.0,
+        "rent_3br_median": 6500000.0,
+        "sale_ppsqm_median": 112500.0,
+        "rent_ppsqm_median": null,
+        "land_ppsqm_median": null,
+        "gross_rent_yield_proxy_pct": 4.81,
+        "sale_count": 2,
+        "rent_count": 2,
+        "land_count": 0
+      },
+      "seller_momentum": null
+    },
+    "trends": {},
+    "week_on_week": {
+      "available": false,
+      "previous_date": null,
+      "metrics": {},
+      "narrative": []
+    },
+    "analysis_notes": [
+      "The deepest comparable coverage this week is in Old Ikoyi, Ikeja GRA, Banana Island.",
+      "Thin coverage in Wuse, Eko Atlantic, Asokoro means those areas should be treated as watchlist signals rather than firm pricing conclusions.",
+      "Eko Atlantic currently shows the strongest rental pricing/yield proxy among areas with usable observations.",
+      "Wuse currently screens as the lowest observed apartment sale ₦/sqm among areas with usable data.",
+      "Eko Atlantic currently screens strongest on the rental-yield proxy, subject to the available comparable sample."
+    ]
+  },
+  "outputs": {
+    "html": "executive_brief_2026-09-09.html",
+    "xlsx": "market_intelligence_2026-09-09.xlsx",
+    "docx": "Lagos_Property_Market_Intelligence_2026-09-09.docx"
+  }
+}
