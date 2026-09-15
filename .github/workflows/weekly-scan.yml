@@ -95,17 +95,21 @@ jobs:
 
       - name: Send Layer 1 executive email
         env:
-          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          MAILJET_API_KEY: ${{ secrets.MAILJET_API_KEY }}
+          MAILJET_SECRET_KEY: ${{ secrets.MAILJET_SECRET_KEY }}
+          MAILJET_FROM_EMAIL: ${{ secrets.MAILJET_FROM_EMAIL }}
+          MAILJET_FROM_NAME: ${{ secrets.MAILJET_FROM_NAME }}
           REPORT_TO_EMAIL: ${{ secrets.REPORT_TO_EMAIL }}
           REPORT_CLIENT_EMAIL: ${{ secrets.REPORT_CLIENT_EMAIL }}
         run: |
-          if [ -n "$RESEND_API_KEY" ] && [ -n "$REPORT_TO_EMAIL" ]; then
+          if [ -n "$MAILJET_API_KEY" ] && [ -n "$MAILJET_SECRET_KEY" ] && [ -n "$REPORT_CLIENT_EMAIL" ]; then
+            test -n "$MAILJET_FROM_EMAIL" || { echo "MAILJET_FROM_EMAIL is not configured; use an active Mailjet sender address."; exit 1; }
             CURR=$(ls -t property_listings_*.csv | head -n 1)
             CHANGES=$(ls -t changes_*.csv 2>/dev/null | head -n 1)
             HTML=$(ls -t executive_brief_*.html | head -n 1)
-            python email_report.py "$CURR" "${CHANGES:-none}" "$REPORT_TO_EMAIL" "$HTML"
+            python email_report.py "$CURR" "${CHANGES:-none}" "$REPORT_CLIENT_EMAIL" "$HTML"
           else
-            echo "Resend secrets not configured; Layer 1 email skipped."
+            echo "Mailjet secrets not configured; Layer 1 email skipped."
           fi
 
       - name: Write Layer 2 to existing Google Sheet

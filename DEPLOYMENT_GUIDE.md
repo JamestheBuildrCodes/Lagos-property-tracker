@@ -25,7 +25,7 @@ Archive + GitHub history
 
 ### Layer 1 — Executive Decision Brief
 
-`executive_brief_YYYY-MM-DD.html` is sent by Resend. It contains the market
+`executive_brief_YYYY-MM-DD.html` is sent by Mailjet. It contains the market
 snapshot, key market signals and decision signals. It intentionally does not
 send the entire raw listing table.
 
@@ -80,9 +80,12 @@ Set these GitHub Actions repository secrets:
 | Secret | Purpose |
 |---|---|
 | `ZYTE_API_KEY` | PropertyPro/Estate Intel browser HTML |
-| `RESEND_API_KEY` | Executive email |
-| `REPORT_TO_EMAIL` | Primary email recipient (comma-separated is supported) |
-| `REPORT_CLIENT_EMAIL` | Optional client recipient and Google Sheet/Doc Viewer |
+| `MAILJET_API_KEY` | Executive email |
+| `MAILJET_FROM_EMAIL` | Active/validated Mailjet sender address |
+| `REPORT_TO_EMAIL` | Your internal verification email (CC) |
+
+**Mailjet production sending:** `MAILJET_FROM_EMAIL` must be an active/validated Mailjet sender address. An individually validated Gmail/Outlook/Yahoo sender is supported; a custom domain is not required for this setup.
+| `REPORT_CLIENT_EMAIL` | Client recipient (To) and Google Sheet/Doc Viewer |
 | `GOOGLE_DOC_ID` | Optional Google Doc to update in place; blank creates a new Doc |
 | `GOOGLE_SERVICE_ACCOUNT_JSON` | Existing Google Sheet authentication |
 | `GOOGLE_SHEET_ID` | Existing Sheet ID |
@@ -127,3 +130,15 @@ python -m unittest discover -s tests -v
 ```
 
 GitHub Actions performs the full dependency install and generates XLSX/DOCX.
+
+
+### Mailjet email delivery
+Set these GitHub Actions secrets:
+- `MAILJET_API_KEY` — Mailjet API key.
+- `MAILJET_SECRET_KEY` — Mailjet secret key.
+- `MAILJET_FROM_EMAIL` — active/validated Mailjet sender address.
+- `MAILJET_FROM_NAME` — optional display name; defaults to `Master Builder`.
+- `REPORT_CLIENT_EMAIL` — client recipient (To).
+- `REPORT_TO_EMAIL` — internal verification recipient (Cc).
+
+The workflow uses Mailjet Send API v3.1. No custom domain is required when using an individually validated sender address.

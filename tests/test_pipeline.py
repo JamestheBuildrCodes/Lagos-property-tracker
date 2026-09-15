@@ -145,8 +145,18 @@ class ClientReportingTests(unittest.TestCase):
         self.assertIn("permissions().create",text)
 
     def test_client_distribution_is_supported(self):
-        self.assertIn("REPORT_CLIENT_EMAIL",Path("email_report.py").read_text(encoding="utf-8"))
-        self.assertIn("REPORT_CLIENT_EMAIL",Path(".github/workflows/weekly-scan.yml").read_text(encoding="utf-8"))
+        email=Path("email_report.py").read_text(encoding="utf-8")
+        workflow=Path(".github/workflows/weekly-scan.yml").read_text(encoding="utf-8")
+        self.assertIn("REPORT_CLIENT_EMAIL",email)
+        self.assertIn("REPORT_CLIENT_EMAIL",workflow)
+        self.assertIn("MAILJET_API_KEY",email)
+        self.assertIn("MAILJET_SECRET_KEY",email)
+        self.assertIn("MAILJET_FROM_EMAIL",email)
+        self.assertIn("MAILJET_API_KEY",workflow)
+        self.assertIn("MAILJET_SECRET_KEY",workflow)
+        self.assertIn("MAILJET_FROM_EMAIL",workflow)
+        self.assertIn('"Cc"',email)
+        self.assertNotIn("onboarding@resend.dev",email)
 
 
     def test_google_docs_dependency_is_declared(self):
