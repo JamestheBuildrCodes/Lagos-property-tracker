@@ -1,7 +1,7 @@
 {
-  "file": "property_listings_2026-09-09.csv",
-  "rows": 260,
-  "validated_at": "2026-09-09T12:23:46.412928+00:00",
+  "file": "property_listings_2026-09-15.csv",
+  "rows": 269,
+  "validated_at": "2026-09-15T11:26:16.959999+00:00",
   "sources": [
     "Nigeria Property Centre",
     "PropertyPro.ng"
