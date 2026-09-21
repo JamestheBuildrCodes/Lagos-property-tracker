@@ -1,8 +1,69 @@
 {
-  "date": "2026-09-15",
+  "date": "2026-09-21",
   "manifest_entries": 207,
   "category_requests": 54,
-  "listing_rows": 269,
+  "listing_rows": 236,
   "estate_intel_rows": 9,
-  "failures": []
+  "failures": [
+    {
+      "source": "Nigeria Property Centre",
+      "node": "Eko Atlantic",
+      "category": "sale",
+      "url": "https://nigeriapropertycentre.com/for-sale/flats-apartments/lagos/victoria-island/eko-atlantic/showtype",
+      "pages": 0,
+      "cards": 0,
+      "rows": 0,
+      "error": "Nigeria Property Centre direct request failed: 404 Client Error: Not Found for url: https://nigeriapropertycentre.com/for-sale/flats-apartments/lagos/victoria-island/eko-atlantic/showtype"
+    },
+    {
+      "source": "Nigeria Property Centre",
+      "node": "Eko Atlantic",
+      "category": "rent",
+      "url": "https://nigeriapropertycentre.com/for-rent/flats-apartments/lagos/victoria-island/eko-atlantic/showtype",
+      "pages": 0,
+      "cards": 0,
+      "rows": 0,
+      "error": "Nigeria Property Centre direct request failed: 404 Client Error: Not Found for url: https://nigeriapropertycentre.com/for-rent/flats-apartments/lagos/victoria-island/eko-atlantic/showtype"
+    },
+    {
+      "source": "Nigeria Property Centre",
+      "node": "Eko Atlantic",
+      "category": "land_sale",
+      "url": "https://nigeriapropertycentre.com/for-sale/land/residential-land/lagos/victoria-island/eko-atlantic/showtype",
+      "pages": 0,
+      "cards": 0,
+      "rows": 0,
+      "error": "Nigeria Property Centre direct request failed: 404 Client Error: Not Found for url: https://nigeriapropertycentre.com/for-sale/land/residential-land/lagos/victoria-island/eko-atlantic/showtype"
+    },
+    {
+      "source": "Nigeria Property Centre",
+      "node": "Ikeja GRA",
+      "category": "rent",
+      "url": "https://nigeriapropertycentre.com/for-rent/flats-apartments/lagos/ikeja/ikeja-gra/showtype",
+      "pages": 0,
+      "cards": 0,
+      "rows": 0,
+      "error": "Nigeria Property Centre direct request failed: 404 Client Error: Not Found for url: https://nigeriapropertycentre.com/for-rent/flats-apartments/lagos/ikeja/ikeja-gra/showtype"
+    },
+    {
+      "source": "Nigeria Property Centre",
+      "node": "Ikeja GRA",
+      "category": "sale",
+      "url": "https://nigeriapropertycentre.com/for-sale/flats-apartments/lagos/ikeja/ikeja-gra/showtype",
+      "pages": 0,
+      "cards": 0,
+      "rows": 0,
+      "error": "Nigeria Property Centre direct request failed: 404 Client Error: Not Found for url: https://nigeriapropertycentre.com/for-sale/flats-apartments/lagos/ikeja/ikeja-gra/showtype"
+    },
+    {
+      "source": "Nigeria Property Centre",
+      "node": "Ikeja GRA",
+      "category": "land_sale",
+      "url": "https://nigeriapropertycentre.com/for-sale/land/residential-land/lagos/ikeja/ikeja-gra/showtype",
+      "pages": 0,
+      "cards": 0,
+      "rows": 0,
+      "error": "Nigeria Property Centre direct request failed: 404 Client Error: Not Found for url: https://nigeriapropertycentre.com/for-sale/land/residential-land/lagos/ikeja/ikeja-gra/showtype"
+    }
+  ]
 }

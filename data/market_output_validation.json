@@ -1,7 +1,7 @@
 {
-  "file": "property_listings_2026-09-15.csv",
-  "rows": 269,
-  "validated_at": "2026-09-15T11:26:16.959999+00:00",
+  "file": "property_listings_2026-09-21.csv",
+  "rows": 236,
+  "validated_at": "2026-09-21T13:33:55.489647+00:00",
   "sources": [
     "Nigeria Property Centre",
     "PropertyPro.ng"
@@ -9,7 +9,6 @@
   "nodes": [
     "Asokoro",
     "Banana Island",
-    "Eko Atlantic",
     "Ikeja GRA",
     "Lekki Phase 1",
     "Maitama",
