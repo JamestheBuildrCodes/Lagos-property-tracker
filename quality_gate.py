@@ -2,20 +2,10 @@
 from __future__ import annotations
 import csv,json,sys
 from pathlib import Path
-NODE_MARKERS={"Banana Island":("banana island",),"Old Ikoyi":("old ikoyi","ikoyi"),"Lekki Phase 1":("lekki phase 1",),"Victoria Island":("victoria island","oniru"),"Eko Atlantic":("eko atlantic",),"Ikeja GRA":("ikeja gra",),"Asokoro":("asokoro",),"Maitama":("maitama",),"Wuse":("wuse",)}
-ALLOWED_CROSS_LABELS={("Banana Island","old ikoyi"),("Old Ikoyi","ikoyi"),("Victoria Island","oniru")}
 def num(v):
     try:return float(str(v).replace(",","").strip())
     except (TypeError,ValueError):return None
 def is_propertypro_agent(url):return "propertypro.ng/agent/" in (url or "").lower()
-def strong_node_conflict(row):
-    title=(row.get("title") or "").lower(); node=row.get("market_node") or ""
-    if not title or not node:return False
-    for other,markers in NODE_MARKERS.items():
-        if other==node:continue
-        for marker in markers:
-            if marker in title and (node,marker) not in ALLOWED_CROSS_LABELS:return True
-    return False
 def process(path):
     with open(path,newline="",encoding="utf-8-sig") as f:rows=list(csv.DictReader(f))
     kept=[];removed=[];fixed=[]
@@ -23,8 +13,6 @@ def process(path):
         url=row.get("source_url","")
         if row.get("source")=="PropertyPro.ng" and is_propertypro_agent(url):
             removed.append({"row":i,"reason":"non-auditable PropertyPro agent/profile URL","url":url});continue
-        if strong_node_conflict(row):
-            removed.append({"row":i,"reason":"title/location conflict","title":row.get("title",""),"market_node":row.get("market_node","")});continue
         if (row.get("property_type") or "").lower()=="land":
             if row.get("bedrooms") not in (None,"","0"):
                 row["bedrooms"]="";fixed.append({"row":i,"fix":"removed bedroom value from land record"})
