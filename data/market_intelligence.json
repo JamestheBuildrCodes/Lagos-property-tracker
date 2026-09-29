@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-09-29T05:31:43.287848+00:00",
+  "generated_at": "2026-09-29T05:52:12.782397+00:00",
   "summary": {
-    "listings_tracked": 175,
+    "listings_tracked": 176,
     "areas_monitored": 9,
     "sources": 3,
     "source_names": [
@@ -9,14 +9,14 @@
       "Nigeria Property Centre",
       "PropertyPro.ng"
     ],
-    "median_apartment_sale": 800000000.0,
-    "median_annual_rent": 20000000.0,
+    "median_apartment_sale": 825000000.0,
+    "median_annual_rent": 19000000.0,
     "median_land_ppsqm": 1200000.0,
     "changes": {
-      "new_listings": 44,
-      "price_reductions": 14,
-      "price_increases": 17,
-      "delisted": 101
+      "new_listings": 1,
+      "price_reductions": 0,
+      "price_increases": 2,
+      "delisted": 0
     },
     "scorecard": [
       {
@@ -34,7 +34,7 @@
       },
       {
         "market_node": "Old Ikoyi",
-        "listing_count": 36,
+        "listing_count": 37,
         "sale_3br_median": 950000000.0,
         "rent_3br_median": 50000000.0,
         "sale_ppsqm_median": 2000000.0,
@@ -43,7 +43,7 @@
         "gross_rent_yield_proxy_pct": 5.26,
         "sale_count": 14,
         "rent_count": 3,
-        "land_count": 19
+        "land_count": 20
       },
       {
         "market_node": "Lekki Phase 1",
@@ -99,28 +99,28 @@
       },
       {
         "market_node": "Asokoro",
-        "listing_count": 21,
-        "sale_3br_median": 50165000.0,
+        "listing_count": 19,
+        "sale_3br_median": 152500000.0,
         "rent_3br_median": 8000000.0,
         "sale_ppsqm_median": null,
         "rent_ppsqm_median": 7000.0,
         "land_ppsqm_median": 78947.37,
-        "gross_rent_yield_proxy_pct": 15.95,
-        "sale_count": 4,
+        "gross_rent_yield_proxy_pct": 5.25,
+        "sale_count": 2,
         "rent_count": 5,
         "land_count": 12
       },
       {
         "market_node": "Maitama",
-        "listing_count": 16,
+        "listing_count": 18,
         "sale_3br_median": null,
-        "rent_3br_median": 30000000.0,
+        "rent_3br_median": 16750000.0,
         "sale_ppsqm_median": null,
         "rent_ppsqm_median": null,
         "land_ppsqm_median": 1200000.0,
         "gross_rent_yield_proxy_pct": null,
         "sale_count": 0,
-        "rent_count": 4,
+        "rent_count": 6,
         "land_count": 12
       },
       {
@@ -140,7 +140,7 @@
     "signals": {
       "most_expensive": {
         "market_node": "Old Ikoyi",
-        "listing_count": 36,
+        "listing_count": 37,
         "sale_3br_median": 950000000.0,
         "rent_3br_median": 50000000.0,
         "sale_ppsqm_median": 2000000.0,
@@ -149,7 +149,7 @@
         "gross_rent_yield_proxy_pct": 5.26,
         "sale_count": 14,
         "rent_count": 3,
-        "land_count": 19
+        "land_count": 20
       },
       "strongest_rental": {
         "market_node": "Lekki Phase 1",
@@ -232,15 +232,15 @@
         },
         {
           "market_node": "Maitama",
-          "listing_count": 16,
+          "listing_count": 18,
           "sale_3br_median": null,
-          "rent_3br_median": 30000000.0,
+          "rent_3br_median": 16750000.0,
           "sale_ppsqm_median": null,
           "rent_ppsqm_median": null,
           "land_ppsqm_median": 1200000.0,
           "gross_rent_yield_proxy_pct": null,
           "sale_count": 0,
-          "rent_count": 4,
+          "rent_count": 6,
           "land_count": 12
         }
       ],
@@ -336,7 +336,7 @@
       "Asokoro": {
         "from_date": "2026-09-09",
         "to_date": "2026-09-29",
-        "sale_pct": -75.5,
+        "sale_pct": -25.6,
         "rent_pct": -11.1,
         "land_ppsqm_pct": -90.0,
         "snapshots": 5
@@ -345,7 +345,7 @@
         "from_date": "2026-09-09",
         "to_date": "2026-09-29",
         "sale_pct": null,
-        "rent_pct": 20.0,
+        "rent_pct": -33.0,
         "land_ppsqm_pct": -34.0,
         "snapshots": 5
       },
@@ -364,15 +364,15 @@
       "metrics": {
         "sale": {
           "label": "median apartment asking sale price",
-          "current": 800000000.0,
+          "current": 825000000.0,
           "previous": 700000000.0,
-          "pct_change": 14.3
+          "pct_change": 17.9
         },
         "rent": {
           "label": "median annual apartment rent",
-          "current": 20000000.0,
+          "current": 19000000.0,
           "previous": 20000000.0,
-          "pct_change": 0.0
+          "pct_change": -5.0
         },
         "land_ppsqm": {
           "label": "median land asking price per sqm",
@@ -382,23 +382,23 @@
         },
         "listings": {
           "label": "comparable listings tracked",
-          "current": 175,
+          "current": 176,
           "previous": 232,
-          "pct_change": -24.6
+          "pct_change": -24.1
         }
       },
       "narrative": [
-        "Median apartment asking sale price increased 14.3% week on week.",
-        "Median annual apartment rent held 0.0% week on week.",
+        "Median apartment asking sale price increased 17.9% week on week.",
+        "Median annual apartment rent decreased 5.0% week on week.",
         "Median land asking price per sqm decreased 59.9% week on week.",
-        "The scan captured 57 fewer comparable listings than the previous snapshot."
+        "The scan captured 56 fewer comparable listings than the previous snapshot."
       ]
     },
     "analysis_notes": [
-      "Median apartment asking sale price increased 14.3% week on week.",
-      "Median annual apartment rent held 0.0% week on week.",
+      "Median apartment asking sale price increased 17.9% week on week.",
+      "Median annual apartment rent decreased 5.0% week on week.",
       "Median land asking price per sqm decreased 59.9% week on week.",
-      "The scan captured 57 fewer comparable listings than the previous snapshot.",
+      "The scan captured 56 fewer comparable listings than the previous snapshot.",
       "The deepest comparable coverage this week is in Old Ikoyi, Banana Island, Lekki Phase 1.",
       "Thin coverage in Wuse, Ikeja GRA, Maitama means those areas should be treated as watchlist signals rather than firm pricing conclusions.",
       "Lekki Phase 1 currently shows the strongest rental pricing/yield proxy among areas with usable observations.",
