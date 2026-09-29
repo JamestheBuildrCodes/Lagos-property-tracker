@@ -1,0 +1,592 @@
+{
+  "input_rows": 224,
+  "output_rows": 175,
+  "removed_rows": 49,
+  "fixed_rows": 84,
+  "duplicates_removed": 0,
+  "removals": [
+    {
+      "row": 1,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/et-cetera-homes"
+    },
+    {
+      "row": 2,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/atinuke-olawumi"
+    },
+    {
+      "row": 3,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/john-boris-ogom1"
+    },
+    {
+      "row": 4,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/utopia-living-luxury"
+    },
+    {
+      "row": 5,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/first-colony-real-estate-company"
+    },
+    {
+      "row": 6,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/pcl-homes"
+    },
+    {
+      "row": 7,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/pecons-realtors"
+    },
+    {
+      "row": 9,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/highspeed-properties"
+    },
+    {
+      "row": 14,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/solution-point-network"
+    },
+    {
+      "row": 15,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/ayomide-oseni"
+    },
+    {
+      "row": 17,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/innerowrkings-investments-limited"
+    },
+    {
+      "row": 18,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/anulika-favour"
+    },
+    {
+      "row": 21,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/tugaris-realtor"
+    },
+    {
+      "row": 22,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/angel-mercy"
+    },
+    {
+      "row": 23,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/saint-joseph-property"
+    },
+    {
+      "row": 33,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/fizzle-adewale-ventures"
+    },
+    {
+      "row": 34,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/chrystal-abodes1"
+    },
+    {
+      "row": 35,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/sunwealth-real-estate-limited"
+    },
+    {
+      "row": 36,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/distinct-pragmatic-limited"
+    },
+    {
+      "row": 37,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/meridian-heritage-properties"
+    },
+    {
+      "row": 38,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/17three-digital-realtors"
+    },
+    {
+      "row": 39,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/christian-onichakwe"
+    },
+    {
+      "row": 40,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/real-and-reliable-homes-limited1"
+    },
+    {
+      "row": 41,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/oip-properties"
+    },
+    {
+      "row": 45,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/daniel-uche-properties"
+    },
+    {
+      "row": 46,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/chikodi-atiah"
+    },
+    {
+      "row": 47,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/b-unique-properties"
+    },
+    {
+      "row": 50,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/quolar-property"
+    },
+    {
+      "row": 52,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/spudy-global-limited"
+    },
+    {
+      "row": 53,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/propertywire-nigeria-limited"
+    },
+    {
+      "row": 55,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/projects-and-services"
+    },
+    {
+      "row": 57,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/titilayomi-comfort"
+    },
+    {
+      "row": 59,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/ayodele-odunuga-company1"
+    },
+    {
+      "row": 61,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/curtain-homes"
+    },
+    {
+      "row": 67,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/muyiwa-awobifa"
+    },
+    {
+      "row": 68,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/48-awolowo-rd-ikoyi"
+    },
+    {
+      "row": 70,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/west-coast-property-group"
+    },
+    {
+      "row": 73,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/ayoola-n-okesanjo-estate-agency-management"
+    },
+    {
+      "row": 77,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/vnt-global-services-limited"
+    },
+    {
+      "row": 78,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/onyinye-uche"
+    },
+    {
+      "row": 79,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/oputa-jay-apartments"
+    },
+    {
+      "row": 81,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/jay-realtor"
+    },
+    {
+      "row": 82,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/citymate-integrated"
+    },
+    {
+      "row": 83,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/olamide-realty-limited"
+    },
+    {
+      "row": 84,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/sabs-asset-limited"
+    },
+    {
+      "row": 85,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/olivemore-homes1"
+    },
+    {
+      "row": 86,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/ridwan-sansaliyu"
+    },
+    {
+      "row": 87,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/micheal-oladapo"
+    },
+    {
+      "row": 89,
+      "reason": "non-auditable PropertyPro agent/profile URL",
+      "url": "https://propertypro.ng/agent/tj-proactive-global-limited1"
+    }
+  ],
+  "fixes": [
+    {
+      "row": 8,
+      "fix": "converted parsed land unit price into total asking price"
+    },
+    {
+      "row": 26,
+      "fix": "converted parsed land unit price into total asking price"
+    },
+    {
+      "row": 27,
+      "fix": "converted parsed land unit price into total asking price"
+    },
+    {
+      "row": 28,
+      "fix": "converted parsed land unit price into total asking price"
+    },
+    {
+      "row": 29,
+      "fix": "converted parsed land unit price into total asking price"
+    },
+    {
+      "row": 32,
+      "fix": "converted parsed land unit price into total asking price"
+    },
+    {
+      "row": 49,
+      "fix": "removed bedroom value from land record"
+    },
+    {
+      "row": 49,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 107,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 108,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 109,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 110,
+      "fix": "converted parsed land unit price into total asking price"
+    },
+    {
+      "row": 111,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 112,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 113,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 114,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 115,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 116,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 117,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 118,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 134,
+      "fix": "removed bedroom value from land record"
+    },
+    {
+      "row": 134,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 135,
+      "fix": "removed bedroom value from land record"
+    },
+    {
+      "row": 135,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 136,
+      "fix": "removed bedroom value from land record"
+    },
+    {
+      "row": 136,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 137,
+      "fix": "removed bedroom value from land record"
+    },
+    {
+      "row": 137,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 138,
+      "fix": "removed bedroom value from land record"
+    },
+    {
+      "row": 138,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 139,
+      "fix": "removed bedroom value from land record"
+    },
+    {
+      "row": 139,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 140,
+      "fix": "removed bedroom value from land record"
+    },
+    {
+      "row": 140,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 141,
+      "fix": "removed bedroom value from land record"
+    },
+    {
+      "row": 141,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 142,
+      "fix": "removed bedroom value from land record"
+    },
+    {
+      "row": 142,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 143,
+      "fix": "removed bedroom value from land record"
+    },
+    {
+      "row": 143,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 144,
+      "fix": "removed bedroom value from land record"
+    },
+    {
+      "row": 144,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 145,
+      "fix": "removed bedroom value from land record"
+    },
+    {
+      "row": 145,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 164,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 167,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 168,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 169,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 170,
+      "fix": "converted parsed land unit price into total asking price"
+    },
+    {
+      "row": 171,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 172,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 173,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 174,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 199,
+      "fix": "removed bedroom value from land record"
+    },
+    {
+      "row": 199,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 200,
+      "fix": "removed bedroom value from land record"
+    },
+    {
+      "row": 200,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 201,
+      "fix": "removed bedroom value from land record"
+    },
+    {
+      "row": 201,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 202,
+      "fix": "removed bedroom value from land record"
+    },
+    {
+      "row": 202,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 203,
+      "fix": "removed bedroom value from land record"
+    },
+    {
+      "row": 203,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 204,
+      "fix": "removed bedroom value from land record"
+    },
+    {
+      "row": 204,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 205,
+      "fix": "removed bedroom value from land record"
+    },
+    {
+      "row": 205,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 206,
+      "fix": "removed bedroom value from land record"
+    },
+    {
+      "row": 206,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 207,
+      "fix": "removed bedroom value from land record"
+    },
+    {
+      "row": 207,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 208,
+      "fix": "removed bedroom value from land record"
+    },
+    {
+      "row": 208,
+      "fix": "recomputed land price per sqm from total asking price and land area"
+    },
+    {
+      "row": 213,
+      "fix": "removed bedroom value from land record"
+    },
+    {
+      "row": 214,
+      "fix": "removed bedroom value from land record"
+    },
+    {
+      "row": 215,
+      "fix": "removed bedroom value from land record"
+    },
+    {
+      "row": 216,
+      "fix": "removed bedroom value from land record"
+    },
+    {
+      "row": 217,
+      "fix": "removed bedroom value from land record"
+    },
+    {
+      "row": 218,
+      "fix": "removed bedroom value from land record"
+    },
+    {
+      "row": 219,
+      "fix": "removed bedroom value from land record"
+    },
+    {
+      "row": 220,
+      "fix": "removed bedroom value from land record"
+    },
+    {
+      "row": 221,
+      "fix": "removed bedroom value from land record"
+    },
+    {
+      "row": 222,
+      "fix": "removed bedroom value from land record"
+    },
+    {
+      "row": 223,
+      "fix": "removed bedroom value from land record"
+    }
+  ]
+}
