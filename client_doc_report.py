@@ -37,6 +37,8 @@ from market_analysis import (
 LAGOS_NODES = ["Banana Island", "Old Ikoyi", "Lekki Phase 1", "Victoria Island", "Eko Atlantic", "Ikeja GRA"]
 ABUJA_NODES = ["Asokoro", "Maitama", "Wuse"]
 BLUE = "2E74B5"
+GRAY = "666666"
+HEADER_FILL = "D9D9D9"
 
 
 def bedroom_rows(listings, node, txn_type):
@@ -96,6 +98,16 @@ def land_rows(listings, node):
         "link": example.get("source_url", ""),
     }]
 
+
+
+def bedroom_breakdown(listings, node, txn_type):
+    """Compatibility wrapper used by the narrative report builder."""
+    return bedroom_rows(listings, node, txn_type)
+
+
+def land_breakdown(listings, node):
+    """Compatibility wrapper used by the narrative report builder."""
+    return land_rows(listings, node)
 
 
 
