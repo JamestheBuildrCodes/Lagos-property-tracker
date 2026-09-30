@@ -8,7 +8,7 @@ from __future__ import annotations
 import json, os, sys
 from datetime import datetime, timezone
 from pathlib import Path
-from market_analysis import build_summary, fmt_naira, load_csv
+from market_analysis import build_summary, clean_rows, fmt_naira, load_csv
 
 TODAY=datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
@@ -17,7 +17,7 @@ def esc(v):
             .replace(">","&gt;").replace('"',"&quot;"))
 
 def _load_inputs(listings_path,changes_path="none",research_path=None):
-    listings=load_csv(listings_path)
+    listings=clean_rows(load_csv(listings_path))
     changes=load_csv(changes_path) if changes_path and changes_path.lower()!="none" and os.path.exists(changes_path) else []
     research=load_csv(research_path) if research_path and research_path.lower()!="none" and os.path.exists(research_path) else []
     summary=build_summary(listings,changes,listings_path)
@@ -37,7 +37,7 @@ def _wow_text(metric):
 def build_executive_html_from_summary(s,date=None):
     date=date or datetime.now(timezone.utc).strftime("%d %b %Y")
     h=["""<!doctype html><html><body style="font-family:Arial,sans-serif;color:#172033;line-height:1.5;max-width:760px;margin:auto">"""]
-    h.append(f"<div style='padding:24px;background:#0d2340;color:white'><div style='font-size:12px;letter-spacing:1.5px'>MASTER BUILDER • MARKET INTELLIGENCE</div><h1 style='margin:8px 0'>Lagos Property Market — Weekly Intelligence Brief</h1><div>{esc(date)}</div></div>")
+    h.append(f"<div style='padding:24px;background:#0d2340;color:white'><div style='font-size:12px;letter-spacing:1.5px'>MASTER BUILDER • MARKET INTELLIGENCE</div><h1 style='margin:8px 0'>Lagos & Abuja Property Market — Weekly Intelligence Brief</h1><div>{esc(date)}</div></div>")
     h.append("<h2>Market snapshot</h2><table style='width:100%;border-collapse:collapse'>")
     h.append("<tr style='background:#e8eef5'><th align='left' style='padding:9px'>Metric</th><th align='left' style='padding:9px'>Current</th><th align='left' style='padding:9px'>WoW</th></tr>")
     wow=s.get("week_on_week",{})
@@ -108,12 +108,12 @@ def build_xlsx_from_data(listings,changes,research,s,output=None):
                 c.alignment=Alignment(vertical="top",wrap_text=True)
         sheet.sheet_view.showGridLines=False
     ws=wb.active; ws.title="Executive Summary"
-    title(ws,"Lagos Property Market — Weekly Intelligence Brief")
+    title(ws,"Lagos & Abuja Property Market — Weekly Intelligence Brief")
     ws["A2"]=datetime.now(timezone.utc).strftime("%d %B %Y"); ws["A2"].font=Font(italic=True,color=grey)
     ws.append(["Metric","Current","Week-on-week"])
     rows=[("Listings tracked",s["listings_tracked"],"listings"),("Areas monitored",s["areas_monitored"],None),("Sources",s["sources"],None),
           ("New listings",s["changes"]["new_listings"],None),("Price reductions",s["changes"]["price_reductions"],None),("Price increases",s["changes"]["price_increases"],None),
-          ("Median apartment sale",s["median_apartment_sale"],"sale"),("Median annual rent",s["median_annual_rent"],"rent"),("Median land ₦/sqm",s["median_land_ppsqm"],"land_ppsqm")]
+          ("Median apartment sale",fmt_naira(s["median_apartment_sale"]),"sale"),("Median annual rent",fmt_naira(s["median_annual_rent"]),"rent"),("Median land ₦/sqm",fmt_naira(s["median_land_ppsqm"]),"land_ppsqm")]
     wow=s.get("week_on_week",{})
     for label,val,key in rows:
         w=_wow_text(wow.get("metrics",{}).get(key,{})) if key and wow.get("available") else "—"
@@ -128,7 +128,10 @@ def build_xlsx_from_data(listings,changes,research,s,output=None):
     for note in s.get("analysis_notes",[]): ws.append([note])
     polish(ws)
     # Scorecard
-    ws=wb.create_sheet("Area Scorecard"); ws.append(["Area","Listings","3BR Sale","3BR Rent","Yield Proxy","Sale ₦/sqm","Rent ₦/sqm","Land ₦/sqm","6-mo Sale","6-mo Rent","6-mo Land ₦/sqm","Sale Data","Rent Data","Land Data"])
+    ws=wb.create_sheet("Area Scorecard")
+    has_full_six_month=any(t.get("full_six_month") for t in s.get("trends",{}).values())
+    trend_prefix="6-mo" if has_full_six_month else "Historical"
+    ws.append(["Area","Listings","3BR Sale","3BR Rent","Yield Proxy","Sale ₦/sqm","Rent ₦/sqm","Land ₦/sqm",f"{trend_prefix} Sale",f"{trend_prefix} Rent",f"{trend_prefix} Land ₦/sqm","Sale Data","Rent Data","Land Data"])
     for x in s["scorecard"]:
         tr=s.get("trends",{}).get(x["market_node"],{})
         ws.append([x["market_node"],x["listing_count"],x["sale_3br_median"],x["rent_3br_median"],x["gross_rent_yield_proxy_pct"],x["sale_ppsqm_median"],x["rent_ppsqm_median"],x["land_ppsqm_median"],tr.get("sale_pct"),tr.get("rent_pct"),tr.get("land_ppsqm_pct"),x["sale_count"],x["rent_count"],x["land_count"]])
@@ -148,13 +151,28 @@ def build_xlsx_from_data(listings,changes,research,s,output=None):
                 ["Freshness","Current listing data targeted to 31 days; weekly refresh"],["Coverage","9 nodes: Banana Island, Old Ikoyi, Lekki Phase 1, Victoria Island, Eko Atlantic, Ikeja GRA, Asokoro, Maitama, Wuse"],
                 ["Assets","Apartment sales/rentals 1–5BR; residential land; Estate Intel public research"],["Pricing","Asking prices; not confirmed closed transactions"],
                 ["Estate Intel","Public research only; premium/login-gated values excluded"],["Transport","NPC direct; PropertyPro and Estate Intel via Zyte browser HTML"],
-                ["History","Six-month directional comparison from archived weekly snapshots"],["Decision use","Executive Summary for decisions; Area Scorecard for comparison; Current Listings for audit"]]: ws.append(row)
+                ["History","Available-period directional comparison; labelled six-month only after at least 180 days of coverage"],["Decision use","Executive Summary for decisions; Area Scorecard for comparison; Current Listings for audit"]]: ws.append(row)
     headers(ws,1); polish(ws)
+    # Column-aware scorecard formats. Trend values are percentage points, not
+    # Excel ratios, so append a literal percent sign rather than multiplying by 100.
+    score_ws = wb["Area Scorecard"]
+    for col in ("C", "D", "F", "G", "H"):
+        for cell in score_ws[col][1:]:
+            cell.number_format = '#,##0'
+    for col in ("E", "I", "J", "K"):
+        for cell in score_ws[col][1:]:
+            cell.number_format = '+0.0"%";-0.0"%";0.0"%"'
+    for col in ("B", "L", "M", "N"):
+        for cell in score_ws[col][1:]:
+            cell.number_format = '#,##0'
     for sh in wb.worksheets:
         sh.auto_filter.ref=sh.dimensions if sh.max_row>1 else None
+        if sh.title == "Area Scorecard":
+            continue
         for row in sh.iter_rows():
             for c in row:
-                if isinstance(c.value,(int,float)) and c.column>1: c.number_format='#,##0.00'
+                if isinstance(c.value,(int,float)) and c.column>1:
+                    c.number_format='#,##0'
     wb.save(output); return output
 
 def build_xlsx(listings_path,changes_path="none",research_path=None,output=None):
@@ -166,11 +184,11 @@ def build_docx_from_data(listings,changes,research,s,output=None):
         from docx.enum.text import WD_ALIGN_PARAGRAPH
         from docx.shared import Inches,Pt
     except ImportError as exc: raise RuntimeError("DOCX reporting requires python-docx.") from exc
-    output=output or f"Lagos_Property_Market_Intelligence_{TODAY}.docx"
+    output=output or f"Lagos_Abuja_Property_Market_Intelligence_{TODAY}.docx"
     doc=Document(); sec=doc.sections[0]
     sec.top_margin=sec.bottom_margin=Inches(.6); sec.left_margin=sec.right_margin=Inches(.7)
     p=doc.add_paragraph(); p.alignment=WD_ALIGN_PARAGRAPH.CENTER
-    r=p.add_run("LAGOS PROPERTY MARKET\nWEEKLY INTELLIGENCE REPORT"); r.bold=True; r.font.size=Pt(20)
+    r=p.add_run("LAGOS & ABUJA PROPERTY MARKET\nWEEKLY INTELLIGENCE REPORT"); r.bold=True; r.font.size=Pt(20)
     p=doc.add_paragraph(); p.alignment=WD_ALIGN_PARAGRAPH.CENTER; p.add_run(datetime.now(timezone.utc).strftime("%d %B %Y")).italic=True
     doc.add_heading("1. Executive Decision Brief",1)
     t=doc.add_table(rows=1,cols=3); t.style="Light Shading Accent 1"
@@ -190,7 +208,8 @@ def build_docx_from_data(listings,changes,research,s,output=None):
     doc.add_heading("4. Sales, Rentals & Land",1)
     for x in [z for z in s["scorecard"] if z["listing_count"]]:
         doc.add_paragraph(f"{x['market_node']}: {x['listing_count']} comparables; 3BR sale {fmt_naira(x['sale_3br_median'])}; 3BR rent {fmt_naira(x['rent_3br_median'])}; sale ₦/sqm {fmt_naira(x['sale_ppsqm_median'])}; land ₦/sqm {fmt_naira(x['land_ppsqm_median'])}.")
-    doc.add_heading("5. Six-Month Trend View",1)
+    full_six_month=any(tr.get("full_six_month") for tr in s.get("trends",{}).values())
+    doc.add_heading("5. Six-Month Trend View" if full_six_month else "5. Historical Trend View",1)
     trend_rows=[(n,tr) for n,tr in s.get("trends",{}).items() if any(tr.get(k) is not None for k in ("sale_pct","rent_pct","land_ppsqm_pct"))]
     if trend_rows:
         for n,tr in trend_rows:
@@ -198,7 +217,10 @@ def build_docx_from_data(listings,changes,research,s,output=None):
             for key,label in (("sale_pct","sale"),("rent_pct","rent"),("land_ppsqm_pct","land ₦/sqm")):
                 if tr.get(key) is not None: vals.append(f"{label} {tr[key]:+.1f}%")
             doc.add_paragraph(f"{n}: "+", ".join(vals),style="List Bullet")
-    else: doc.add_paragraph("Trend baseline is being established; future weekly runs will extend the six-month archive.")
+    else: doc.add_paragraph("Trend baseline is being established; future weekly runs will extend the historical archive.")
+    if not full_six_month and s.get("trends"):
+        days=max((tr.get("period_days",0) for tr in s["trends"].values()), default=0)
+        doc.add_paragraph(f"Available archived snapshots cover approximately {days} days; changes shown are directional for that available period, not a complete six-month series.")
     doc.add_heading("6. Recommended Actions",1)
     doc.add_paragraph("Use relative pricing and weekly movement to prioritise negotiations and areas for deeper diligence. Do not treat a thinly sampled area as a definitive market index.")
     doc.add_paragraph("All prices are asking prices. Estate Intel data is limited to public research; no premium or authentication controls are bypassed.")

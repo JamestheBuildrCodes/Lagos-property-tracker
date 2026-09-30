@@ -59,6 +59,34 @@ ALLOWED_HOSTS = {
     "Estate Intel": {"estateintel.com", "www.estateintel.com"},
 }
 
+NODE_SLUGS = {
+    "Banana Island": "banana-island",
+    "Old Ikoyi": "old-ikoyi",
+    "Lekki Phase 1": "lekki-phase-1",
+    "Victoria Island": "victoria-island",
+    "Eko Atlantic": "eko-atlantic",
+    "Ikeja GRA": "ikeja-gra",
+    "Asokoro": "asokoro",
+    "Maitama": "maitama",
+    "Wuse": "wuse",
+}
+NODE_URL_PATTERNS = {
+    "Banana Island": ("banana-island",),
+    "Old Ikoyi": ("old-ikoyi",),
+    "Lekki Phase 1": ("lekki-phase-1",),
+    "Victoria Island": ("victoria-island",),
+    "Eko Atlantic": ("eko-atlantic",),
+    "Ikeja GRA": ("ikeja-gra", "ikeja/gra"),
+    "Asokoro": ("asokoro",),
+    "Maitama": ("maitama",),
+    "Wuse": ("wuse",),
+}
+
+DEFINITIVE_NODE_CONFLICTS = {
+    node: {other: slug for other, slug in NODE_SLUGS.items() if other != node}
+    for node in NODE_SLUGS
+}
+
 
 def clean_text(value: Optional[str]) -> str:
     return re.sub(r"\s+", " ", value or "").strip()
@@ -275,50 +303,106 @@ def add_page_param(url: str, page: int) -> str:
 
 
 def looks_like_listing_url(url: str, source: str) -> bool:
-    path = urlparse(url).path.lower()
+    path = urlparse(url).path.lower().rstrip("/")
     if source == "PropertyPro.ng":
-        if any(x in path for x in ("/property-for-sale/", "/property-for-rent/", "/property-for/",
-                                    "/login", "/register", "/contact", "/about")):
-            return False
-        return bool(re.search(r"(?:-[a-z0-9]{4,})$", path))
+        # PropertyPro exposes agent/profile links beside listings. Only the
+        # canonical /property/<slug> route is a listing detail page.
+        return path.startswith("/property/") and path != "/property"
     if source == "Nigeria Property Centre":
         return ("/for-sale/" in path or "/for-rent/" in path) and "/showtype" not in path
     return False
 
 
+def node_consistent_with_evidence(node: str, listing_url: str, text: str) -> tuple[bool, str]:
+    """Reject a listing when URL/title evidence contradicts its assigned node.
+
+    The category URL is only a collection target; it is not proof that every
+    card belongs to that node. A detail URL is therefore required to contain
+    the canonical node slug, and explicit conflicting node slugs in the URL or
+    card text also quarantine the row. This prevents cross-area contamination
+    from distorting client medians and trends.
+    """
+    expected = NODE_SLUGS.get(node)
+    path = urlparse(listing_url).path.lower()
+    patterns = NODE_URL_PATTERNS.get(node, (expected,) if expected else ())
+    lowered = clean_text(text).lower()
+    if node == "Eko Atlantic":
+        if "eko-atlantic" not in path and "eko atlantic" not in lowered:
+            return False, "Eko Atlantic listing lacks explicit Eko Atlantic URL/text evidence"
+    elif patterns and not any(pattern in path for pattern in patterns):
+        return False, f"detail URL does not contain canonical node evidence for '{node}'"
+    for other, slug in DEFINITIVE_NODE_CONFLICTS.get(node, {}).items():
+        # Eko Atlantic canonically sits under the Victoria Island URL branch;
+        # the presence of that parent slug is not a conflict when the Eko slug
+        # is also present.
+        if node == "Eko Atlantic" and other == "Victoria Island":
+            continue
+        if slug in path:
+            return False, f"detail URL identifies conflicting node '{other}'"
+    # Title/card text is secondary evidence. Require explicit node phrases,
+    # but avoid treating generic words such as 'Lagos' or 'Abuja' as conflicts.
+    for other, slug in DEFINITIVE_NODE_CONFLICTS.get(node, {}).items():
+        phrase = other.lower()
+        if phrase in lowered:
+            return False, f"listing text identifies conflicting node '{other}'"
+    return True, ""
+
+PROMO_TEXT_MARKERS = (
+    "get alerts", "email you when a new listing matches", "manage alerts",
+    "premium plus", "top promoted listing", "alert on",
+)
+
+
 def candidate_cards(html: str, source: str, base_url: str) -> list[tuple[str, str]]:
+    """Extract individual listing cards without importing page-level promo UI."""
     soup = BeautifulSoup(html, "html.parser")
     host = urlparse(base_url).netloc.lower()
-    seen = set()
-    cards: list[tuple[str, str]] = []
-
+    all_listing_anchors = []
     for a in soup.find_all("a", href=True):
         href = canonical_url(urljoin(base_url, a["href"].strip()))
-        if urlparse(href).netloc.lower() != host or not looks_like_listing_url(href, source):
+        if urlparse(href).netloc.lower() == host and looks_like_listing_url(href, source):
+            all_listing_anchors.append((href, a))
+
+    seen = set()
+    cards: list[tuple[str, str]] = []
+    for href, a in all_listing_anchors:
+        if href in seen:
             continue
-        # Climb a few levels to capture the complete listing card.
-        node = a
+        seen.add(href)
         best = ""
+        node = a
         for _ in range(6):
             if node is None:
                 break
+            # Stop before a shared ancestor containing another listing detail link.
+            descendants = node.find_all("a", href=True)
+            other_listing_inside = any(
+                canonical_url(urljoin(base_url, item.get("href", "").strip())) != href
+                and urlparse(canonical_url(urljoin(base_url, item.get("href", "").strip()))).netloc.lower() == host
+                and looks_like_listing_url(canonical_url(urljoin(base_url, item.get("href", "").strip())), source)
+                for item in descendants
+            )
+            if other_listing_inside:
+                break
             txt = clean_text(node.get_text(" ", strip=True))
-            if len(txt) > len(best):
+            if txt and len(txt) > len(best):
                 best = txt
-            # Stop when we have a compact but information-rich card.
-            if len(best) >= 80 and (("₦" in best or "N" in best) and
-                                    ("Added" in best or "Updated" in best or "Bedroom" in best or "Beds" in best)):
+            if len(best) >= 80 and (("₦" in best or re.search(r"\bN\s*[\d,]", best)) and
+                                     re.search(r"\b(?:Added|Updated|Posted|Listed|Bedroom|Beds)\b", best, re.I)):
                 break
             node = node.parent
-        if href not in seen:
-            seen.add(href)
-            cards.append((href, best))
-    return cards
 
+        if not best or any(marker in best.lower() for marker in PROMO_TEXT_MARKERS):
+            continue
+        cards.append((href, best))
+    return cards
 
 def parse_card(card_text: str, listing_url: str, target: dict) -> Optional[dict]:
     text = clean_text(card_text)
     if len(text) < 20:
+        return None
+    consistent, _reason = node_consistent_with_evidence(target["node"], listing_url, text)
+    if not consistent:
         return None
     listing_dt, date_type = parse_date(text)
     now = datetime.now(timezone.utc)
@@ -381,7 +465,7 @@ def parse_card(card_text: str, listing_url: str, target: dict) -> Optional[dict]
 
 def scrape_category(target: dict) -> tuple[list[dict], dict]:
     stats = {"source": target["source"], "node": target["node"], "category": target["category"],
-             "url": target["url"], "pages": 0, "cards": 0, "rows": 0, "error": None}
+             "url": target["url"], "pages": 0, "cards": 0, "rows": 0, "rejected_quality": 0, "error": None}
     rows: list[dict] = []
     seen = set()
 
@@ -401,7 +485,10 @@ def scrape_category(target: dict) -> tuple[list[dict], dict]:
                 continue
             seen.add(listing_url)
             row = parse_card(card_text, listing_url, target)
-            if row and row["is_within_31_days"]:
+            if row is None:
+                stats["rejected_quality"] += 1
+                continue
+            if row["is_within_31_days"]:
                 rows.append(row)
                 if len(rows) >= MAX_LISTINGS_PER_CATEGORY:
                     break
@@ -621,6 +708,8 @@ def run() -> None:
         "listing_rows": len(all_rows),
         "estate_intel_rows": len(ei_rows),
         "failures": failures,
+        "quality_rejections": sum(int(x.get("rejected_quality", 0)) for x in category_stats),
+        "listing_quality_policy": "Only detail URLs whose canonical node slug matches the assigned node are admitted; explicit conflicting node evidence is rejected.",
     }
     Path("scrape_run_report.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
 

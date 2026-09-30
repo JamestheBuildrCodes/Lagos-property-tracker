@@ -54,6 +54,55 @@ class PipelineTests(unittest.TestCase):
         text = (ROOT / ".github/workflows/weekly-scan.yml").read_text()
         self.assertIn("property_listings_", text)
         self.assertNotIn("lagos_listings_*.csv", text)
+        self.assertIn("Create and email a new client-preferred weekly document", text)
+        self.assertIn("python client_doc_report.py", text)
+        self.assertIn("MAILJET_SECRET_KEY: ${{ secrets.MAILJET_SECRET_KEY }}", text)
+
+
+
+class DataQualityTests(unittest.TestCase):
+    def test_propertypro_agent_urls_are_not_listing_urls(self):
+        import scraper
+        self.assertFalse(scraper.looks_like_listing_url("https://propertypro.ng/agent/example", "PropertyPro.ng"))
+        self.assertTrue(scraper.looks_like_listing_url("https://propertypro.ng/property/3-bedroom-flat-for-sale-old-ikoyi-ikoyi-lagos-ABC12", "PropertyPro.ng"))
+
+    def test_card_extraction_does_not_use_page_container(self):
+        import scraper
+        html="""<div class="page"><div>Sort: Default Result 1–20 of 500</div>
+        <div class="property-card"><a href="/property/3-bedroom-flat-for-sale-old-ikoyi-ikoyi-lagos-ABC12">3 Bedroom Flat Old Ikoyi</a><span>₦500,000,000</span><span>Updated 14 Sep 2026</span><span>3 Beds</span></div>
+        <div class="property-card"><a href="/property/4-bedroom-flat-for-sale-old-ikoyi-ikoyi-lagos-DEF34">4 Bedroom Flat Old Ikoyi</a><span>₦700,000,000</span><span>Updated 14 Sep 2026</span><span>4 Beds</span></div></div>"""
+        cards=scraper.candidate_cards(html,"PropertyPro.ng","https://propertypro.ng/property-for-sale/flat-apartment/in/lagos/ikoyi/old-ikoyi")
+        self.assertEqual(len(cards),2)
+        self.assertNotIn("Result 1–20 of 500",cards[0][1])
+
+    def test_node_evidence_rejects_cross_node_listing(self):
+        import market_analysis
+        bad={"market_node":"Eko Atlantic","source":"Nigeria Property Centre","source_url":"https://nigeriapropertycentre.com/for-sale/flats-apartments/lagos/ikeja/ikeja-gra/123", "title":"3 bedroom apartment in Ikeja GRA","location":"Ikeja GRA"}
+        ok, reason=market_analysis.node_evidence_ok(bad)
+        self.assertFalse(ok)
+        self.assertTrue(reason)
+
+    def test_node_evidence_rejects_propertypro_agent_record(self):
+        import market_analysis
+        bad={"market_node":"Ikeja GRA","source":"PropertyPro.ng","source_url":"https://propertypro.ng/agent/example","title":"1 Bedroom", "location":"Ikeja GRA"}
+        ok, _=market_analysis.node_evidence_ok(bad)
+        self.assertFalse(ok)
+
+    def test_short_history_is_not_called_six_months(self):
+        import market_analysis
+        rows=[{"market_node":"Lekki Phase 1","source":"Nigeria Property Centre","source_url":"https://nigeriapropertycentre.com/for-sale/flats-apartments/lagos/lekki/lekki-phase-1/123","title":"3 bedroom apartment Lekki Phase 1","transaction":"sale","property_type":"flat_apartment","bedrooms":"3","asking_price_ngn":"100000000"}]
+        with tempfile.TemporaryDirectory() as td:
+            current=Path(td)/"property_listings_2026-09-15.csv"
+            old=Path(td)/"property_listings_2026-09-04.csv"
+            import csv
+            fields=list(rows[0].keys())
+            for path,price in ((old,"90000000"),(current,"100000000")):
+                rr=[dict(rows[0],asking_price_ngn=price)]
+                with path.open("w",newline="",encoding="utf-8") as f:
+                    w=csv.DictWriter(f,fieldnames=fields); w.writeheader(); w.writerows(rr)
+            trends=market_analysis.six_month_area_trends(str(current),rows)
+            self.assertFalse(trends["Lekki Phase 1"]["full_six_month"])
+            self.assertEqual(trends["Lekki Phase 1"]["coverage"],"available_period")
 
 
 if __name__ == "__main__":

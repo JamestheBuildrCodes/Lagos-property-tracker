@@ -15,13 +15,16 @@ email_report.py reads to build the actual email.
 import csv
 import sys
 from datetime import datetime
+from market_analysis import clean_rows
 
 PRICE_CHANGE_THRESHOLD_PCT = 5  # flag anything moving more than this
 
 
 def load_csv(path):
-    with open(path, newline="", encoding="utf-8") as f:
-        return {row.get("source_url") or row.get("listing_url"): row for row in csv.DictReader(f)}
+    with open(path, newline="", encoding="utf-8-sig") as f:
+        rows=list(csv.DictReader(f))
+    rows=clean_rows(rows)
+    return {row.get("source_url") or row.get("listing_url"): row for row in rows if row.get("source_url") or row.get("listing_url")}
 
 
 def detect_changes(old_path, new_path):

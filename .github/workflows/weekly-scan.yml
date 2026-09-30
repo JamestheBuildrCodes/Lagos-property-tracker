@@ -21,21 +21,27 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: pip
+
       - name: Install production dependencies
         run: python -m pip install -r requirements.txt
+
       - name: Build deterministic source manifest
         run: python discover_sources.py
+
       - name: Run architecture tests
         run: python -m unittest discover -s tests -v
+
       - name: Zyte connectivity preflight
         env:
           ZYTE_API_KEY: ${{ secrets.ZYTE_API_KEY }}
         run: python zyte_preflight.py
+
       - name: Collect current market data
         env:
           ZYTE_API_KEY: ${{ secrets.ZYTE_API_KEY }}
@@ -48,30 +54,40 @@ jobs:
           SCRAPER_WORKERS: "2"
           ZYTE_TIMEOUT_SECONDS: "90"
         run: python scraper.py
+
       - name: Apply market data quality gate
         run: |
           CURR=$(ls -t property_listings_*.csv | head -n 1)
           test -s "$CURR"
           python quality_gate.py "$CURR"
+
       - name: Validate market output
         run: |
           CURR=$(ls -t property_listings_*.csv | head -n 1)
           test -s "$CURR"
           python validate_market_output.py "$CURR"
           python - <<'PY'
-          import csv,glob,json,sys
-          current=sorted(glob.glob("property_listings_*.csv"))[-1]
-          with open(current,newline="",encoding="utf-8") as f: rows=list(csv.DictReader(f))
+          import csv, glob, json, sys
+          current = sorted(glob.glob("property_listings_*.csv"))[-1]
+          with open(current, newline="", encoding="utf-8") as f:
+              rows=list(csv.DictReader(f))
           print(f"Validated comparable listings: {len(rows)}")
           if not rows:
-              print(json.dumps(json.load(open("scrape_run_report.json")),indent=2));sys.exit("Refusing to publish an empty report")
+              print(json.dumps(json.load(open("scrape_run_report.json")), indent=2))
+              sys.exit("Refusing to publish an empty report")
           PY
+
       - name: Detect weekly changes
         shell: bash
         run: |
           CURR=$(ls -t property_listings_*.csv | head -n 1)
           PREV=$(find data -maxdepth 1 -name 'property_listings_*.csv' -type f -print | sort | tail -n 1)
-          if [ -n "$PREV" ] && [ "$PREV" != "$CURR" ]; then python detect_changes.py "$PREV" "$CURR"; else echo "No previous property snapshot found; establishing baseline."; fi
+          if [ -n "$PREV" ] && [ "$PREV" != "$CURR" ]; then
+            python detect_changes.py "$PREV" "$CURR"
+          else
+            echo "No previous property snapshot found; establishing baseline."
+          fi
+
       - name: Build all three intelligence layers from one analysis
         run: |
           CURR=$(ls -t property_listings_*.csv | head -n 1)
@@ -80,8 +96,9 @@ jobs:
           python report_builder.py "$CURR" "${CHANGES:-none}" "${RESEARCH:-none}"
           test -s executive_brief_*.html
           test -s market_intelligence_*.xlsx
-          test -s Lagos_Property_Market_Intelligence_*.docx
+          test -s Lagos_Abuja_Property_Market_Intelligence_*.docx
           test -s market_intelligence.json
+
       - name: Send Layer 1 executive email
         env:
           MAILJET_API_KEY: ${{ secrets.MAILJET_API_KEY }}
@@ -93,9 +110,14 @@ jobs:
         run: |
           if [ -n "$MAILJET_API_KEY" ] && [ -n "$MAILJET_SECRET_KEY" ] && [ -n "$REPORT_CLIENT_EMAIL" ]; then
             test -n "$MAILJET_FROM_EMAIL" || { echo "MAILJET_FROM_EMAIL is not configured; use an active Mailjet sender address."; exit 1; }
-            CURR=$(ls -t property_listings_*.csv | head -n 1); CHANGES=$(ls -t changes_*.csv 2>/dev/null | head -n 1); HTML=$(ls -t executive_brief_*.html | head -n 1)
+            CURR=$(ls -t property_listings_*.csv | head -n 1)
+            CHANGES=$(ls -t changes_*.csv 2>/dev/null | head -n 1)
+            HTML=$(ls -t executive_brief_*.html | head -n 1)
             python email_report.py "$CURR" "${CHANGES:-none}" "$REPORT_CLIENT_EMAIL" "$HTML"
-          else echo "Mailjet secrets not configured; Layer 1 email skipped."; fi
+          else
+            echo "Mailjet secrets not configured; Layer 1 email skipped."
+          fi
+
       - name: Write Layer 2 to existing Google Sheet
         env:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
@@ -103,9 +125,15 @@ jobs:
           REPORT_CLIENT_EMAIL: ${{ secrets.REPORT_CLIENT_EMAIL }}
         run: |
           if [ -n "$GOOGLE_SERVICE_ACCOUNT_JSON" ] && [ -n "$GOOGLE_SHEET_ID" ]; then
-            CURR=$(ls -t property_listings_*.csv | head -n 1); CHANGES=$(ls -t changes_*.csv 2>/dev/null | head -n 1); RESEARCH=$(ls -t estateintel_public_research_*.csv 2>/dev/null | head -n 1); XLSX=$(ls -t market_intelligence_*.xlsx | head -n 1)
+            CURR=$(ls -t property_listings_*.csv | head -n 1)
+            CHANGES=$(ls -t changes_*.csv 2>/dev/null | head -n 1)
+            RESEARCH=$(ls -t estateintel_public_research_*.csv 2>/dev/null | head -n 1)
+            XLSX=$(ls -t market_intelligence_*.xlsx | head -n 1)
             python sheets_writer.py "$CURR" "${CHANGES:-none}" "${RESEARCH:-none}" "$XLSX"
-          else echo "Google Sheets secrets not configured; Layer 2 mirror skipped."; fi
+          else
+            echo "Google Sheets secrets not configured; Layer 2 mirror skipped."
+          fi
+
       - name: Publish Layer 3 as Google Doc
         env:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
@@ -113,7 +141,30 @@ jobs:
           REPORT_TO_EMAIL: ${{ secrets.REPORT_TO_EMAIL }}
           REPORT_CLIENT_EMAIL: ${{ secrets.REPORT_CLIENT_EMAIL }}
         run: |
-          if [ -n "$GOOGLE_SERVICE_ACCOUNT_JSON" ]; then python docs_writer.py market_intelligence.json; test -s google_doc_url.txt; else echo "Google service account secret not configured; Google Doc publication skipped."; fi
+          if [ -n "$GOOGLE_SERVICE_ACCOUNT_JSON" ]; then
+            python docs_writer.py market_intelligence.json
+            test -s google_doc_url.txt
+          else
+            echo "Google service account secret not configured; Google Doc publication skipped."
+          fi
+
+      - name: Create and email a new client-preferred weekly document
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          MAILJET_API_KEY: ${{ secrets.MAILJET_API_KEY }}
+          MAILJET_SECRET_KEY: ${{ secrets.MAILJET_SECRET_KEY }}
+          MAILJET_FROM_EMAIL: ${{ secrets.MAILJET_FROM_EMAIL }}
+          MAILJET_FROM_NAME: ${{ secrets.MAILJET_FROM_NAME }}
+          REPORT_CLIENT_EMAIL: ${{ secrets.REPORT_CLIENT_EMAIL }}
+          REPORT_TO_EMAIL: ${{ secrets.REPORT_TO_EMAIL }}
+        run: |
+          CURR=$(ls -t property_listings_*.csv | head -n 1)
+          test -s "$CURR"
+          test -n "$GOOGLE_SERVICE_ACCOUNT_JSON" || { echo "GOOGLE_SERVICE_ACCOUNT_JSON is required for the client-preferred Google Doc."; exit 1; }
+          python client_doc_report.py "$CURR"
+          test -s Lagos_Property_Market_Snapshot_*.docx
+          test -s client_doc_url.txt
+
       - name: Archive intelligence outputs
         run: |
           mkdir -p data
@@ -121,28 +172,37 @@ jobs:
           mv estateintel_public_research_*.csv data/ 2>/dev/null || true
           mv changes_*.csv data/ 2>/dev/null || true
           mv market_intelligence_*.xlsx data/ 2>/dev/null || true
-          mv Lagos_Property_Market_Intelligence_*.docx data/ 2>/dev/null || true
+          mv Lagos_Abuja_Property_Market_Intelligence_*.docx data/ 2>/dev/null || true
+          mv Lagos_Property_Market_Snapshot_*.docx data/ 2>/dev/null || true
           mv executive_brief_*.html data/ 2>/dev/null || true
           cp scrape_run_report.json data/
-          cp market_output_quality.json data/
           cp market_output_validation.json data/
+          cp market_output_quality.json data/ 2>/dev/null || true
           cp market_intelligence.json data/
           cp report_outputs.json data/
           cp google_doc_url.txt data/ 2>/dev/null || true
+          cp client_doc_url.txt data/ 2>/dev/null || true
+
       - name: Commit results
         run: |
           git config user.name "property-market-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/ tests/ discover_sources.py scraper.py quality_gate.py market_analysis.py report_builder.py sheets_writer.py email_report.py docs_writer.py validate_market_output.py requirements.txt .github/workflows/weekly-scan.yml
+          git add data/ tests/ discover_sources.py scraper.py market_analysis.py report_builder.py sheets_writer.py email_report.py docs_writer.py validate_market_output.py requirements.txt .github/workflows/weekly-scan.yml
           git commit -m "Property market snapshot $(date -u +%Y-%m-%d)" || echo "Nothing to commit"
+
       - name: Rebase and push results safely
         run: |
           for attempt in 1 2 3; do
             git fetch origin main
             if git rebase origin/main; then
-              if git push origin HEAD:main; then exit 0; fi
+              if git push origin HEAD:main; then
+                exit 0
+              fi
               git rebase --abort 2>/dev/null || true
-            else git rebase --abort || true; fi
-            echo "Push attempt $attempt failed; retrying..."; sleep 3
+            else
+              git rebase --abort || true
+            fi
+            echo "Push attempt $attempt failed; retrying..."
+            sleep 3
           done
           exit 1

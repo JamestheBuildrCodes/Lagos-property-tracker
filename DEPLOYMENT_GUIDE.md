@@ -17,7 +17,8 @@ Market analysis engine
 ┌──────────────────────────────────────┐
 │ Layer 1 — Executive email            │
 │ Layer 2 — Existing Google Sheet      │
-│ Layer 3 — Google Doc + DOCX archive │
+│ Layer 3 — Analyst Google Doc + DOCX archive │
+│ Additional — New client snapshot Google Doc weekly │
 └──────────────────────────────────────┘
         ↓
 Archive + GitHub history
@@ -43,10 +44,16 @@ into the **existing Google Sheet**. Tabs:
 
 ### Layer 3 — Analyst Report
 
-`Lagos_Property_Market_Intelligence_YYYY-MM-DD.docx` is the archive copy. The
-same report is published as a real Google Doc by `docs_writer.py`. Set
-`GOOGLE_DOC_ID` to update an existing report in place; leave it blank to create
-a new weekly Google Doc.
+`Lagos_Abuja_Property_Market_Intelligence_YYYY-MM-DD.docx` is the archive copy. The
+analyst report is published by `docs_writer.py`; `GOOGLE_DOC_ID` optionally lets
+that existing analyst document be updated in place.
+
+Separately, `client_doc_report.py` creates a **brand-new Google Doc every run**
+for the client-preferred market snapshot. It never reads or reuses `GOOGLE_DOC_ID`.
+The document uses Times New Roman, a black 28pt title, blue #2E74B5 city/area
+headings, gray #D9D9D9 table headers, and clickable `View source` links. It then
+sends a separate Mailjet notification email with the new document URL. It only
+covers the nine real Lagos/Abuja tracked nodes; it does not invent Port Harcourt data.
 
 ## Coverage
 
@@ -80,8 +87,10 @@ Set these GitHub Actions repository secrets:
 | Secret | Purpose |
 |---|---|
 | `ZYTE_API_KEY` | PropertyPro/Estate Intel browser HTML |
-| `MAILJET_API_KEY` | Executive email |
+| `MAILJET_API_KEY` | Executive email and new-document notification |
+| `MAILJET_SECRET_KEY` | Mailjet secret key |
 | `MAILJET_FROM_EMAIL` | Active/validated Mailjet sender address |
+| `MAILJET_FROM_NAME` | Optional sender display name |
 | `REPORT_TO_EMAIL` | Your internal verification email (CC) |
 
 **Mailjet production sending:** `MAILJET_FROM_EMAIL` must be an active/validated Mailjet sender address. An individually validated Gmail/Outlook/Yahoo sender is supported; a custom domain is not required for this setup.
@@ -116,8 +125,9 @@ Termux. It then:
 7. builds the executive email, polished workbook and analyst report from one analysis pass;
 8. sends Layer 1 to the configured distribution;
 9. mirrors and styles the existing Layer 2 Google Sheet and can grant the client Viewer access;
-10. publishes Layer 3 as a real Google Doc and archives the DOCX;
-11. commits the archive back to GitHub.
+10. publishes Layer 3 as the analyst Google Doc and archives its DOCX;
+11. creates a new client snapshot Google Doc, grants viewer access, and sends its separate notification email;
+12. commits the archive back to GitHub.
 
 ## Local checks
 
@@ -142,3 +152,15 @@ Set these GitHub Actions secrets:
 - `REPORT_TO_EMAIL` — internal verification recipient (Cc).
 
 The workflow uses Mailjet Send API v3.1. No custom domain is required when using an individually validated sender address.
+
+
+## First live client-document verification
+
+The DOCX builder and report formatting have been exercised locally without network
+access or Zyte credits. The Google Docs API table insertion and Mailjet notification
+require a live workflow run to verify against the account. Run the workflow manually
+from **Actions → Nigeria Property Market Scan → Run workflow** after confirming all
+secrets above exist. Check that the log contains `New weekly Google Doc published:`
+and `Notification email accepted by Mailjet`, then open the new URL and visually
+confirm the table cells, gray header row, and clickable `View source` links. The
+workflow now fails rather than reporting success if publishing/sharing/email fails.

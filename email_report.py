@@ -44,7 +44,7 @@ def send_report(client_email: str, cc_email: str, html_body: str) -> None:
     message = {
         "From": {"Email": sender, "Name": sender_name},
         "To": [{"Email": address} for address in to],
-        "Subject": "Lagos Property Market — Weekly Intelligence Brief",
+        "Subject": "Lagos & Abuja Property Market — Weekly Intelligence Brief",
         "HTMLPart": html_body,
         "CustomID": "lagos-property-market-weekly-intelligence",
     }
