@@ -1,13 +1,18 @@
 """Client-preferred weekly market report.
 
-Important deployment note:
-The GitHub Actions service account has no usable Google Drive storage quota for
-creating/copying new files. Therefore this report deliberately REUSES the
-existing GOOGLE_DOC_ID and replaces its contents on each run. This avoids the
-Drive storageQuotaExceeded failure while keeping the client report automated.
+This report creates a BRAND-NEW Google Doc for every weekly run.
 
-REPORT_CLIENT_EMAIL and REPORT_TO_EMAIL are recipients only; they do not
-control Google Drive storage and do not cause the quota error.
+Google Drive authentication for this layer is OAuth 2.0 on behalf of a human
+Google account. This is intentional: consumer Gmail accounts own the files and
+the files consume that user's My Drive quota. The GitHub Actions service
+account remains available for the existing Google Sheet/analyst-doc layers.
+
+Required environment variables for publication:
+- GOOGLE_OAUTH_TOKEN_JSON: serialized Google OAuth authorized-user token,
+  including refresh_token, client_id, client_secret and token_uri.
+- GOOGLE_WEEKLY_REPORT_FOLDER_ID: destination My Drive folder ID.
+- REPORT_CLIENT_EMAIL / REPORT_TO_EMAIL: optional viewers.
+- Mailjet variables for the notification email.
 """
 from __future__ import annotations
 
@@ -192,40 +197,45 @@ def build_docx(listings, summary, output=None):
     return output
 
 
-def _doc_service():
-    from google.oauth2.service_account import Credentials
+def _oauth_services():
+    """Build Docs/Drive clients using a human user's OAuth refresh token."""
+    from google.auth.transport.requests import Request
+    from google.oauth2.credentials import Credentials
     from googleapiclient.discovery import build
-    raw = os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON", "").strip()
+
+    raw = os.environ.get("GOOGLE_OAUTH_TOKEN_JSON", "").strip()
     if not raw:
-        raise RuntimeError("GOOGLE_SERVICE_ACCOUNT_JSON is missing")
-    creds = Credentials.from_service_account_info(json.loads(raw), scopes=[
+        raise RuntimeError("GOOGLE_OAUTH_TOKEN_JSON is missing")
+
+    try:
+        info = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        raise RuntimeError("GOOGLE_OAUTH_TOKEN_JSON is not valid JSON") from exc
+
+    required = ("refresh_token", "client_id", "client_secret", "token_uri")
+    missing = [key for key in required if not info.get(key)]
+    if missing:
+        raise RuntimeError(
+            "GOOGLE_OAUTH_TOKEN_JSON is missing required fields: " + ", ".join(missing)
+        )
+
+    scopes = [
         "https://www.googleapis.com/auth/documents",
         "https://www.googleapis.com/auth/drive",
-    ])
-    return build("docs", "v1", credentials=creds, cache_discovery=False), build("drive", "v3", credentials=creds, cache_discovery=False)
+    ]
+    creds = Credentials.from_authorized_user_info(info, scopes=scopes)
+    if not creds.valid:
+        if not creds.refresh_token:
+            raise RuntimeError("OAuth credentials are expired and have no refresh token")
+        creds.refresh(Request())
+
+    return (
+        build("docs", "v1", credentials=creds, cache_discovery=False),
+        build("drive", "v3", credentials=creds, cache_discovery=False),
+    )
 
 
-def publish_google_doc(listings, summary):
-    """Replace the existing GOOGLE_DOC_ID contents in-place.
-
-    We intentionally do NOT call documents.create() or drive.files.copy().
-    Those operations make the service account the owner of a new Drive file,
-    and its Drive storage quota is exhausted. Reusing a client-shared existing
-    document avoids that quota entirely.
-    """
-    from googleapiclient.errors import HttpError
-    docs, drive = _doc_service()
-    doc_id = os.environ.get("GOOGLE_DOC_ID", "").strip()
-    if not doc_id:
-        raise RuntimeError("GOOGLE_DOC_ID is required. It must be a Google Doc shared with the service account.")
-
-    current = docs.documents().get(documentId=doc_id).execute()
-    end_index = current.get("body", {}).get("content", [{}])[-1].get("endIndex", 2)
-    if end_index > 2:
-        docs.documents().batchUpdate(documentId=doc_id, body={"requests": [{
-            "deleteContentRange": {"range": {"startIndex": 1, "endIndex": end_index - 1}}
-        }]}).execute()
-
+def _report_text(listings, summary):
     lines = [
         "Lagos & Abuja Property Market Snapshot",
         "Weekly Intelligence Report — Real Tracked Listings, Linked to Source",
@@ -243,7 +253,8 @@ def publish_google_doc(listings, summary):
                 continue
             lines += ["", node]
             for title, rows in (("Rental Market (per annum)", rent), ("Sales Market", sale), ("Land", land)):
-                if not rows: continue
+                if not rows:
+                    continue
                 lines += [title, "Metric | Value | Sample | Source & Date | Link"]
                 for row in rows:
                     lines.append(" | ".join([
@@ -251,29 +262,70 @@ def publish_google_doc(listings, summary):
                     ]))
     lines += ["", "What Stands Out This Week"]
     sig = summary.get("signals", {})
-    for label, obj in [("Most expensive area", sig.get("most_expensive")), ("Strongest rental/yield screen", sig.get("investment")),
-                       ("Best buyer value screen", sig.get("buyer_value")), ("Lowest observed land ₦/sqm", sig.get("land_opportunity"))]:
+    for label, obj in [
+        ("Most expensive area", sig.get("most_expensive")),
+        ("Strongest rental/yield screen", sig.get("investment")),
+        ("Best buyer value screen", sig.get("buyer_value")),
+        ("Lowest observed land ₦/sqm", sig.get("land_opportunity")),
+    ]:
         lines.append(f"• {label}: {obj['market_node'] if obj else 'Not enough data yet'}")
     lines += ["", "Sources Used in This Report", ", ".join(summary.get("source_names", [])) or "No sources recorded"]
-    text = "\n".join(lines) + "\n"
-    docs.documents().batchUpdate(documentId=doc_id, body={"requests": [{"insertText": {"location": {"index": 1}, "text": text}}]}).execute()
+    return "\n".join(lines) + "\n"
 
-    # Give the existing document to both configured recipients. This does not
-    # consume Drive storage because no new file is created.
+
+def publish_google_doc(listings, summary):
+    """Create a new Google Doc inside the configured My Drive folder."""
+    from googleapiclient.errors import HttpError
+
+    docs, drive = _oauth_services()
+    folder_id = os.environ.get("GOOGLE_WEEKLY_REPORT_FOLDER_ID", "").strip()
+    if not folder_id:
+        raise RuntimeError("GOOGLE_WEEKLY_REPORT_FOLDER_ID is required")
+
+    title = f"Lagos & Abuja Property Market Snapshot — {datetime.now(timezone.utc):%Y-%m-%d}"
+    try:
+        created = drive.files().create(
+            body={
+                "name": title,
+                "mimeType": "application/vnd.google-apps.document",
+                "parents": [folder_id],
+            },
+            fields="id,name,webViewLink,parents",
+        ).execute()
+    except HttpError as exc:
+        raise RuntimeError(
+            "Could not create the weekly Google Doc in the configured Drive folder. "
+            "Confirm the OAuth account owns/has Editor access to the folder and has available storage. "
+            f"Google API error: {exc}"
+        ) from exc
+
+    doc_id = created["id"]
+    text = _report_text(listings, summary)
+    docs.documents().batchUpdate(
+        documentId=doc_id,
+        body={"requests": [{"insertText": {"location": {"index": 1}, "text": text}}]},
+    ).execute()
+
+    # Make the report readable by the configured recipients without changing
+    # ownership or creating any additional copies.
     recipients = []
     for key in ("REPORT_CLIENT_EMAIL", "REPORT_TO_EMAIL"):
-        recipients.extend(x.strip() for x in os.environ.get(key, "").split(",") if "@" in x)
+        recipients.extend(
+            x.strip() for x in os.environ.get(key, "").split(",") if "@" in x
+        )
     for email in dict.fromkeys(recipients):
         try:
-            drive.permissions().create(fileId=doc_id, body={"type": "user", "role": "reader", "emailAddress": email}, sendNotificationEmail=False).execute()
+            drive.permissions().create(
+                fileId=doc_id,
+                body={"type": "user", "role": "reader", "emailAddress": email},
+                sendNotificationEmail=False,
+            ).execute()
         except HttpError as exc:
-            # The report itself is already published. Do not turn a harmless
-            # already-shared permission into a failed market scan.
             print(f"Warning: could not grant viewer access to {email}: {exc}")
 
-    url = f"https://docs.google.com/document/d/{doc_id}/edit"
+    url = created.get("webViewLink") or f"https://docs.google.com/document/d/{doc_id}/edit"
     Path("client_doc_url.txt").write_text(url + "\n", encoding="utf-8")
-    print(f"Weekly Google Doc updated in place: {url}")
+    print(f"New weekly Google Doc published: {url}")
     return doc_id, url
 
 
@@ -313,11 +365,11 @@ def main():
     summary = build_summary(listings, [], sys.argv[1])
     docx_path = build_docx(listings, summary)
     print(f"DOCX created: {docx_path}")
-    if os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON"):
+    if os.environ.get("GOOGLE_OAUTH_TOKEN_JSON"):
         _, url = publish_google_doc(listings, summary)
         send_notification_email(url)
     else:
-        print("GOOGLE_SERVICE_ACCOUNT_JSON not set — skipping Google Doc publish, DOCX only.")
+        print("GOOGLE_OAUTH_TOKEN_JSON not set — skipping Google Doc publish, DOCX only.")
 
 
 if __name__ == "__main__":
