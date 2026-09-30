@@ -40,6 +40,8 @@ WORKERS = max(1, int(os.environ.get("SCRAPER_WORKERS", "3")))
 ZYTE_TIMEOUT = int(os.environ.get("ZYTE_TIMEOUT_SECONDS", "90"))
 ZYTE_BROWSER_HTML = os.environ.get("ZYTE_BROWSER_HTML", "true").lower() == "true"
 PAID_SOURCE_FAILURE = threading.Event()
+PAID_SOURCE_BANS: set[str] = set()
+PAID_SOURCE_BANS_LOCK = threading.Lock()
 MANIFEST = Path("data/source_manifest.json")
 
 FIELDNAMES = [
@@ -245,6 +247,9 @@ def fetch_page(url: str, source: str) -> requests.Response:
 
     if not ZYTE_API_KEY:
         raise RuntimeError("ZYTE_API_KEY is missing")
+    with PAID_SOURCE_BANS_LOCK:
+        if source in PAID_SOURCE_BANS:
+            raise RuntimeError(f"{source} is temporarily blocked by a Zyte Website Ban; skipping further paid requests for this source.")
     if PAID_SOURCE_FAILURE.is_set():
         raise RuntimeError("Zyte transport is unavailable after a previous billing/authorization failure; skipping further paid requests.")
 
@@ -261,6 +266,10 @@ def fetch_page(url: str, source: str) -> requests.Response:
                 json=payload,
                 timeout=ZYTE_TIMEOUT,
             )
+            if response.status_code == 520 and ("Website Ban" in response.text or "temporary-error" in response.text):
+                with PAID_SOURCE_BANS_LOCK:
+                    PAID_SOURCE_BANS.add(source)
+                raise RuntimeError(f"Zyte HTTP 520 Website Ban for {source}; skipping further paid requests for this source.")
             if response.status_code in (401, 402, 403):
                 PAID_SOURCE_FAILURE.set()
                 raise RuntimeError(
@@ -285,7 +294,7 @@ def fetch_page(url: str, source: str) -> requests.Response:
                 return wrapped
             last_exc = RuntimeError(f"Zyte HTTP {response.status_code}: {response.text[:300]}")
         except RuntimeError as exc:
-            if "HTTP 401" in str(exc) or "HTTP 402" in str(exc) or "HTTP 403" in str(exc):
+            if any(marker in str(exc) for marker in ("HTTP 401", "HTTP 402", "HTTP 403", "HTTP 520 Website Ban")):
                 raise
             last_exc = exc
         except (requests.RequestException, ValueError) as exc:
