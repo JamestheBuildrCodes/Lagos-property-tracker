@@ -582,8 +582,11 @@ def scrape_estate_intel(entries: list[dict]) -> tuple[list[dict], list[dict]]:
                 text,
                 re.I,
             )
+            # The page text is flattened to one line. Capture only the actual
+            # date/relative-age token so location text is not appended to it.
             updated = re.search(
-                r"last updated\s+([^\n]+?)(?=\s+[A-Z][a-z]+,\s+Nigeria|\s+Overview)",
+                r"last updated\s+((?:\d+\s+(?:day|week|month|year)s?\s+ago)|"
+                r"(?:[A-Za-z]+\s+\d{1,2},?\s+\d{4})|(?:[A-Za-z]+\s+\d{4}))",
                 text,
                 re.I,
             )
