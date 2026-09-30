@@ -25,3 +25,14 @@
 ## Not yet verified live
 
 The Google Docs API table creation/styling and Mailjet delivery cannot be certified from offline/local tests. The first manual GitHub Actions run must verify the published Google Doc visually and confirm the notification email. The workflow is configured to fail if those steps fail.
+
+
+## Narrative and source-health correction — 30 September 2026
+
+- Rebuilt the client-preferred report around a shared narrative builder used by both DOCX and Google Docs: **How to Read This Report**, evidence-led cross-node comparisons, source-disagreement notes when source medians differ by more than 15%, small-sample caveats, available freshness flags, **What Stands Out This Week**, **Estate Intel — Public Research Context**, **What This Snapshot Covers — and What's Next**, and **Sources Used in This Report**.
+- Added a distinct Estate Intel public-research table with direct links. Estate Intel research/project pages are not presented as comparable rental/sale listings; no private or premium figures are inferred.
+- Updated the workflow to pass the current Estate Intel research CSV into the client document builder.
+- Added a **Source Health** workbook/Google Sheets tab showing each approved source's output rows, usable public prices/sizes, and source/category failures. The existing **Estate Intel Public** tab remains available for the nine public research records.
+- Fixed Estate Intel's last-updated parser so relative-age values such as "6 months ago" are not polluted by following location text.
+- Changed client-preferred Google Doc publication to the configured human OAuth account and Drive folder. This avoids the observed service-account storage-quota failure and uses notification-enabled sharing where a recipient needs an invitation.
+- Historical verification notes above refer to the earlier implementation. **This correction has not yet been verified by a fresh end-to-end GitHub Actions run or visually inspected in a newly published Google Doc.** The next manual workflow run must verify document layout, populated tables and links, the Source Health/ Estate Intel tabs, and client email delivery.
