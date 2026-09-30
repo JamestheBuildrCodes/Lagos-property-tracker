@@ -50,6 +50,15 @@ class PipelineTests(unittest.TestCase):
         self.assertIn('response.status_code in (401, 402, 403)', text)
         self.assertIn('PAID_SOURCE_FAILURE.set()', text)
         self.assertIn('will not retry billing/authorization failures', text)
+
+    def test_zyte_website_ban_is_source_specific_and_not_retried(self):
+        scraper = Path("scraper.py").read_text(encoding="utf-8")
+        preflight = Path("zyte_preflight.py").read_text(encoding="utf-8")
+        self.assertIn("PAID_SOURCE_BANS", scraper)
+        self.assertIn("response.status_code == 520", scraper)
+        self.assertIn("HTTP 520 Website Ban", scraper)
+        self.assertIn("if not successes", preflight)
+        self.assertIn("Source-specific warnings", preflight)
     def test_workflow_uses_expected_output_name(self):
         text = (ROOT / ".github/workflows/weekly-scan.yml").read_text()
         self.assertIn("property_listings_", text)
