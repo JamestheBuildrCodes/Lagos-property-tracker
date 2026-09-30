@@ -269,7 +269,7 @@ def _narrative_lines(listings, summary, research=None):
                                      ("sale", "Sales Market", sales), ("land", "Land", land)):
                 if not rows:
                     continue
-                lines.append(("body", label))
+                lines.append(("h3", label))
                 lines.append(("table", f"{node}_{txn}"))
                 for item in rows:
                     import re
@@ -341,6 +341,8 @@ def build_docx(listings, summary, output=None, research=None):
         p = doc.add_paragraph(style="Heading 1"); r = p.add_run(text); set_font(r, 16, BLUE); return p
     def h2(text):
         p = doc.add_paragraph(style="Heading 2"); r = p.add_run(text); set_font(r, 13, BLUE); return p
+    def h3(text):
+        p = doc.add_paragraph(style="Heading 3"); r = p.add_run(text); set_font(r, 12, BLUE); r.bold = True; return p
     def body(text):
         p = doc.add_paragraph(); p.paragraph_format.space_after = Pt(6); r = p.add_run(text); set_font(r, 11); return p
     def bullet(text):
@@ -379,6 +381,7 @@ def build_docx(listings, summary, output=None, research=None):
     for kind, value in _narrative_lines(listings, summary, research):
         if kind == "h1": h1(value)
         elif kind == "h2": h2(value)
+        elif kind == "h3": h3(value)
         elif kind == "body": body(value)
         elif kind == "bullet": bullet(value)
         elif kind == "table":
@@ -517,6 +520,7 @@ def publish_google_doc(listings, summary, research=None):
                 "Estate Intel — Public Research Context", "What This Snapshot Covers — and What's Next",
                 "Sources Used in This Report"}
     heading2 = set(LAGOS_NODES + ABUJA_NODES)
+    heading3 = {"Rental Market (per annum)", "Sales Market", "Land"}
     requests = [{"updateTextStyle": {"range": {"startIndex": 1, "endIndex": len(text) + 1},
         "textStyle": {"weightedFontFamily": {"fontFamily": "Times New Roman"},
                       "fontSize": {"magnitude": 11, "unit": "PT"}},
@@ -544,15 +548,19 @@ def publish_google_doc(listings, summary, research=None):
                 "textStyle": {"fontSize": {"magnitude": 10, "unit": "PT"},
                               "foregroundColor": {"color": {"rgbColor": {"red": .4, "green": .4, "blue": .4}}}},
                 "fields": "fontSize,foregroundColor"}})
-        elif raw_line in heading1 or raw_line in heading2:
-            level = "HEADING_1" if raw_line in heading1 else "HEADING_2"
-            size = 16 if level == "HEADING_1" else 13
+        elif raw_line in heading1 or raw_line in heading2 or raw_line in heading3:
+            level = "HEADING_1" if raw_line in heading1 else "HEADING_2" if raw_line in heading2 else "HEADING_3"
+            size = 16 if level == "HEADING_1" else 13 if level == "HEADING_2" else 12
+            style = {"weightedFontFamily": {"fontFamily": "Times New Roman"}, "fontSize": {"magnitude": size, "unit": "PT"},
+                     "foregroundColor": {"color": {"rgbColor": {"red": 46/255, "green": 116/255, "blue": 181/255}}}}
+            fields = "weightedFontFamily,fontSize,foregroundColor"
+            if level == "HEADING_3":
+                style["bold"] = True
+                fields += ",bold"
             requests.append({"updateParagraphStyle": {"range": {"startIndex": start, "endIndex": end + 1},
                 "paragraphStyle": {"namedStyleType": level}, "fields": "namedStyleType"}})
             requests.append({"updateTextStyle": {"range": {"startIndex": start, "endIndex": end},
-                "textStyle": {"weightedFontFamily": {"fontFamily": "Times New Roman"}, "fontSize": {"magnitude": size, "unit": "PT"},
-                              "foregroundColor": {"color": {"rgbColor": {"red": 46/255, "green": 116/255, "blue": 181/255}}}},
-                "fields": "weightedFontFamily,fontSize,foregroundColor"}})
+                "textStyle": style, "fields": fields}})
         offset += len(line)
     docs.documents().batchUpdate(documentId=doc_id, body={"requests": requests}).execute()
 
