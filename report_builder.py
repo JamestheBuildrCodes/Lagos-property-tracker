@@ -146,6 +146,35 @@ def build_xlsx_from_data(listings,changes,research,s,output=None):
         else: sh.append(["No data returned"])
         polish(sh)
     add_data("Current Listings",listings); add_data("Weekly Changes",changes); add_data("Estate Intel Public",research)
+
+    # A separate health tab makes source coverage and failures visible instead
+    # of mixing scraper errors with market-price data.
+    ws=wb.create_sheet("Source Health")
+    ws.append(["Source","Output rows","Rows with public asking price","Rows with size/units","Failures","Status / interpretation"])
+    try:
+        run_report=json.loads(Path("scrape_run_report.json").read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        run_report={}
+    failures=run_report.get("failures",[]) if isinstance(run_report,dict) else []
+    for source in ("Nigeria Property Centre","PropertyPro.ng","Estate Intel"):
+        if source=="Estate Intel":
+            source_rows=[r for r in research if (r.get("url") or "").startswith(("http://","https://"))]
+            price_rows=sum(1 for r in source_rows if r.get("public_sale_price_ngn") not in (None,"") and str(r.get("public_sale_price_ngn")).strip())
+            size_rows=sum(1 for r in source_rows if r.get("land_area_sqm") not in (None,"") or r.get("size_units") not in (None,""))
+            note=("Public research only; no comparable listing prices inferred. Check linked pages and scrape failures."
+                  if source_rows else "No public research records returned; review source-level failures.")
+        else:
+            source_rows=[r for r in listings if r.get("source")==source]
+            price_rows=sum(1 for r in source_rows if r.get("asking_price_ngn") not in (None,"") and str(r.get("asking_price_ngn")).strip())
+            size_rows=sum(1 for r in source_rows if r.get("size_sqm") not in (None,"") and str(r.get("size_sqm")).strip())
+            note="Comparable listing rows; asking prices, not confirmed transactions."
+        source_failures=[f for f in failures if f.get("source")==source]
+        note += (f" {len(source_failures)} source/category failure(s) recorded." if source_failures else " No source/category failures recorded.")
+        ws.append([source,len(source_rows),price_rows,size_rows,len(source_failures),note])
+        for failure in source_failures:
+            ws.append([source,0,0,0,1,f"{failure.get('node','Unknown node')} / {failure.get('category','research')}: {failure.get('error','Unknown error')}"])
+    headers(ws,1); polish(ws)
+
     ws=wb.create_sheet("Methodology")
     for row in [["Purpose","Decision-ready property market intelligence"],["Approved sources","Nigeria Property Centre; PropertyPro Nigeria; Estate Intel"],
                 ["Freshness","Current listing data targeted to 31 days; weekly refresh"],["Coverage","9 nodes: Banana Island, Old Ikoyi, Lekki Phase 1, Victoria Island, Eko Atlantic, Ikeja GRA, Asokoro, Maitama, Wuse"],
