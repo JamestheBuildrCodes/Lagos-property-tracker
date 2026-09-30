@@ -148,9 +148,24 @@ jobs:
             echo "Google service account secret not configured; Google Doc publication skipped."
           fi
 
+      - name: Fix client document creation for service-account storage
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path("client_doc_report.py")
+          s = p.read_text(encoding="utf-8")
+          old = '''    doc = docs.documents().create(body={"title": title}).execute()\n    doc_id = doc["documentId"]'''
+          new = '''    # GitHub Actions service accounts are not guaranteed to have their own\n    # consumer Drive storage/quota. Use the existing shared Google Doc as a\n    # template and copy it through Drive, then clear the copy before filling\n    # the new weekly report. This preserves the client's requested\n    # "new document every week" behavior without calling Docs create().\n    template_id = os.environ.get("GOOGLE_DOC_ID", "").strip()\n    if not template_id:\n        raise RuntimeError(\n            "GOOGLE_DOC_ID is required as an accessible Google Doc template "\n            "for the weekly client report."\n        )\n    copied = drive.files().copy(\n        fileId=template_id,\n        body={"name": title},\n        supportsAllDrives=True,\n        fields="id",\n    ).execute()\n    doc_id = copied["id"]\n\n    # The template may contain the previous report. Clear its body while\n    # preserving the final required document newline, then write this run.\n    existing = docs.documents().get(documentId=doc_id).execute()\n    body = existing.get("body", {}).get("content", [])\n    end = max((el.get("endIndex", 1) for el in body), default=1) - 1\n    if end > 1:\n        docs.documents().batchUpdate(\n            documentId=doc_id,\n            body={"requests": [{\n                "deleteContentRange": {"range": {"startIndex": 1, "endIndex": end}}\n            }]}\n        ).execute()'''
+          if old not in s:
+              raise SystemExit("Expected client_doc_report.py create() block was not found; refusing to modify the file.")
+          p.write_text(s.replace(old, new, 1), encoding="utf-8")
+          print("Patched client_doc_report.py to copy GOOGLE_DOC_ID as a template.")
+          PY
+
       - name: Create and email a new client-preferred weekly document
         env:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_DOC_ID: ${{ secrets.GOOGLE_DOC_ID }}
           MAILJET_API_KEY: ${{ secrets.MAILJET_API_KEY }}
           MAILJET_SECRET_KEY: ${{ secrets.MAILJET_SECRET_KEY }}
           MAILJET_FROM_EMAIL: ${{ secrets.MAILJET_FROM_EMAIL }}
@@ -161,6 +176,7 @@ jobs:
           CURR=$(ls -t property_listings_*.csv | head -n 1)
           test -s "$CURR"
           test -n "$GOOGLE_SERVICE_ACCOUNT_JSON" || { echo "GOOGLE_SERVICE_ACCOUNT_JSON is required for the client-preferred Google Doc."; exit 1; }
+          test -n "$GOOGLE_DOC_ID" || { echo "GOOGLE_DOC_ID must point to the accessible Google Doc template."; exit 1; }
           python client_doc_report.py "$CURR"
           test -s Lagos_Property_Market_Snapshot_*.docx
           test -s client_doc_url.txt
@@ -187,7 +203,7 @@ jobs:
         run: |
           git config user.name "property-market-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/ tests/ discover_sources.py scraper.py market_analysis.py report_builder.py sheets_writer.py email_report.py docs_writer.py validate_market_output.py requirements.txt .github/workflows/weekly-scan.yml
+          git add data/ tests/ discover_sources.py scraper.py market_analysis.py report_builder.py sheets_writer.py email_report.py docs_writer.py client_doc_report.py validate_market_output.py requirements.txt .github/workflows/weekly-scan.yml
           git commit -m "Property market snapshot $(date -u +%Y-%m-%d)" || echo "Nothing to commit"
 
       - name: Rebase and push results safely
