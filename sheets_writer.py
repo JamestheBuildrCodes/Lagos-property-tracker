@@ -5,7 +5,7 @@ from pathlib import Path
 import gspread
 from google.oauth2.service_account import Credentials
 SCOPES=["https://www.googleapis.com/auth/spreadsheets","https://www.googleapis.com/auth/drive"]
-DESIRED=["Executive Summary","Area Scorecard","Current Listings","Weekly Changes","Estate Intel Public","Methodology"]
+DESIRED=["Executive Summary","Area Scorecard","Current Listings","Weekly Changes","Estate Intel Public","Source Health","Methodology"]
 NAVY={"red":0.05,"green":0.14,"blue":0.25}; LIGHT={"red":0.91,"green":0.94,"blue":0.97}; WHITE={"red":1,"green":1,"blue":1}; TEXT={"red":0.09,"green":0.13,"blue":0.20}
 def get_client():
     raw=os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON","").strip()
