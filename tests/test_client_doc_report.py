@@ -107,7 +107,7 @@ class ClientDocReportTests(unittest.TestCase):
         self.assertIn('GOOGLE_OAUTH_TOKEN_JSON', source)
         self.assertNotIn('GOOGLE_DOC_ID', source)
         self.assertIn('"updateTableCellStyle"', source)
-        self.assertIn('"link": {"url": rows[ri - 1].get("link")}', source)
+        self.assertIn('"link": {"url": rows[ri - 1]["link"]}', source)
         self.assertIn('"MAILJET_API_KEY"', source)
         self.assertIn('"MAILJET_SECRET_KEY"', source)
         self.assertIn('"How to Read This Report"', source)
