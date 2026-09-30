@@ -2,3 +2,9 @@ __pycache__/
 *.py[cod]
 *.class
 .env
+# Private Google OAuth credentials
+/client_secret.json
+/google_oauth_token.json
+/token.json
+# Local development backups
+*.local-backup
