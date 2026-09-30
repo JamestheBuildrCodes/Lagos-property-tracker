@@ -63,6 +63,32 @@ class ClientDocReportTests(unittest.TestCase):
             self.assertNotEqual(score["E2"].number_format, "#,##0.00")
 
 
+    def test_xlsx_has_explicit_estate_intel_public_research_status(self):
+        from market_analysis import clean_rows
+        rows = clean_rows(self.sample_rows())
+        summary = build_summary(rows, [], None)
+        research = [{
+            "market_node": "Lekki Phase 1",
+            "title": "Public research overview",
+            "url": "https://estateintel.com/insights/example",
+            "date_scraped": "2026-09-29",
+            "public_sale_price_ngn": "",
+            "land_area_sqm": "",
+            "size_units": "",
+        }]
+        with tempfile.TemporaryDirectory() as td:
+            out = Path(td) / "report.xlsx"
+            build_xlsx_from_data(rows, [], research, summary, str(out))
+            from openpyxl import load_workbook
+            wb = load_workbook(out, data_only=True)
+            self.assertIn("Estate Intel Public", wb.sheetnames)
+            self.assertIn("Source Health", wb.sheetnames)
+            health = wb["Source Health"]
+            row = next(i for i in range(2, health.max_row + 1) if health.cell(i, 1).value == "Estate Intel")
+            self.assertEqual(health.cell(row, 2).value, 1)
+            self.assertEqual(health.cell(row, 3).value, 0)
+            self.assertIn("Public research only", health.cell(row, 6).value)
+
     def test_docs_writer_formats_currency_and_uses_real_bullets(self):
         import docs_writer
         from market_analysis import clean_rows
