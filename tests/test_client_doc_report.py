@@ -77,12 +77,30 @@ class ClientDocReportTests(unittest.TestCase):
 
     def test_google_doc_is_created_new_and_has_requested_table_styles(self):
         source = Path(client_doc_report.__file__).read_text(encoding="utf-8")
-        self.assertIn('docs.documents().create(body={"title": title})', source)
+        self.assertIn('drive.files().create(body=', source)
+        self.assertIn('GOOGLE_OAUTH_TOKEN_JSON', source)
         self.assertNotIn('GOOGLE_DOC_ID', source)
         self.assertIn('"updateTableCellStyle"', source)
-        self.assertIn('"link": {"url": rows[r_idx - 1]["link"]}', source)
+        self.assertIn('"link": {"url": rows[ri - 1]["link"]}', source)
         self.assertIn('"MAILJET_API_KEY"', source)
         self.assertIn('"MAILJET_SECRET_KEY"', source)
+        self.assertIn('"How to Read This Report"', source)
+        self.assertIn('"What This Snapshot Covers — and What\'s Next"', source)
+        self.assertIn('"Estate Intel — Public Research Context"', source)
+
+    def test_narrative_discloses_missing_port_harcourt_and_estate_intel_context(self):
+        from market_analysis import clean_rows
+        rows = clean_rows(self.sample_rows())
+        summary = build_summary(rows, [], None)
+        narrative = client_doc_report._narrative_lines(rows, summary, research=[
+            {"market_node": "Lekki Phase 1", "title": "Public research page",
+             "url": "https://estateintel.com/insights/public-example",
+             "date_scraped": "2026-09-29", "public_sale_price_ngn": ""}])
+        rendered = "\n".join(value for kind, value in narrative if kind != "table")
+        self.assertIn("Port Harcourt is not currently tracked", rendered)
+        self.assertIn("Estate Intel", rendered)
+        self.assertIn("How to Read This Report", rendered)
+        self.assertIn("What This Snapshot Covers — and What's Next", rendered)
 
     def test_scraper_rejects_promo_copy_from_listing_cards(self):
         import scraper
