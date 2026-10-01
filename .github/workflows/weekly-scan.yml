@@ -188,6 +188,28 @@ jobs:
           test -s Lagos_Property_Market_Snapshot_*.docx
           test -s client_doc_url.txt
 
+      - name: Verify Mailjet send receipts
+        shell: bash
+        run: |
+          test -s mailjet_layer1_receipt.json
+          test -s mailjet_client-doc_receipt.json
+          python - <<'PY'
+          import json
+          for path in ("mailjet_layer1_receipt.json", "mailjet_client-doc_receipt.json"):
+              data = json.load(open(path, encoding="utf-8"))
+              statuses = [
+                  result.get("status")
+                  for result in data.get("message_results", [])
+              ]
+              assert statuses and all(status == "success" for status in statuses), (
+                  f"Mailjet receipt is not fully successful: {path}"
+              )
+              print(
+                  f"{path}: HTTP {data.get('http_status')}; "
+                  f"status=success; CustomID={data.get('custom_id')}"
+              )
+          PY
+
       - name: Archive intelligence outputs
         run: |
           mkdir -p data
@@ -205,12 +227,13 @@ jobs:
           cp report_outputs.json data/
           cp google_doc_url.txt data/ 2>/dev/null || true
           cp client_doc_url.txt data/ 2>/dev/null || true
+          mv mailjet_*_receipt.json data/ 2>/dev/null || true
 
       - name: Commit results
         run: |
           git config user.name "property-market-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/ tests/ discover_sources.py scraper.py market_analysis.py report_builder.py sheets_writer.py email_report.py docs_writer.py client_doc_report.py validate_market_output.py requirements.txt .github/workflows/weekly-scan.yml
+          git add data/ tests/ discover_sources.py scraper.py market_analysis.py report_builder.py sheets_writer.py email_report.py docs_writer.py client_doc_report.py mailjet_sender.py validate_market_output.py requirements.txt .github/workflows/weekly-scan.yml .github/workflows/email-delivery-diagnostic.yml mailjet_delivery_diagnostic.py
           git commit -m "Property market snapshot $(date -u +%Y-%m-%d)" || echo "Nothing to commit"
 
       - name: Rebase and push results safely
