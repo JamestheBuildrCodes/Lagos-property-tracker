@@ -211,6 +211,7 @@ class ClientReportingTests(unittest.TestCase):
         self.assertIn("REPORT_CLIENT_EMAIL",email)
         self.assertIn("REPORT_CLIENT_EMAIL",workflow)
         self.assertIn("MAILJET_API_KEY",sender)
+        self.assertIn("MAILJET_SECRET_KEY",sender)
         self.assertIn("send_message(",email)
         self.assertIn("MAILJET_SECRET_KEY",email)
         self.assertIn("MAILJET_FROM_EMAIL",email)
