@@ -525,3 +525,110 @@ def publish_google_doc(listings, summary, research=None):
                 "tableCellStyle": {"backgroundColor": {"color": {"rgbColor": {"red": 217/255, "green": 217/255, "blue": 217/255}}},
                                    "paddingTop": {"magnitude": 4, "unit": "PT"}, "paddingBottom": {"magnitude": 4, "unit": "PT"}},
                 "fields": "backgroundColor,paddingTop,paddingBottom"}}]}).execute()
+
+def send_notification_email(doc_url):
+    """Email the newly-created Google Doc link via Mailjet.
+
+    Local runs may not have Mailjet credentials. In that case the report
+    publication still succeeds and the notification is skipped. GitHub Actions
+    supplies the credentials through repository secrets, so scheduled runs
+    still send the notification.
+    """
+    import requests as req
+
+    pub = os.environ.get("MAILJET_API_KEY")
+    priv = os.environ.get("MAILJET_SECRET_KEY")
+
+    if not (pub and priv):
+        print(
+            "Mailjet credentials not available locally; "
+            "skipping client-document notification email."
+        )
+        return
+
+    recipients = []
+    for value in (
+        os.environ.get("REPORT_CLIENT_EMAIL"),
+        os.environ.get("REPORT_TO_EMAIL"),
+    ):
+        if value and value not in recipients:
+            recipients.append(value)
+
+    if not recipients:
+        print(
+            "REPORT_CLIENT_EMAIL/REPORT_TO_EMAIL not configured; "
+            "skipping client-document notification email."
+        )
+        return
+
+    from_email = os.environ.get("MAILJET_FROM_EMAIL") or os.environ.get(
+        "REPORT_TO_EMAIL"
+    )
+    from_name = os.environ.get("MAILJET_FROM_NAME", "Lagos Property Tracker")
+
+    payload = {
+        "Messages": [{
+            "From": {"Email": from_email, "Name": from_name},
+            "To": [{"Email": email} for email in recipients],
+            "Subject": f"Weekly Nigeria Property Market Snapshot — {datetime.now(timezone.utc):%Y-%m-%d}",
+            "TextPart": (
+                "The latest Lagos & Abuja Property Market Snapshot is ready.\n\n"
+                f"Open the new Google Doc: {doc_url}\n"
+            ),
+            "HTMLPart": (
+                "<p>The latest Lagos &amp; Abuja Property Market Snapshot is ready.</p>"
+                f'<p><a href="{doc_url}">Open the new Google Doc</a></p>'
+            ),
+        }]
+    }
+
+    response = req.post(
+        "https://api.mailjet.com/v3.1/send",
+        auth=(pub, priv),
+        json=payload,
+        timeout=30,
+    )
+    response.raise_for_status()
+    print(f"Client-document notification email sent via Mailjet: HTTP {response.status_code}")
+
+
+def main():
+    if len(sys.argv) < 2:
+        raise SystemExit(
+            "Usage: python client_doc_report.py <csv_path> [research_csv_path]"
+        )
+
+    csv_path = Path(sys.argv[1])
+    research_path = Path(sys.argv[2]) if len(sys.argv) > 2 else None
+
+    listings = load_csv(csv_path)
+    summary = build_summary(listings)
+
+    research = []
+    if research_path and research_path.exists():
+        research = load_csv(research_path)
+
+    print(
+        f"Client report input rows: {len(listings)}; "
+        f"validated rows: {len(clean_rows(listings))}; "
+        f"Estate Intel public research rows: {len(research)}"
+    )
+
+    # Keep the existing DOCX report generation out of the OAuth publication
+    # path if that helper is unavailable in a reduced checkout. The Google Doc
+    # remains the client-facing weekly artifact.
+    raw_oauth = os.environ.get("GOOGLE_OAUTH_TOKEN_JSON", "").strip()
+    if raw_oauth:
+        _, url = publish_google_doc(listings, summary, research)
+        print(f"New weekly Google Doc published: {url}")
+        send_notification_email(url)
+        return
+
+    print(
+        "GOOGLE_OAUTH_TOKEN_JSON not set — skipping Google Doc publish, "
+        "DOCX only."
+    )
+
+
+if __name__ == "__main__":
+    main()
