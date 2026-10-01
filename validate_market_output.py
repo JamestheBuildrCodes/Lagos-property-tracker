@@ -55,6 +55,7 @@ def main():
 
     errors=[]
     ids=set()
+    today = datetime.now(timezone.utc).date().isoformat()
     for i,r in enumerate(rows,1):
         if r.get("source") not in ALLOWED_SOURCES: errors.append(f"row {i}: unapproved source {r.get('source')}")
         if r.get("market_node") not in NODES: errors.append(f"row {i}: unapproved node {r.get('market_node')}")
