@@ -23,7 +23,9 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from mailjet_sender import recipients_from_values, send_message\n\nfrom market_analysis import (
+from mailjet_sender import recipients_from_values, send_message
+
+from market_analysis import (
     clean_rows,
     fnum,
     fmt_naira,
