@@ -218,7 +218,7 @@ class ClientReportingTests(unittest.TestCase):
         self.assertIn("MAILJET_API_KEY",workflow)
         self.assertIn("MAILJET_SECRET_KEY",workflow)
         self.assertIn("MAILJET_FROM_EMAIL",workflow)
-        self.assertIn('"Cc"',email)
+        self.assertIn('"Cc"',sender)
         self.assertNotIn("onboarding@resend.dev",email)
 
 
