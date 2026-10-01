@@ -500,7 +500,7 @@ def parse_card(card_text: str, listing_url: str, target: dict) -> Optional[dict]
         if age <= PREFERRED_FRESHNESS_DAYS:
             freshness_band = f"0-{PREFERRED_FRESHNESS_DAYS} days"
         else:
-            freshness_band = f"{PREFERRED_FRESHNESS_DAYS + 1}-{MAX_LISTING_AGE_DAYS} days"
+            freshness_band = "stale-excluded"
     else:
         freshness_band = "unknown"
 
@@ -588,8 +588,6 @@ def scrape_category(target: dict) -> tuple[list[dict], dict]:
                 rows.append(row)
             else:
                 stats["stale_rejected"] += 1
-                if len(rows) >= MAX_LISTINGS_PER_CATEGORY:
-                    break
 
         fresh_count = sum(
             1 for row in rows
