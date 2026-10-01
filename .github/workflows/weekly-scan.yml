@@ -94,6 +94,8 @@ jobs:
           with open(current, newline="", encoding="utf-8") as f:
               rows=list(csv.DictReader(f))
           print(f"Validated comparable listings: {len(rows)}")
+          fresh = sum(1 for r in rows if r.get("freshness_band") == "0-7 days")
+          print(f"Listings updated/added within 7 days: {fresh}")
           if not rows:
               print(json.dumps(json.load(open("scrape_run_report.json")), indent=2))
               sys.exit("Refusing to publish an empty report")
