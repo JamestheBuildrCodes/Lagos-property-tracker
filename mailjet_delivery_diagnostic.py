@@ -75,10 +75,30 @@ def main() -> int:
     print(f"Relevant report messages found: {len(messages)}")
 
     for item in messages:
+        message_id = item.get("ID", "unknown")
+        detail = {}
+
+        if message_id != "unknown":
+            detail_response = requests.get(
+                f"{MAILJET_MESSAGE_URL}information/{message_id}",
+                auth=(public, private),
+                timeout=30,
+            )
+            if detail_response.status_code < 300:
+                try:
+                    detail_data = detail_response.json()
+                    rows = detail_data.get("Data", [])
+                    if rows:
+                        detail = rows[0]
+                except ValueError:
+                    pass
+
         print(
             "Message "
-            f"ID={item.get('ID', 'unknown')} "
-            f"status={item.get('Status', 'unknown')} "
+            f"ID={message_id} "
+            f"status={item.get('Status', detail.get('Status', 'unknown'))} "
+            f"state_id={detail.get('StateID', 'n/a')} "
+            f"state={detail.get('State', 'n/a')} "
             f"recipient={_mask(item.get('ContactAlt', ''))} "
             f"arrived={item.get('ArrivedAt', 'unknown')} "
             f"subject={item.get('Subject', 'unknown')}"
