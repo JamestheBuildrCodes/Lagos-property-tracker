@@ -4,9 +4,10 @@ The collector is manifest-driven and uses Zyte API only for protected-source col
 
 Key reliability rules:
 - Never invent source URLs.
-- One category page is enough to classify 1-5BR; no bedroom-specific URL calls.
-- Parse listing cards from the category page first. Detail pages are optional
-  and disabled by default to control cost/latency.
+- One category request serves 1-5BR; no bedroom-specific URL calls.
+- Parse listing cards from multiple category pages, prioritizing the newest
+  source-reported dates and continuing until a fresh sample is obtained or
+  the page ceiling is reached.
 - Estate Intel is public research only; premium values are ignored.
 - A failed category does not crash the entire run. The final report records
   source/category failures separately.
@@ -50,7 +51,7 @@ FIELDNAMES = [
     "record_id", "date_scraped", "city", "market_node", "transaction",
     "property_type", "bedrooms", "title", "asking_price_ngn", "size_sqm",
     "price_per_sqm_ngn", "location", "listing_date", "listing_age_days",
-    "listing_date_type", "freshness_band", "is_within_31_days",
+    "listing_date_type", "freshness_band", "is_within_max_age",
     "source", "source_url",
 ]
 RESEARCH_FIELDS = [
@@ -552,7 +553,7 @@ def parse_card(card_text: str, listing_url: str, target: dict) -> Optional[dict]
         "listing_age_days": age,
         "listing_date_type": date_type,
         "freshness_band": freshness_band,
-        "is_within_31_days": recent,
+        "is_within_max_age": recent,
         "source": target["source"],
         "source_url": listing_url,
     }
@@ -583,7 +584,7 @@ def scrape_category(target: dict) -> tuple[list[dict], dict]:
             if row is None:
                 stats["rejected_quality"] += 1
                 continue
-            if row["is_within_31_days"]:
+            if row["is_within_max_age"]:
                 rows.append(row)
                 if len(rows) >= MAX_LISTINGS_PER_CATEGORY:
                     break
