@@ -83,8 +83,8 @@ def main():
             except ValueError: br=0
             if br not in {1,2,3,4,5}: errors.append(f"row {i}: apartment outside 1-5BR")
         age=age_days(r.get("listing_date"))
-        if age is not None and not 0 <= age <= 31: errors.append(f"row {i}: listing older than 31 days ({age})")
-        if r.get("is_within_31_days") != "True": errors.append(f"row {i}: row is not marked within 31 days")
+        if age is not None and not 0 <= age <= 14: errors.append(f"row {i}: listing older than 14 days ({age})")
+        if r.get("is_within_max_age") != "True": errors.append(f"row {i}: row is not marked within the 14-day maximum age")
         if r.get("source") == "Estate Intel": errors.append(f"row {i}: Estate Intel must be in research output, not comparable listing output")
     if errors:
         print("MARKET OUTPUT VALIDATION FAILED")
