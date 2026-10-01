@@ -2,6 +2,9 @@ name: Nigeria Property Market Scan
 
 on:
   workflow_dispatch: {}
+  push:
+    paths:
+      - ".ops/live-scan-trigger"
   schedule:
     - cron: "0 7 * * 1"
 
