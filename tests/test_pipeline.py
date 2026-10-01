@@ -222,6 +222,17 @@ class ClientReportingTests(unittest.TestCase):
         self.assertNotIn("onboarding@resend.dev",email)
 
 
+    def test_final_client_delivery_is_report_only(self):
+        workflow = Path(
+            ".github/workflows/final-client-report-delivery.yml"
+        ).read_text(encoding="utf-8")
+        self.assertIn("workflow_dispatch", workflow)
+        self.assertIn("REPORT_CLIENT_EMAIL", workflow)
+        self.assertIn("client_doc_report.py", workflow)
+        self.assertIn("upload-artifact@v4", workflow)
+        self.assertNotIn("scraper.py", workflow)
+        self.assertNotIn("ZYTE_API_KEY", workflow)
+
     def test_google_docs_dependency_is_declared(self):
         self.assertIn("google-api-python-client", Path("requirements.txt").read_text(encoding="utf-8"))
 
