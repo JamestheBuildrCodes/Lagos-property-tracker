@@ -31,10 +31,12 @@ from bs4 import BeautifulSoup
 
 ZYTE_ENDPOINT = "https://api.zyte.com/v1/extract"
 ZYTE_API_KEY = os.environ.get("ZYTE_API_KEY", "").strip()
-MAX_LISTING_AGE_DAYS = int(os.environ.get("MAX_LISTING_AGE_DAYS", "31"))
+MAX_LISTING_AGE_DAYS = int(os.environ.get("MAX_LISTING_AGE_DAYS", "14"))
+PREFERRED_FRESHNESS_DAYS = int(os.environ.get("PREFERRED_FRESHNESS_DAYS", "7"))
+MIN_FRESH_LISTINGS_PER_CATEGORY = int(os.environ.get("MIN_FRESH_LISTINGS_PER_CATEGORY", "6"))
 REQUEST_DELAY_SECONDS = float(os.environ.get("REQUEST_DELAY_SECONDS", "0.5"))
-MAX_PAGES_PER_CATEGORY = int(os.environ.get("MAX_PAGES_PER_CATEGORY", "1"))
-MAX_LISTINGS_PER_CATEGORY = int(os.environ.get("MAX_LISTINGS_PER_CATEGORY", "12"))
+MAX_PAGES_PER_CATEGORY = int(os.environ.get("MAX_PAGES_PER_CATEGORY", "3"))
+MAX_LISTINGS_PER_CATEGORY = int(os.environ.get("MAX_LISTINGS_PER_CATEGORY", "24"))
 MAX_DETAIL_FETCHES_PER_CATEGORY = int(os.environ.get("MAX_DETAIL_FETCHES_PER_CATEGORY", "0"))
 WORKERS = max(1, int(os.environ.get("SCRAPER_WORKERS", "3")))
 ZYTE_TIMEOUT = int(os.environ.get("ZYTE_TIMEOUT_SECONDS", "90"))
@@ -48,7 +50,8 @@ FIELDNAMES = [
     "record_id", "date_scraped", "city", "market_node", "transaction",
     "property_type", "bedrooms", "title", "asking_price_ngn", "size_sqm",
     "price_per_sqm_ngn", "location", "listing_date", "listing_age_days",
-    "listing_date_type", "is_within_31_days", "source", "source_url",
+    "listing_date_type", "freshness_band", "is_within_31_days",
+    "source", "source_url",
 ]
 RESEARCH_FIELDS = [
     "date_scraped", "market", "market_node", "title", "url", "date_added",
@@ -492,6 +495,13 @@ def parse_card(card_text: str, listing_url: str, target: dict) -> Optional[dict]
     now = datetime.now(timezone.utc)
     age = (now.date() - listing_dt.date()).days if listing_dt else None
     recent = bool(listing_dt and 0 <= age <= MAX_LISTING_AGE_DAYS)
+    if listing_dt is not None and age is not None:
+        if age <= PREFERRED_FRESHNESS_DAYS:
+            freshness_band = f"0-{PREFERRED_FRESHNESS_DAYS} days"
+        else:
+            freshness_band = f"{PREFERRED_FRESHNESS_DAYS + 1}-{MAX_LISTING_AGE_DAYS} days"
+    else:
+        freshness_band = "unknown"
 
     title = None
     for pattern in (
@@ -541,6 +551,7 @@ def parse_card(card_text: str, listing_url: str, target: dict) -> Optional[dict]
         "listing_date": listing_dt.date().isoformat() if listing_dt else None,
         "listing_age_days": age,
         "listing_date_type": date_type,
+        "freshness_band": freshness_band,
         "is_within_31_days": recent,
         "source": target["source"],
         "source_url": listing_url,
@@ -576,11 +587,39 @@ def scrape_category(target: dict) -> tuple[list[dict], dict]:
                 rows.append(row)
                 if len(rows) >= MAX_LISTINGS_PER_CATEGORY:
                     break
+
+        fresh_count = sum(
+            1 for row in rows
+            if row.get("listing_age_days") is not None
+            and int(row["listing_age_days"]) <= PREFERRED_FRESHNESS_DAYS
+        )
+
         if len(rows) >= MAX_LISTINGS_PER_CATEGORY:
             break
+
+        # Do not stop after page 1 just because it contained some valid
+        # records. Continue until the category has a useful fresh sample,
+        # or until the configured page ceiling is reached.
+        if fresh_count >= MIN_FRESH_LISTINGS_PER_CATEGORY:
+            break
+
         if not cards:
             break
+
         time.sleep(REQUEST_DELAY_SECONDS)
+
+    # Category pages are source-ordered, but we still sort explicitly before
+    # capping the category result so page/HTML changes cannot reorder the
+    # final sample arbitrarily.
+    rows.sort(
+        key=lambda r: (
+            r.get("listing_date") or "0000-00-00",
+            r.get("date_scraped") or "0000-00-00",
+            r.get("record_id") or "",
+        ),
+        reverse=True,
+    )
+    rows = rows[:MAX_LISTINGS_PER_CATEGORY]
 
     stats["rows"] = len(rows)
     return rows, stats
