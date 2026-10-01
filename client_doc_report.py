@@ -1466,6 +1466,130 @@ def _iter_placeholder_paragraphs(docs, doc_id):
 
     return placeholders
 
+    
+def _google_doc_text_and_styles(document):
+    texts = []
+    styles = []
+
+    def walk_elements(elements):
+        for element in elements or []:
+            paragraph = element.get("paragraph")
+            if paragraph:
+                for child in paragraph.get("elements", []):
+                    text_run = child.get("textRun")
+                    if text_run and text_run.get("content"):
+                        texts.append(text_run["content"])
+                        styles.append((text_run["content"], text_run.get("textStyle", {})))
+
+            table_obj = element.get("table")
+            if table_obj:
+                for row in table_obj.get("tableRows", []):
+                    for cell in row.get("tableCells", []):
+                        walk_elements(cell.get("content", []))
+
+    walk_elements(document.get("body", {}).get("content", []))
+    return "".join(texts), styles
+
+
+def verify_google_doc(docs, doc_id, listings, summary, research=None):
+    """Fail closed if the published Google Doc does not match the same
+    validated snapshot used to build the report."""
+    document = docs.documents().get(documentId=doc_id).execute()
+    text, styles = _google_doc_text_and_styles(document)
+
+    required_sections = [
+        "LAGOS PROPERTY MARKET INTELLIGENCE — ",
+        "Weekly Market Report — Lagos & Abuja",
+        "1. What This Report Is",
+        "2. Coverage & Method",
+        "3. Rental Market",
+        "4. Sales Market",
+        "5. Land Market — and Cross-Source Discrepancies",
+        "6. Data Quality Notes",
+        "7. What Happens Next",
+        "8. Sources & Definitions",
+    ]
+
+    missing = [item for item in required_sections if item not in text]
+    if "[[TABLE:" in text:
+        missing.append("unresolved table placeholder")
+    if missing:
+        raise RuntimeError("Google Doc content verification failed: " + "; ".join(missing))
+
+    expected_rows = []
+    for node in LAGOS_NODES + ABUJA_NODES:
+        for txn in ("rent", "sale", "land"):
+            expected_rows.extend(_node_transaction_rows(listings, node, txn))
+    expected_rows.extend(_research_table_rows(research or []))
+
+    for row in expected_rows:
+        for field in ("label", "value", "range", "sample", "source", "as_of"):
+            value = str(row.get(field, ""))
+            if value and value not in text:
+                raise RuntimeError(
+                    "Google Doc data verification failed: "
+                    f"{field}={value!r} is missing from published document"
+                )
+
+    def style_for(target):
+        for content, style in styles:
+            if target in content:
+                return style
+        return None
+
+    def font_size(style):
+        return ((style or {}).get("fontSize") or {}).get("magnitude")
+
+    def rgb(style):
+        return (
+            (((style or {}).get("foregroundColor") or {}).get("color") or {}).get("rgbColor")
+        )
+
+    title_style = style_for("LAGOS PROPERTY MARKET INTELLIGENCE — ")
+    h1_style = style_for("1. What This Report Is")
+
+    if font_size(title_style) != 20:
+        raise RuntimeError(
+            f"Google Doc title font-size verification failed: {font_size(title_style)!r}"
+        )
+    if font_size(h1_style) != 12:
+        raise RuntimeError(
+            f"Google Doc section font-size verification failed: {font_size(h1_style)!r}"
+        )
+
+    title_rgb = rgb(title_style) or {}
+    h1_rgb = rgb(h1_style) or {}
+
+    if not (
+        abs(float(title_rgb.get("red", 0)) - 31 / 255) < 0.03
+        and abs(float(title_rgb.get("green", 0)) - 56 / 255) < 0.03
+        and abs(float(title_rgb.get("blue", 0)) - 100 / 255) < 0.03
+    ):
+        raise RuntimeError("Google Doc title color verification failed; expected #1F3864")
+
+    if not all(abs(float(h1_rgb.get(channel, 0))) < 0.03 for channel in ("red", "green", "blue")):
+        raise RuntimeError("Google Doc section heading color verification failed; expected black")
+
+    Path("google_doc_verification.json").write_text(
+        json.dumps(
+            {
+                "verified_at_utc": datetime.now(timezone.utc).isoformat(),
+                "document_id": doc_id,
+                "validated_listing_rows": len(clean_rows(listings)),
+                "expected_table_rows": len(expected_rows),
+                "content_verified": True,
+                "typography_verified": True,
+            },
+            indent=2,
+        ) + "\n",
+        encoding="utf-8",
+    )
+
+    print(
+        "Google Doc readback verification passed: "
+        f"{len(expected_rows)} generated rows and typography contract verified."
+    )
+
 
 def publish_google_doc(
     listings,
@@ -2203,6 +2327,14 @@ def publish_google_doc(
                 ]
             },
         ).execute()
+
+    verify_google_doc(
+        docs,
+        doc_id,
+        listings,
+        summary,
+        research=research,
+    )
 
     recipients = []
 
