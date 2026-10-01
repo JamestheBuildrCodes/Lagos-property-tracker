@@ -34,6 +34,9 @@ jobs:
       - name: Build deterministic source manifest
         run: python discover_sources.py
 
+      - name: Validate Python syntax
+        run: python -m compileall -q *.py tests
+
       - name: Run architecture tests
         run: python -m unittest discover -s tests -v
 
