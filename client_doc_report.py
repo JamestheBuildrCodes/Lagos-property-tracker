@@ -207,7 +207,7 @@ def land_breakdown(listings, node):
 
 DISCREPANCY_THRESHOLD_PCT = 15
 SMALL_SAMPLE_THRESHOLD = 3
-STALE_DAYS_THRESHOLD = 14
+STALE_DAYS_THRESHOLD = 7
 
 
 def _category_group(listings, node, txn_type, beds=None):
@@ -642,15 +642,15 @@ def _narrative_lines(listings, summary, research=None):
             "bullet",
             "Method: source-by-source medians from listing-level "
             "asking prices, with observed min–max ranges and sample "
-            "counts. The primary freshness window is 0–7 days; rows "
-            "older than 7 days but no more than 14 days are retained as "
-            "secondary recent references. Sources are kept separate because "
+            "counts. Only source observations from the last 7 days are "
+            "included in the current snapshot. Sources are kept separate because "
             "platforms can contain different property mixes and price points.",
         ),
         (
             "bullet",
-            "Current validation checks source URLs and market-node "
-            "evidence. Cross-source matching of the same physical "
+            "Current validation checks source URLs, market-node evidence, "
+            "same-day collection, and a maximum source-observation age "
+            "of 7 days. Cross-source matching of the same physical "
             "property is not guaranteed in this weekly snapshot.",
         ),
     ]
