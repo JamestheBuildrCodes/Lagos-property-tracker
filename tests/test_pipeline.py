@@ -38,12 +38,12 @@ class PipelineTests(unittest.TestCase):
         self.assertTrue(all(e["transaction"] == "research" for e in ei))
         self.assertTrue(all("premium" not in e["url"].lower() for e in ei))
 
-    def test_npc_does_not_use_zyte(self):
+    def test_npc_direct_first_with_zyte_fallback(self):
         text = Path("scraper.py").read_text(encoding="utf-8")
-        marker = 'def fetch_page(url: str, source: str) -> requests.Response:'
-        block = text[text.index(marker):text.index('    if not ZYTE_API_KEY:', text.index(marker))]
-        self.assertIn('if source == "Nigeria Property Centre":', block)
-        self.assertNotIn('ZYTE_ENDPOINT', block)
+        self.assertIn('if source == "Nigeria Property Centre":', text)
+        self.assertIn('response.status_code == 403', text)
+        self.assertIn('falling back to Zyte', text)
+        self.assertIn('return _fetch_zyte(url, source)', text)
 
     def test_zyte_billing_failure_is_not_retried(self):
         text = Path("scraper.py").read_text(encoding="utf-8")
@@ -51,12 +51,14 @@ class PipelineTests(unittest.TestCase):
         self.assertIn('PAID_SOURCE_FAILURE.set()', text)
         self.assertIn('will not retry billing/authorization failures', text)
 
-    def test_zyte_website_ban_is_source_specific_and_not_retried(self):
+    def test_zyte_website_ban_is_retried_before_source_quarantine(self):
         scraper = Path("scraper.py").read_text(encoding="utf-8")
         preflight = Path("zyte_preflight.py").read_text(encoding="utf-8")
         self.assertIn("PAID_SOURCE_BANS", scraper)
         self.assertIn("response.status_code == 520", scraper)
-        self.assertIn("HTTP 520 Website Ban", scraper)
+        self.assertIn("max_attempts = 3", scraper)
+        self.assertIn("retrying in", scraper)
+        self.assertIn("after 3 attempts", scraper)
         self.assertIn("if not successes", preflight)
         self.assertIn("Source-specific warnings", preflight)
     def test_workflow_uses_expected_output_name(self):
