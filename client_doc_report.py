@@ -107,7 +107,10 @@ def bedroom_rows(listings, node, txn_type):
 
         example = sorted(
             group,
-            key=lambda r: r.get("date_scraped") or "",
+            key=lambda r: (
+                r.get("listing_date") or "0000-00-00",
+                r.get("date_scraped") or "0000-00-00",
+            ),
             reverse=True,
         )[0]
 
@@ -168,7 +171,10 @@ def land_rows(listings, node):
 
     example = sorted(
         group,
-        key=lambda r: r.get("date_scraped") or "",
+        key=lambda r: (
+            r.get("listing_date") or "0000-00-00",
+            r.get("date_scraped") or "0000-00-00",
+        ),
         reverse=True,
     )[0]
 
@@ -519,7 +525,8 @@ def _source_breakdown_rows(listings, node, txn_type, beds=None):
         latest = sorted(
             source_rows,
             key=lambda r: (
-                r.get("date_scraped")
+                r.get("listing_date")
+                or r.get("date_scraped")
                 or r.get("last_updated")
                 or ""
             ),
