@@ -49,9 +49,11 @@ jobs:
         env:
           ZYTE_API_KEY: ${{ secrets.ZYTE_API_KEY }}
           ZYTE_BROWSER_HTML: "true"
-          MAX_LISTING_AGE_DAYS: "31"
-          MAX_PAGES_PER_CATEGORY: "1"
-          MAX_LISTINGS_PER_CATEGORY: "12"
+          MAX_LISTING_AGE_DAYS: "14"
+          PREFERRED_FRESHNESS_DAYS: "7"
+          MIN_FRESH_LISTINGS_PER_CATEGORY: "6"
+          MAX_PAGES_PER_CATEGORY: "3"
+          MAX_LISTINGS_PER_CATEGORY: "24"
           MAX_DETAIL_FETCHES_PER_CATEGORY: "0"
           REQUEST_DELAY_SECONDS: "0.5"
           SCRAPER_WORKERS: "2"
