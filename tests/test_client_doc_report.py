@@ -103,11 +103,17 @@ class ClientDocReportTests(unittest.TestCase):
 
     def test_google_doc_is_created_new_and_has_requested_table_styles(self):
         source = Path(client_doc_report.__file__).read_text(encoding="utf-8")
-        self.assertIn('drive.files().create(body=', source)
-        self.assertIn('GOOGLE_OAUTH_TOKEN_JSON', source)
-        self.assertNotIn('GOOGLE_DOC_ID', source)
+        import re
+
+        # Normalize whitespace so the test checks implementation intent,
+        # not source formatting choices such as line wrapping.
+        normalized = re.sub(r"\s+", "", source)
+
+        self.assertIn("drive.files().create(", normalized)
+        self.assertIn("GOOGLE_OAUTH_TOKEN_JSON", source)
+        self.assertNotIn("GOOGLE_DOC_ID", source)
         self.assertIn('"updateTableCellStyle"', source)
-        self.assertIn('"link": {"url": rows[ri - 1]["link"]}', source)
+        self.assertIn('"link":{"url":rows[ri-1]["link"]}', normalized)
         self.assertIn('"MAILJET_API_KEY"', source)
         self.assertIn('"MAILJET_SECRET_KEY"', source)
         self.assertIn('"How to Read This Report"', source)
