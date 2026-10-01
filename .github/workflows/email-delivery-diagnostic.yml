@@ -1,0 +1,35 @@
+name: Mailjet Email Delivery Diagnostic
+
+on:
+  workflow_dispatch:
+    inputs:
+      since_utc:
+        description: "Optional UTC start time, e.g. 2026-10-01T09:15:00Z"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install requests
+        run: python -m pip install requests
+
+      - name: Inspect Mailjet message status
+        env:
+          MAILJET_API_KEY: ${{ secrets.MAILJET_API_KEY }}
+          MAILJET_SECRET_KEY: ${{ secrets.MAILJET_SECRET_KEY }}
+          MAILJET_DIAGNOSTIC_SINCE: ${{ inputs.since_utc }}
+        run: python mailjet_delivery_diagnostic.py
