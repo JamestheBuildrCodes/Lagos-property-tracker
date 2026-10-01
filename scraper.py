@@ -216,13 +216,137 @@ def load_manifest() -> list[dict]:
     return approved
 
 
+def _fetch_zyte(url: str, source: str) -> requests.Response:
+    """Fetch one protected-source URL through Zyte with safe retries.
+
+    Zyte documents HTTP 520 as a temporary website-ban response and recommends
+    retrying it. These responses are not account failures and are not charged.
+    Account/auth failures (401/402/403) remain fail-fast.
+    """
+    if not ZYTE_API_KEY:
+        raise RuntimeError("ZYTE_API_KEY is missing")
+    with PAID_SOURCE_BANS_LOCK:
+        if source in PAID_SOURCE_BANS:
+            raise RuntimeError(
+                f"{source} is temporarily blocked by a Zyte Website Ban; "
+                "skipping further paid requests for this source."
+            )
+    if PAID_SOURCE_FAILURE.is_set():
+        raise RuntimeError(
+            "Zyte transport is unavailable after a previous billing/authorization "
+            "failure; skipping further paid requests."
+        )
+
+    payload = {"url": url, "browserHtml": ZYTE_BROWSER_HTML}
+    last_exc = None
+    max_attempts = 3
+
+    for attempt in range(1, max_attempts + 1):
+        if PAID_SOURCE_FAILURE.is_set():
+            raise RuntimeError(
+                "Zyte transport is unavailable after a previous billing/authorization "
+                "failure; skipping further paid requests."
+            )
+        try:
+            print(f"[Zyte] {source} attempt={attempt} url={url}")
+            response = requests.post(
+                ZYTE_ENDPOINT,
+                auth=(ZYTE_API_KEY, ""),
+                json=payload,
+                timeout=ZYTE_TIMEOUT,
+            )
+
+            if response.status_code in (401, 402, 403):
+                PAID_SOURCE_FAILURE.set()
+                raise RuntimeError(
+                    f"Zyte HTTP {response.status_code}: authorization/account access failed. "
+                    "Check ZYTE_API_KEY and Zyte account credit/plan. "
+                    "The scraper will not retry billing/authorization failures."
+                )
+
+            if response.status_code == 520 and (
+                "Website Ban" in response.text or "temporary-error" in response.text
+            ):
+                last_exc = RuntimeError(
+                    f"Zyte HTTP 520 Website Ban for {source}"
+                )
+                if attempt < max_attempts:
+                    wait = 3 * attempt
+                    print(
+                        f"[Zyte] {source} temporary Website Ban (HTTP 520); "
+                        f"retrying in {wait}s."
+                    )
+                    time.sleep(wait)
+                    continue
+                with PAID_SOURCE_BANS_LOCK:
+                    PAID_SOURCE_BANS.add(source)
+                raise RuntimeError(
+                    f"Zyte HTTP 520 Website Ban for {source} after "
+                    f"{max_attempts} attempts; skipping further paid requests "
+                    "for this source."
+                )
+
+            if response.status_code in (429, 500, 503):
+                last_exc = RuntimeError(
+                    f"Zyte HTTP {response.status_code}: {response.text[:300]}"
+                )
+                if attempt < max_attempts:
+                    wait = 3 * attempt
+                    print(
+                        f"[Zyte] {source} HTTP {response.status_code}; "
+                        f"retrying in {wait}s."
+                    )
+                    time.sleep(wait)
+                    continue
+                raise last_exc
+
+            if 400 <= response.status_code < 500:
+                raise RuntimeError(
+                    f"Zyte HTTP {response.status_code}: {response.text[:300]}"
+                )
+
+            response.raise_for_status()
+            body = response.json()
+            html = body.get("browserHtml") or body.get("httpResponseBody")
+            if not html:
+                raise RuntimeError(
+                    "Zyte returned no browserHtml/httpResponseBody for the requested URL"
+                )
+
+            wrapped = requests.Response()
+            wrapped.status_code = response.status_code
+            wrapped.url = url
+            wrapped.headers = response.headers
+            wrapped.encoding = "utf-8"
+            wrapped._content = (
+                html.encode("utf-8", errors="replace")
+                if isinstance(html, str)
+                else bytes(html)
+            )
+            return wrapped
+
+        except RuntimeError as exc:
+            if any(
+                marker in str(exc)
+                for marker in ("HTTP 401", "HTTP 402", "HTTP 403", "HTTP 520 Website Ban")
+            ):
+                raise
+            last_exc = exc
+        except (requests.RequestException, ValueError) as exc:
+            last_exc = exc
+            if attempt < max_attempts:
+                wait = 3 * attempt
+                time.sleep(wait)
+
+    raise RuntimeError(str(last_exc))
+
+
 def fetch_page(url: str, source: str) -> requests.Response:
     """Fetch a manifest URL using the cheapest valid transport.
 
-    NPC is reachable directly from GitHub Actions, so it must never consume
-    Zyte credits. PropertyPro and Estate Intel are Cloudflare-protected on the
-    runner and use Zyte browser HTML. A Zyte billing/authorization failure is
-    fail-fast and never retried.
+    NPC is attempted directly first. If the public site returns 403, the
+    request falls back to Zyte rather than treating the source as permanently
+    unavailable. PropertyPro and Estate Intel use Zyte browser HTML.
     """
     host = urlparse(url).netloc.lower()
     if host not in ALLOWED_HOSTS[source]:
@@ -239,70 +363,21 @@ def fetch_page(url: str, source: str) -> requests.Response:
                 timeout=30,
                 allow_redirects=True,
             )
-            if response.status_code >= 400:
-                response.raise_for_status()
-            return response
-        except requests.RequestException as exc:
-            raise RuntimeError(f"Nigeria Property Centre direct request failed: {exc}") from exc
-
-    if not ZYTE_API_KEY:
-        raise RuntimeError("ZYTE_API_KEY is missing")
-    with PAID_SOURCE_BANS_LOCK:
-        if source in PAID_SOURCE_BANS:
-            raise RuntimeError(f"{source} is temporarily blocked by a Zyte Website Ban; skipping further paid requests for this source.")
-    if PAID_SOURCE_FAILURE.is_set():
-        raise RuntimeError("Zyte transport is unavailable after a previous billing/authorization failure; skipping further paid requests.")
-
-    payload = {"url": url, "browserHtml": ZYTE_BROWSER_HTML}
-    last_exc = None
-    for attempt in range(1, 3):
-        if PAID_SOURCE_FAILURE.is_set():
-            raise RuntimeError("Zyte transport is unavailable after a previous billing/authorization failure; skipping further paid requests.")
-        try:
-            print(f"[Zyte] {source} attempt={attempt} url={url}")
-            response = requests.post(
-                ZYTE_ENDPOINT,
-                auth=(ZYTE_API_KEY, ""),
-                json=payload,
-                timeout=ZYTE_TIMEOUT,
-            )
-            if response.status_code == 520 and ("Website Ban" in response.text or "temporary-error" in response.text):
-                with PAID_SOURCE_BANS_LOCK:
-                    PAID_SOURCE_BANS.add(source)
-                raise RuntimeError(f"Zyte HTTP 520 Website Ban for {source}; skipping further paid requests for this source.")
-            if response.status_code in (401, 402, 403):
-                PAID_SOURCE_FAILURE.set()
-                raise RuntimeError(
-                    f"Zyte HTTP {response.status_code}: authorization/account access failed. "
-                    "Check ZYTE_API_KEY and Zyte account credit/plan. "
-                    "The scraper will not retry billing/authorization failures."
+            if response.status_code < 400:
+                return response
+            if response.status_code == 403:
+                print(
+                    f"[NPC] Direct request returned HTTP 403 for {url}; "
+                    "falling back to Zyte."
                 )
-            if 400 <= response.status_code < 500:
-                raise RuntimeError(f"Zyte HTTP {response.status_code}: {response.text[:300]}")
-            if response.status_code < 500:
-                response.raise_for_status()
-                body = response.json()
-                html = body.get("browserHtml") or body.get("httpResponseBody")
-                if not html:
-                    raise RuntimeError("Zyte returned no browserHtml/httpResponseBody for the requested URL")
-                wrapped = requests.Response()
-                wrapped.status_code = response.status_code
-                wrapped.url = url
-                wrapped.headers = response.headers
-                wrapped.encoding = "utf-8"
-                wrapped._content = html.encode("utf-8", errors="replace") if isinstance(html, str) else bytes(html)
-                return wrapped
-            last_exc = RuntimeError(f"Zyte HTTP {response.status_code}: {response.text[:300]}")
-        except RuntimeError as exc:
-            if any(marker in str(exc) for marker in ("HTTP 401", "HTTP 402", "HTTP 403", "HTTP 520 Website Ban")):
-                raise
-            last_exc = exc
-        except (requests.RequestException, ValueError) as exc:
-            last_exc = exc
-        if attempt < 2:
-            time.sleep(2)
-    raise RuntimeError(str(last_exc))
+                return _fetch_zyte(url, source)
+            response.raise_for_status()
+        except requests.RequestException as exc:
+            raise RuntimeError(
+                f"Nigeria Property Centre direct request failed: {exc}"
+            ) from exc
 
+    return _fetch_zyte(url, source)
 
 def add_page_param(url: str, page: int) -> str:
     if page == 1:
