@@ -32,7 +32,7 @@ from bs4 import BeautifulSoup
 
 ZYTE_ENDPOINT = "https://api.zyte.com/v1/extract"
 ZYTE_API_KEY = os.environ.get("ZYTE_API_KEY", "").strip()
-MAX_LISTING_AGE_DAYS = int(os.environ.get("MAX_LISTING_AGE_DAYS", "14"))
+MAX_LISTING_AGE_DAYS = int(os.environ.get("MAX_LISTING_AGE_DAYS", "7"))
 PREFERRED_FRESHNESS_DAYS = int(os.environ.get("PREFERRED_FRESHNESS_DAYS", "7"))
 MIN_FRESH_LISTINGS_PER_CATEGORY = int(os.environ.get("MIN_FRESH_LISTINGS_PER_CATEGORY", "6"))
 REQUEST_DELAY_SECONDS = float(os.environ.get("REQUEST_DELAY_SECONDS", "0.5"))
@@ -561,7 +561,7 @@ def parse_card(card_text: str, listing_url: str, target: dict) -> Optional[dict]
 
 def scrape_category(target: dict) -> tuple[list[dict], dict]:
     stats = {"source": target["source"], "node": target["node"], "category": target["category"],
-             "url": target["url"], "pages": 0, "cards": 0, "rows": 0, "rejected_quality": 0, "error": None}
+             "url": target["url"], "pages": 0, "cards": 0, "rows": 0, "rejected_quality": 0, "stale_rejected": 0, "error": None}
     rows: list[dict] = []
     seen = set()
 
@@ -586,6 +586,8 @@ def scrape_category(target: dict) -> tuple[list[dict], dict]:
                 continue
             if row["is_within_max_age"]:
                 rows.append(row)
+            else:
+                stats["stale_rejected"] += 1
                 if len(rows) >= MAX_LISTINGS_PER_CATEGORY:
                     break
 
@@ -836,12 +838,13 @@ def run() -> None:
         "estate_intel_rows": len(ei_rows),
         "failures": failures,
         "quality_rejections": sum(int(x.get("rejected_quality", 0)) for x in category_stats),
+        "stale_rejections": sum(int(x.get("stale_rejected", 0)) for x in category_stats),
         "listing_quality_policy": "Only detail URLs whose canonical node slug matches the assigned node are admitted; explicit conflicting node evidence is rejected.",
     }
     Path("scrape_run_report.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
 
     print("=" * 70)
-    print(f"SCRAPE COMPLETE: {len(all_rows)} recent comparable listings")
+    print(f"SCRAPE COMPLETE: {len(all_rows)} comparable listings no older than {MAX_LISTING_AGE_DAYS} days")
     print(f"LISTING OUTPUT: {listing_output}")
     print(f"ESTATE INTEL PUBLIC RESEARCH: {len(ei_rows)} rows")
     print(f"CATEGORY/RESEARCH FAILURES: {len(failures)}")
