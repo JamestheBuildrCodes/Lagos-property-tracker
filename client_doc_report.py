@@ -52,8 +52,19 @@ ABUJA_NODES = [
 ]
 
 BLUE = "2E74B5"
+DARK_BLUE = "1F3864"
 GRAY = "666666"
 HEADER_FILL = "D9D9D9"
+
+
+def source_as_of(row):
+    date = row.get("listing_date")
+    kind = (row.get("listing_date_type") or "").strip()
+    if date and kind:
+        return f"{date} ({kind})"
+    if date:
+        return date
+    return row.get("date_scraped") or "date unavailable"
 
 
 def bedroom_rows(listings, node, txn_type):
@@ -114,7 +125,7 @@ def bedroom_rows(listings, node, txn_type):
                 ),
                 "source_date": (
                     f"{example.get('source', 'Unknown')}, "
-                    f"{example.get('date_scraped', 'unknown date')}"
+                    f"{source_as_of(example)}"
                 ),
                 "link": example.get("source_url", ""),
             }
@@ -190,7 +201,7 @@ def land_breakdown(listings, node):
 
 DISCREPANCY_THRESHOLD_PCT = 15
 SMALL_SAMPLE_THRESHOLD = 3
-STALE_DAYS_THRESHOLD = 60
+STALE_DAYS_THRESHOLD = 14
 
 
 def _category_group(listings, node, txn_type, beds=None):
@@ -534,11 +545,7 @@ def _source_breakdown_rows(listings, node, txn_type, beds=None):
                 ),
                 "sample": str(len(prices)),
                 "source": source,
-                "as_of": (
-                    latest.get("date_scraped")
-                    or latest.get("last_updated")
-                    or "date unavailable"
-                ),
+                "as_of": source_as_of(latest),
                 "link": latest.get("source_url", ""),
             }
         )
@@ -628,8 +635,10 @@ def _narrative_lines(listings, summary, research=None):
             "bullet",
             "Method: source-by-source medians from listing-level "
             "asking prices, with observed min–max ranges and sample "
-            "counts. Sources are kept separate because platforms can "
-            "contain different property mixes and price points.",
+            "counts. The primary freshness window is 0–7 days; rows "
+            "older than 7 days but no more than 14 days are retained as "
+            "secondary recent references. Sources are kept separate because "
+            "platforms can contain different property mixes and price points.",
         ),
         (
             "bullet",
@@ -829,9 +838,10 @@ def _narrative_lines(listings, summary, research=None):
     lines.append(
         (
             "bullet",
-            "Freshness: the report uses the collection date shown in "
-            "each row and flags stale source observations rather than "
-            "silently presenting them as current.",
+            "Freshness: each comparable row carries the source-reported "
+            "added/updated date and listing age. The primary analysis "
+            "prefers observations from the last 7 days and excludes "
+            "rows older than 14 days from the current snapshot.",
         )
     )
 
@@ -993,13 +1003,15 @@ def build_docx(
     def h1(text):
         p = doc.add_paragraph(style="Heading 1")
         r = p.add_run(text)
-        set_font(r, 16, BLUE)
+        set_font(r, 12, "000000")
+        r.bold = True
         return p
 
     def h2(text):
         p = doc.add_paragraph(style="Heading 2")
         r = p.add_run(text)
         set_font(r, 13, BLUE)
+        r.bold = True
         return p
 
     def h3(text):
@@ -1130,7 +1142,7 @@ def build_docx(
     r = title.add_run(
         "LAGOS PROPERTY MARKET INTELLIGENCE"
     )
-    set_font(r, 20, "000000")
+    set_font(r, 20, DARK_BLUE)
     r.bold = True
 
     sub = doc.add_paragraph()
@@ -1726,7 +1738,7 @@ def publish_google_doc(
                                 "fontFamily": "Times New Roman"
                             },
                             "fontSize": {
-                                "magnitude": 28,
+                                "magnitude": 20,
                                 "unit": "PT",
                             },
                             "foregroundColor": {
@@ -1738,7 +1750,7 @@ def publish_google_doc(
                                     }
                                 }
                             },
-                            "bold": False,
+                            "bold": True,
                         },
                         "fields": (
                             "weightedFontFamily,"
@@ -1850,12 +1862,21 @@ def publish_google_doc(
             )
 
             size = (
-                16
+                12
                 if level == "HEADING_1"
                 else 13
                 if level == "HEADING_2"
                 else 12
             )
+
+            if level == "HEADING_1":
+                rgb = {"red": 0, "green": 0, "blue": 0}
+            else:
+                rgb = {
+                    "red": 46 / 255,
+                    "green": 116 / 255,
+                    "blue": 181 / 255,
+                }
 
             style = {
                 "weightedFontFamily": {
@@ -1867,24 +1888,18 @@ def publish_google_doc(
                 },
                 "foregroundColor": {
                     "color": {
-                        "rgbColor": {
-                            "red": 46 / 255,
-                            "green": 116 / 255,
-                            "blue": 181 / 255,
-                        }
+                        "rgbColor": rgb
                     }
                 },
+                "bold": True,
             }
 
             fields = (
                 "weightedFontFamily,"
                 "fontSize,"
-                "foregroundColor"
+                "foregroundColor,"
+                "bold"
             )
-
-            if level == "HEADING_3":
-                style["bold"] = True
-                fields += ",bold"
 
             requests.append(
                 {
