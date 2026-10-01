@@ -49,6 +49,15 @@ def run():
         try: ws=sheet.worksheet(name); ws.clear()
         except gspread.WorksheetNotFound: ws=sheet.add_worksheet(title=name,rows=max(len(values)+10,100),cols=max(max(len(r) for r in values),10))
         rows=max(len(values)+5,20); cols=max(max((len(r) for r in values),default=1)+2,10); ws.resize(rows=rows,cols=cols); ws.update(values,"A1")
+        # Read back the written range from the live Google Sheet and compare
+        # it with the exact workbook values. This catches partial writes,
+        # row/column drift, and stale-tab updates before the run is reported
+        # as successful.
+        written = ws.get(f"A1:{gspread.utils.rowcol_to_a1(len(values), max(len(r) for r in values))}")
+        expected = [[str(cell.value if cell.value is not None else "") for cell in row] for row in values]
+        actual = [[str(v or "") for v in row] for row in written]
+        if actual != expected:
+            raise RuntimeError(f"Google Sheet readback mismatch in worksheet '{name}'")
         style(ws,name,rows,cols)
         if name in {"Current Listings","Weekly Changes","Estate Intel Public"}: ws.freeze(rows=1)
         if name=="Current Listings":
