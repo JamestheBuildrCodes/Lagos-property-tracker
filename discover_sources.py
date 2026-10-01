@@ -170,7 +170,7 @@ def main() -> None:
     }
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "max_listing_age_days": 31,
+        "max_listing_age_days": 14,
         "nodes": [x[0] for x in NODES],
         "entries": output,
         "policy": policy,
