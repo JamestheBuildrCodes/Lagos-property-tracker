@@ -67,4 +67,5 @@ jobs:
             Lagos_Property_Market_Snapshot_*.docx
             client_doc_url.txt
             mailjet_client-doc_receipt.json
+            google_doc_verification.json
           if-no-files-found: error
