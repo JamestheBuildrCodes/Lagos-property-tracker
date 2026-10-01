@@ -114,7 +114,7 @@ def build_propertypro(rows: list[ManifestEntry]) -> None:
 def build_npc(rows: list[ManifestEntry]) -> None:
     for node, market, pp_path, npc_path in NODES:
         for transaction, tx_path in (("sale", "for-sale"), ("rent", "for-rent")):
-            url = f"{NPC}/{tx_path}/flats-apartments/{npc_path}/showtype"
+            url = f"{NPC}/{tx_path}/flats-apartments/{npc_path}/showtype?sort=2"
             # The site exposes bedroom counts on the category page. Do not
             # manufacture bedroom-specific URLs.
             for bedroom in BEDROOMS:
