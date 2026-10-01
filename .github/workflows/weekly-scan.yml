@@ -49,7 +49,7 @@ jobs:
         env:
           ZYTE_API_KEY: ${{ secrets.ZYTE_API_KEY }}
           ZYTE_BROWSER_HTML: "true"
-          MAX_LISTING_AGE_DAYS: "14"
+          MAX_LISTING_AGE_DAYS: "7"
           PREFERRED_FRESHNESS_DAYS: "7"
           MIN_FRESH_LISTINGS_PER_CATEGORY: "6"
           MAX_PAGES_PER_CATEGORY: "3"
