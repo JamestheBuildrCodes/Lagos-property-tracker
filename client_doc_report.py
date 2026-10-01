@@ -893,9 +893,9 @@ def _narrative_lines(listings, summary, research=None):
     lines.append(
         (
             "body",
-            "Port Harcourt is not currently part of the live validated "
-            "scraper scope, so this report makes no Port Harcourt price "
-            "claim. The system is structured so additional city/source "
+            "Port Harcourt is not currently tracked by the live "
+            "validated scraper, so this report makes no Port Harcourt "
+            "price claim. The system is structured so additional city/source "
             "adapters can be added without changing the reporting model.",
         )
     )
@@ -1176,15 +1176,10 @@ def build_docx(
                 node, txn = value.rsplit("_", 1)
 
                 table(
-                    bedroom_breakdown(
+                    _node_transaction_rows(
                         listings,
                         node,
                         txn,
-                    )
-                    if txn != "land"
-                    else land_breakdown(
-                        listings,
-                        node,
                     )
                 )
 
