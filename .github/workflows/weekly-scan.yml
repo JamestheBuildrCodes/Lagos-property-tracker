@@ -181,10 +181,11 @@ jobs:
         run: |
           CURR=$(ls -t property_listings_*.csv | head -n 1)
           RESEARCH=$(ls -t estateintel_public_research_*.csv 2>/dev/null | head -n 1)
+          CHANGES=$(ls -t changes_*.csv 2>/dev/null | head -n 1)
           test -s "$CURR"
           test -n "$GOOGLE_OAUTH_TOKEN_JSON" || { echo "GOOGLE_OAUTH_TOKEN_JSON is required for the client-preferred Google Doc."; exit 1; }
           test -n "$GOOGLE_WEEKLY_REPORT_FOLDER_ID" || { echo "GOOGLE_WEEKLY_REPORT_FOLDER_ID is required."; exit 1; }
-          python client_doc_report.py "$CURR" "${RESEARCH:-none}"
+          python client_doc_report.py "$CURR" "${RESEARCH:-none}" "${CHANGES:-none}"
           test -s Lagos_Property_Market_Snapshot_*.docx
           test -s client_doc_url.txt
 
