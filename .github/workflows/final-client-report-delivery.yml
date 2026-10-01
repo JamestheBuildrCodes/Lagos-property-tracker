@@ -43,6 +43,31 @@ jobs:
           test -n "$GOOGLE_OAUTH_TOKEN_JSON" || { echo "GOOGLE_OAUTH_TOKEN_JSON is required."; exit 1; }
           test -n "$REPORT_CLIENT_EMAIL" || { echo "REPORT_CLIENT_EMAIL is required."; exit 1; }
 
+          CURRENT="$CURR" python - <<'PY'
+          import csv, os
+          from datetime import date
+          current = os.environ["CURRENT"]
+          today = date.today().isoformat()
+          with open(current, newline="", encoding="utf-8-sig") as f:
+              rows = list(csv.DictReader(f))
+          if not rows:
+              raise SystemExit("Committed snapshot is empty.")
+          bad_date = [r.get("date_scraped") for r in rows if r.get("date_scraped") != today]
+          bad_age = []
+          for r in rows:
+              try:
+                  age = int(float(r.get("listing_age_days") or 0))
+              except (TypeError, ValueError):
+                  raise SystemExit(f"Invalid listing_age_days in {current}: {r.get('listing_age_days')!r}")
+              if age < 0 or age > 7:
+                  bad_age.append(age)
+          if bad_date:
+              raise SystemExit(f"Committed snapshot is not same-day: found date_scraped values {sorted(set(bad_date))}")
+          if bad_age:
+              raise SystemExit(f"Committed snapshot contains listing_age_days outside 0-7: {sorted(set(bad_age))[:10]}")
+          print(f"Using same-day committed snapshot: {current} ({len(rows)} rows; max age 7 days)")
+          PY
+
           python client_doc_report.py             "$CURR"             "${RESEARCH:-none}"             "${CHANGES:-none}"
 
           test -s Lagos_Property_Market_Snapshot_*.docx
