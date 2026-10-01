@@ -76,6 +76,7 @@ def main():
                 matches_node = any(pattern and pattern in path for pattern in patterns)
             if node in NODE_SLUGS and not matches_node:
                 errors.append(f"row {i}: source URL/evidence does not match market node {node}")
+        if r.get("date_scraped") != today: errors.append(f"row {i}: snapshot row date_scraped {r.get('date_scraped')} is not today {today}")
         if r.get("record_id") in ids: errors.append(f"row {i}: duplicate record_id")
         ids.add(r.get("record_id"))
         if r.get("property_type") == "flat_apartment":
@@ -83,8 +84,8 @@ def main():
             except ValueError: br=0
             if br not in {1,2,3,4,5}: errors.append(f"row {i}: apartment outside 1-5BR")
         age=age_days(r.get("listing_date"))
-        if age is not None and not 0 <= age <= 14: errors.append(f"row {i}: listing older than 14 days ({age})")
-        if r.get("is_within_max_age") != "True": errors.append(f"row {i}: row is not marked within the 14-day maximum age")
+        if age is not None and not 0 <= age <= 7: errors.append(f"row {i}: listing older than 7 days ({age})")
+        if r.get("is_within_max_age") != "True": errors.append(f"row {i}: row is not marked within the 7-day maximum age")
         if r.get("source") == "Estate Intel": errors.append(f"row {i}: Estate Intel must be in research output, not comparable listing output")
     if errors:
         print("MARKET OUTPUT VALIDATION FAILED")
