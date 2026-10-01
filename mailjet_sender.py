@@ -28,13 +28,22 @@ def valid_email(value: str) -> bool:
 
 def recipients_from_values(*values: str) -> list[str]:
     raw = ",".join(value or "" for value in values)
-    return list(
-        dict.fromkeys(
-            item.strip()
-            for item in raw.split(",")
-            if valid_email(item.strip())
-        )
-    )
+    out = []
+    seen = set()
+
+    for item in raw.split(","):
+        item = item.strip()
+        if not valid_email(item):
+            continue
+
+        key = item.lower()
+        if key in seen:
+            continue
+
+        seen.add(key)
+        out.append(item)
+
+    return out
 
 
 def _mask_email(value: str) -> str:
