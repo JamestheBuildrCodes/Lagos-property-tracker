@@ -188,7 +188,7 @@ def land_rows(listings, node):
             ),
             "source_date": (
                 f"{example.get('source', 'Unknown')}, "
-                f"{example.get('date_scraped', 'unknown date')}"
+                f"{source_as_of(example)}"
             ),
             "link": example.get("source_url", ""),
         }
