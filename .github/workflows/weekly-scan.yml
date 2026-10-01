@@ -55,6 +55,23 @@ jobs:
           ZYTE_TIMEOUT_SECONDS: "90"
         run: python scraper.py
 
+      - name: Verify core listing output
+        shell: bash
+        run: |
+          CURR=$(ls -t property_listings_*.csv | head -n 1)
+          test -s "$CURR"
+          python - <<'PY'
+          import csv, json, sys, glob
+          current = sorted(glob.glob("property_listings_*.csv"))[-1]
+          with open(current, newline="", encoding="utf-8") as f:
+              rows = list(csv.DictReader(f))
+          print(f"Core comparable listings: {len(rows)}")
+          if not rows:
+              report = json.load(open("scrape_run_report.json", encoding="utf-8"))
+              print(json.dumps(report, indent=2))
+              sys.exit("Core scraper produced zero comparable listings; stopping before report generation.")
+          PY
+
       - name: Apply market data quality gate
         run: |
           CURR=$(ls -t property_listings_*.csv | head -n 1)
