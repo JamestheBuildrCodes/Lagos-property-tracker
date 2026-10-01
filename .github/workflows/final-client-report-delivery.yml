@@ -31,7 +31,7 @@ jobs:
           MAILJET_FROM_EMAIL: ${{ secrets.MAILJET_FROM_EMAIL }}
           MAILJET_FROM_NAME: ${{ secrets.MAILJET_FROM_NAME }}
           REPORT_CLIENT_EMAIL: ${{ secrets.REPORT_CLIENT_EMAIL }}
-          REPORT_TO_EMAIL: ""
+          REPORT_TO_EMAIL: ${{ secrets.REPORT_TO_EMAIL }}
           GITHUB_RUN_ID: ${{ github.run_id }}
         run: |
           CURR=$(find data -maxdepth 1 -name 'property_listings_*.csv' -type f -print | sort | tail -n 1)
@@ -48,6 +48,7 @@ jobs:
           test -s Lagos_Property_Market_Snapshot_*.docx
           test -s client_doc_url.txt
           test -s mailjet_client-doc_receipt.json
+          test -s google_doc_verification.json
 
           python - <<'PY'
           import json, glob
