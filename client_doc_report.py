@@ -639,6 +639,7 @@ def _narrative_lines(listings, summary, research=None):
         ),
     ]
 
+    rental_groups = []
     for city, nodes in (
         ("Lagos", LAGOS_NODES),
         ("Abuja", ABUJA_NODES),
@@ -652,25 +653,26 @@ def _narrative_lines(listings, summary, research=None):
                 "rent",
             )
         ]
+        if rentable:
+            rental_groups.append((city, rentable))
 
-        if not rentable:
-            continue
-
+    if rental_groups:
         lines.append(("h1", "3. Rental Market"))
 
-        lines.append(("h2", city))
-
-        for node in rentable:
-            lines.append(
-                (
-                    "h3",
-                    f"{node} — Flats/Apartments (per annum)",
+        for city, rentable in rental_groups:
+            lines.append(("h2", city))
+            for node in rentable:
+                lines.append(
+                    (
+                        "h3",
+                        f"{node} — Flats/Apartments (per annum)",
+                    )
                 )
-            )
-            lines.append(
-                ("table", f"{node}_rent")
-            )
+                lines.append(
+                    ("table", f"{node}_rent")
+                )
 
+    sales_groups = []
     for city, nodes in (
         ("Lagos", LAGOS_NODES),
         ("Abuja", ABUJA_NODES),
@@ -684,40 +686,42 @@ def _narrative_lines(listings, summary, research=None):
                 "sale",
             )
         ]
+        if salable:
+            sales_groups.append((city, salable))
 
-        if not salable:
-            continue
-
+    if sales_groups:
         lines.append(("h1", "4. Sales Market"))
-        lines.append(("h2", city))
 
-        for node in salable:
-            lines.append(
-                (
-                    "h3",
-                    f"{node} — Flats/Apartments & Houses (sale)",
-                )
-            )
-            lines.append(
-                ("table", f"{node}_sale")
-            )
+        for city, salable in sales_groups:
+            lines.append(("h2", city))
 
-            for beds in range(1, 6):
-                analysis = _category_analysis(
-                    listings,
-                    node,
-                    "sale",
-                    str(beds),
+            for node in salable:
+                lines.append(
+                    (
+                        "h3",
+                        f"{node} — Flats/Apartments & Houses (sale)",
+                    )
                 )
-                if not analysis:
-                    continue
+                lines.append(
+                    ("table", f"{node}_sale")
+                )
 
-                note = _discrepancy_note(
-                    analysis,
-                    node,
-                )
-                if note:
-                    lines.append(("body", note))
+                for beds in range(1, 6):
+                    analysis = _category_analysis(
+                        listings,
+                        node,
+                        "sale",
+                        str(beds),
+                    )
+                    if not analysis:
+                        continue
+
+                    note = _discrepancy_note(
+                        analysis,
+                        node,
+                    )
+                    if note:
+                        lines.append(("body", note))
 
     lines.append(
         (
