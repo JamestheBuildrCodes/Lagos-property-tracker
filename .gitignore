@@ -8,3 +8,4 @@ __pycache__/
 /token.json
 # Local development backups
 *.local-backup
+*.final-backup
