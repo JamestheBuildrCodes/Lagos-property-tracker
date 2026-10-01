@@ -1,13 +1,13 @@
 """Source-aware paid connectivity check for Zyte before the full market scan.
 
-A Website Ban (HTTP 520) is source-specific, not proof that Zyte credentials
-are broken. Warn and continue if another approved source is reachable; fail
-only when no configured source can be checked successfully.
+HTTP 520 is a temporary website-ban response. Zyte recommends retrying ban
+responses, so preflight retries those responses before warning and continuing
+with other approved sources.
 """
 from __future__ import annotations
 
 import os
-import sys
+import time
 import requests
 
 URLS = [
@@ -21,47 +21,76 @@ if not key:
 
 successes = []
 failures = []
+
 for source, url in URLS:
     print(f"[Zyte preflight] {source}: {url}")
-    try:
-        r = requests.post(
-            "https://api.zyte.com/v1/extract",
-            auth=(key, ""),
-            json={"url": url, "browserHtml": True},
-            timeout=90,
-        )
-    except requests.RequestException as exc:
-        failures.append((source, str(exc)))
-        print(f"  WARNING: {source} preflight request failed: {exc}")
-        continue
+    last_detail = None
 
-    if r.status_code >= 400:
-        detail = r.text[:500]
-        # Zyte's 520 Website Ban means this target is blocked at present;
-        # it must not prevent collection from other approved sources.
-        if r.status_code == 520 and ("Website Ban" in detail or "temporary-error" in detail):
-            failures.append((source, f"HTTP 520 Website Ban: {detail}"))
-            print(f"  WARNING: {source} is currently banned by the target site (HTTP 520). Skipping this preflight target.")
-            continue
-        if r.status_code in (401, 402, 403):
-            raise SystemExit(f"Zyte preflight authentication/account failure HTTP {r.status_code}: {detail}")
-        failures.append((source, f"HTTP {r.status_code}: {detail}"))
-        print(f"  WARNING: {source} preflight failed: HTTP {r.status_code}: {detail}")
-        continue
+    for attempt in range(1, 4):
+        try:
+            r = requests.post(
+                "https://api.zyte.com/v1/extract",
+                auth=(key, ""),
+                json={"url": url, "browserHtml": True},
+                timeout=90,
+            )
+        except requests.RequestException as exc:
+            last_detail = str(exc)
+            if attempt < 3:
+                time.sleep(3 * attempt)
+                continue
+            failures.append((source, last_detail))
+            print(f"  WARNING: {source} preflight request failed: {last_detail}")
+            break
 
-    try:
-        body = r.json()
-    except ValueError:
-        failures.append((source, "Zyte returned non-JSON response"))
-        print(f"  WARNING: {source} preflight returned non-JSON response.")
-        continue
-    html = body.get("browserHtml") or body.get("httpResponseBody")
-    if not html:
-        failures.append((source, "Zyte returned no HTML"))
-        print(f"  WARNING: {source} preflight returned no HTML.")
-        continue
-    successes.append(source)
-    print(f"  OK: {len(html)} HTML characters")
+        if r.status_code >= 400:
+            detail = r.text[:500]
+            if r.status_code in (401, 402, 403):
+                raise SystemExit(
+                    f"Zyte preflight authentication/account failure HTTP "
+                    f"{r.status_code}: {detail}"
+                )
+            if r.status_code == 520 and (
+                "Website Ban" in detail or "temporary-error" in detail
+            ):
+                last_detail = f"HTTP 520 Website Ban: {detail}"
+                if attempt < 3:
+                    wait = 3 * attempt
+                    print(
+                        f"  WARNING: {source} returned HTTP 520 Website Ban; "
+                        f"retrying in {wait}s."
+                    )
+                    time.sleep(wait)
+                    continue
+                failures.append((source, last_detail))
+                print(
+                    f"  WARNING: {source} is currently banned by the target site "
+                    "(HTTP 520) after 3 attempts. Skipping this preflight target."
+                )
+                break
+            failures.append((source, f"HTTP {r.status_code}: {detail}"))
+            print(
+                f"  WARNING: {source} preflight failed: "
+                f"HTTP {r.status_code}: {detail}"
+            )
+            break
+
+        try:
+            body = r.json()
+        except ValueError:
+            failures.append((source, "Zyte returned non-JSON response"))
+            print(f"  WARNING: {source} preflight returned non-JSON response.")
+            break
+
+        html = body.get("browserHtml") or body.get("httpResponseBody")
+        if not html:
+            failures.append((source, "Zyte returned no HTML"))
+            print(f"  WARNING: {source} preflight returned no HTML.")
+            break
+
+        successes.append(source)
+        print(f"  OK: {len(html)} HTML characters")
+        break
 
 if not successes:
     print("Zyte preflight failed: no approved source returned usable HTML.")
