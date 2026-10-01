@@ -99,7 +99,6 @@ def land_rows(listings, node):
     }]
 
 
-
 def bedroom_breakdown(listings, node, txn_type):
     """Compatibility wrapper used by the narrative report builder."""
     return bedroom_rows(listings, node, txn_type)
@@ -108,7 +107,6 @@ def bedroom_breakdown(listings, node, txn_type):
 def land_breakdown(listings, node):
     """Compatibility wrapper used by the narrative report builder."""
     return land_rows(listings, node)
-
 
 
 DISCREPANCY_THRESHOLD_PCT = 15
@@ -308,126 +306,10 @@ def _narrative_lines(listings, summary, research=None):
     lines.append(("h1", "What This Snapshot Covers — and What's Next"))
     cover = f"This snapshot covers validated, linked residential asking-price listings across {len(covered)} of the 9 tracked nodes in Lagos and Abuja, with rental, sale, and land tables shown only where usable comparable listings exist."
     if missing_beds:
-        cover += f" Bedroom categories not represented anywhere in this week's usable listings: {', '.join(missing_beds)}."
-    if missing_nodes:
-        cover += f" Nodes needing more coverage: {', '.join(missing_nodes)}."
+        cover += f" No comparable records were available for: {', '.join(missing_beds)}."
     lines.append(("body", cover))
-    lines.append(("body", "Port Harcourt is not currently tracked by the live scraper, so this report makes no Port Harcourt price claim. The next useful improvements are to widen comparable listing samples, retain enough dated snapshots for trend analysis, and check public-source accessibility and data quality each week."))
-    lines.append(("h1", "Sources Used in This Report"))
-    source_names = sorted(set(summary.get("source_names", [])) | ({"Estate Intel"} if research_rows else set()))
-    lines.append(("bullet", ", ".join(source_names) if source_names else "No sources recorded"))
-    lines.append(("body", "Each comparable listing table links to a real source listing. Estate Intel links point to public research/project pages and should not be interpreted as listing-price sources unless a public price is explicitly shown in that row."))
+    lines.append(("body", "Next steps: inspect the linked source listings behind any decision-grade number, compare like-for-like property size and condition, and treat small-sample or stale categories as indicative rather than definitive."))
     return lines
-
-
-def build_docx(listings, summary, output=None, research=None):
-    from docx import Document
-    from docx.shared import Pt, RGBColor
-    from docx.enum.text import WD_ALIGN_PARAGRAPH
-    from docx.oxml.ns import qn
-    from docx.oxml import OxmlElement
-
-    output = output or f"Lagos_Property_Market_Snapshot_{datetime.now(timezone.utc):%Y-%m-%d}.docx"
-    doc = Document()
-    section = doc.sections[0]
-    section.top_margin = section.bottom_margin = Pt(48)
-    section.left_margin = section.right_margin = Pt(52)
-
-    def set_font(run, size, color=None):
-        run.font.name = "Times New Roman"; run.font.size = Pt(size)
-        if color: run.font.color.rgb = RGBColor.from_string(color)
-
-    def h1(text):
-        p = doc.add_paragraph(style="Heading 1"); r = p.add_run(text); set_font(r, 16, BLUE); return p
-    def h2(text):
-        p = doc.add_paragraph(style="Heading 2"); r = p.add_run(text); set_font(r, 13, BLUE); return p
-    def h3(text):
-        p = doc.add_paragraph(style="Heading 3"); r = p.add_run(text); set_font(r, 12, BLUE); r.bold = True; return p
-    def body(text):
-        p = doc.add_paragraph(); p.paragraph_format.space_after = Pt(6); r = p.add_run(text); set_font(r, 11); return p
-    def bullet(text):
-        p = doc.add_paragraph(style="List Bullet"); r = p.add_run(text); set_font(r, 11); return p
-    def add_hyperlink(paragraph, url, label):
-        rel = paragraph.part.relate_to(url, "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink", is_external=True)
-        link = OxmlElement("w:hyperlink"); link.set(qn("r:id"), rel)
-        run = OxmlElement("w:r"); props = OxmlElement("w:rPr")
-        color = OxmlElement("w:color"); color.set(qn("w:val"), "1155CC")
-        underline = OxmlElement("w:u"); underline.set(qn("w:val"), "single")
-        props.append(color); props.append(underline); run.append(props)
-        t = OxmlElement("w:t"); t.text = label; run.append(t); link.append(run); paragraph._p.append(link)
-    def table(rows):
-        if not rows:
-            body("No comparable rows were available for this section."); return
-        t = doc.add_table(rows=1, cols=5); t.autofit = True
-        for i, label in enumerate(["Metric", "Value", "Sample", "Source & Date", "Link"]):
-            cell = t.rows[0].cells[i]; p = cell.paragraphs[0]; r = p.add_run(label); r.bold = True; set_font(r, 10)
-            shd = OxmlElement("w:shd"); shd.set(qn("w:val"), "clear"); shd.set(qn("w:fill"), HEADER_FILL); cell._tc.get_or_add_tcPr().append(shd)
-        for item in rows:
-            cells = t.add_row().cells
-            for i, key in enumerate(("label", "value", "sample", "source_date")):
-                p = cells[i].paragraphs[0]; r = p.add_run(str(item.get(key, ""))); set_font(r, 9)
-            p = cells[4].paragraphs[0]
-            if item.get("link"): add_hyperlink(p, item["link"], "View source")
-            else: r = p.add_run("—"); set_font(r, 9)
-        doc.add_paragraph()
-
-    title = doc.add_paragraph(style="Title"); title.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r = title.add_run("Nigeria Real Estate Market Snapshot"); set_font(r, 28, "000000")
-    sub = doc.add_paragraph(); sub.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r = sub.add_run("Lagos & Abuja — Tracked Listings, Public Research & Current Asking Prices"); set_font(r, 12)
-    date_p = doc.add_paragraph(); date_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r = date_p.add_run(f"Data captured {datetime.now(timezone.utc):%d %B %Y}"); set_font(r, 10, GRAY)
-
-    for kind, value in _narrative_lines(listings, summary, research):
-        if kind == "h1": h1(value)
-        elif kind == "h2": h2(value)
-        elif kind == "h3": h3(value)
-        elif kind == "body": body(value)
-        elif kind == "bullet": bullet(value)
-        elif kind == "table":
-            if value == "estate_intel_public": table(_research_table_rows(research or []))
-            else:
-                node, txn = value.rsplit("_", 1)
-                table(bedroom_breakdown(listings, node, txn) if txn != "land" else land_breakdown(listings, node))
-    doc.save(output)
-    return output
-
-def _oauth_services():
-    """Build Docs/Drive clients using a human user's OAuth refresh token."""
-    from google.auth.transport.requests import Request
-    from google.oauth2.credentials import Credentials
-    from googleapiclient.discovery import build
-
-    raw = os.environ.get("GOOGLE_OAUTH_TOKEN_JSON", "").strip()
-    if not raw:
-        raise RuntimeError("GOOGLE_OAUTH_TOKEN_JSON is missing")
-
-    try:
-        info = json.loads(raw)
-    except json.JSONDecodeError as exc:
-        raise RuntimeError("GOOGLE_OAUTH_TOKEN_JSON is not valid JSON") from exc
-
-    required = ("refresh_token", "client_id", "client_secret", "token_uri")
-    missing = [key for key in required if not info.get(key)]
-    if missing:
-        raise RuntimeError(
-            "GOOGLE_OAUTH_TOKEN_JSON is missing required fields: " + ", ".join(missing)
-        )
-
-    scopes = [
-        "https://www.googleapis.com/auth/documents",
-        "https://www.googleapis.com/auth/drive",
-    ]
-    creds = Credentials.from_authorized_user_info(info, scopes=scopes)
-    if not creds.valid:
-        if not creds.refresh_token:
-            raise RuntimeError("OAuth credentials are expired and have no refresh token")
-        creds.refresh(Request())
-
-    return (
-        build("docs", "v1", credentials=creds, cache_discovery=False),
-        build("drive", "v3", credentials=creds, cache_discovery=False),
-    )
 
 
 def _report_text(listings, summary):
@@ -466,6 +348,42 @@ def _report_text(listings, summary):
         lines.append(f"• {label}: {obj['market_node'] if obj else 'Not enough data yet'}")
     lines += ["", "Sources Used in This Report", ", ".join(summary.get("source_names", [])) or "No sources recorded"]
     return "\n".join(lines) + "\n"
+
+
+def _iter_placeholder_paragraphs(docs, doc_id):
+    """Return (start_index, end_index, marker) for each [[TABLE:key]] paragraph.
+
+    Google Docs indexes are document-level UTF-16-style character positions.
+    The marker is deliberately kept as a complete paragraph so the caller can
+    replace the whole placeholder paragraph with a table at the same location.
+    """
+    document = docs.documents().get(documentId=doc_id).execute()
+    placeholders = []
+    body = document.get("body", {}).get("content", [])
+    for element in body:
+        paragraph = element.get("paragraph")
+        if not paragraph:
+            continue
+        parts = []
+        for child in paragraph.get("elements", []):
+            text_run = child.get("textRun")
+            if text_run and "content" in text_run:
+                parts.append(text_run["content"])
+        paragraph_text = "".join(parts)
+        if not paragraph_text.strip().startswith("[[TABLE:"):
+            continue
+        stripped = paragraph_text.strip()
+        if not stripped.endswith("]]" ):
+            continue
+        marker = stripped
+        if not marker.startswith("[[TABLE:"):
+            continue
+        start = element.get("startIndex")
+        end = element.get("endIndex")
+        if start is None or end is None:
+            continue
+        placeholders.append((start, end, marker))
+    return placeholders
 
 
 def publish_google_doc(listings, summary, research=None):
@@ -596,7 +514,7 @@ def publish_google_doc(listings, summary, research=None):
                     "textStyle": {"bold": True}, "fields": "bold"}})
             elif ci == 4 and rows[ri - 1].get("link"):
                 fill.append({"updateTextStyle": {"range": {"startIndex": idx, "endIndex": idx + len(value)},
-                    "textStyle": {"link": {"url": rows[ri - 1]["link"]},
+                    "textStyle": {"link": {"url": rows[ri - 1]["link"],
                                   "foregroundColor": {"color": {"rgbColor": {"red": .07, "green": .33, "blue": .8}}},
                                   "underline": True}, "fields": "link,foregroundColor,underline"}})
         if fill:
@@ -607,67 +525,3 @@ def publish_google_doc(listings, summary, research=None):
                 "tableCellStyle": {"backgroundColor": {"color": {"rgbColor": {"red": 217/255, "green": 217/255, "blue": 217/255}}},
                                    "paddingTop": {"magnitude": 4, "unit": "PT"}, "paddingBottom": {"magnitude": 4, "unit": "PT"}},
                 "fields": "backgroundColor,paddingTop,paddingBottom"}}]}).execute()
-
-    recipients = []
-    for key in ("REPORT_CLIENT_EMAIL", "REPORT_TO_EMAIL"):
-        recipients.extend(x.strip() for x in os.environ.get(key, "").split(",") if "@" in x)
-    for email in dict.fromkeys(recipients):
-        try:
-            drive.permissions().create(fileId=doc_id, body={"type": "user", "role": "reader", "emailAddress": email},
-                                       sendNotificationEmail=True).execute()
-        except HttpError as exc:
-            print(f"Warning: document created, but sharing with {email} failed: {exc}")
-    url = created.get("webViewLink") or f"https://docs.google.com/document/d/{doc_id}/edit"
-    Path("client_doc_url.txt").write_text(url + "\n", encoding="utf-8")
-    print(f"New weekly Google Doc published: {url}")
-    return doc_id, url
-
-def send_notification_email(doc_url):
-    import requests as req
-    pub = os.environ.get("MAILJET_API_KEY")
-    priv = os.environ.get("MAILJET_SECRET_KEY")
-    if not (pub and priv):
-        raise RuntimeError("MAILJET_API_KEY and MAILJET_SECRET_KEY are required for the client-document notification.")
-    recipients = []
-    for key in ("REPORT_CLIENT_EMAIL", "REPORT_TO_EMAIL"):
-        recipients += [{"Email": x.strip()} for x in os.environ.get(key, "").split(",") if "@" in x]
-    if not recipients:
-        raise RuntimeError("REPORT_CLIENT_EMAIL or REPORT_TO_EMAIL is required for notification.")
-    sender = os.environ.get("MAILJET_FROM_EMAIL", "").strip()
-    if not sender or "@" not in sender:
-        raise RuntimeError("MAILJET_FROM_EMAIL is missing or invalid.")
-    payload = {"Messages": [{
-        "From": {"Email": sender, "Name": os.environ.get("MAILJET_FROM_NAME", "Master Builder").strip() or "Master Builder"},
-        "To": recipients,
-        "Subject": "Your Weekly Lagos & Abuja Property Market Snapshot",
-        "HTMLPart": f"<p>This week's market snapshot document is ready.</p><p><a href='{doc_url}'>Open the report</a></p>",
-    }]}
-    resp = req.post("https://api.mailjet.com/v3.1/send", auth=(pub, priv), json=payload, timeout=30)
-    resp.raise_for_status()
-    print(f"Notification email accepted by Mailjet: HTTP {resp.status_code}")
-
-
-def main():
-    if len(sys.argv) < 2:
-        raise SystemExit("Usage: python client_doc_report.py <listings.csv> [estateintel_research.csv]")
-    raw = load_csv(sys.argv[1])
-    listings = clean_rows(raw)
-    if not listings:
-        raise SystemExit("No validated listings with auditable source URLs; refusing to publish client report.")
-    research_path = sys.argv[2] if len(sys.argv) > 2 else "none"
-    research = load_csv(research_path) if research_path.lower() != "none" and Path(research_path).exists() else []
-    print(f"Client report input rows: {len(raw)}; validated rows: {len(listings)}; Estate Intel public research rows: {len(research)}")
-    summary = build_summary(listings, [], sys.argv[1])
-    if research:
-        summary["source_names"] = sorted(set(summary.get("source_names", [])) | {"Estate Intel"})
-    docx_path = build_docx(listings, summary, research=research)
-    print(f"DOCX created: {docx_path}")
-    if os.environ.get("GOOGLE_OAUTH_TOKEN_JSON"):
-        _, url = publish_google_doc(listings, summary, research=research)
-        send_notification_email(url)
-    else:
-        print("GOOGLE_OAUTH_TOKEN_JSON not set — skipping Google Doc publish, DOCX only.")
-
-
-if __name__ == "__main__":
-    main()
