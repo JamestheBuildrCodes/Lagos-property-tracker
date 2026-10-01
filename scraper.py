@@ -281,8 +281,8 @@ def _fetch_zyte(url: str, source: str) -> requests.Response:
                 with PAID_SOURCE_BANS_LOCK:
                     PAID_SOURCE_BANS.add(source)
                 raise RuntimeError(
-                    f"Zyte HTTP 520 Website Ban for {source} after "
-                    f"{max_attempts} attempts; skipping further paid requests "
+                    f"Zyte HTTP 520 Website Ban for {source} after 3 attempts; "
+                    "skipping further paid requests "
                     "for this source."
                 )
 
