@@ -192,6 +192,7 @@ jobs:
           python client_doc_report.py "$CURR" "${RESEARCH:-none}" "${CHANGES:-none}"
           test -s Lagos_Property_Market_Snapshot_*.docx
           test -s client_doc_url.txt
+          test -s google_doc_verification.json
 
       - name: Verify Mailjet send receipts
         shell: bash
@@ -232,6 +233,7 @@ jobs:
           cp report_outputs.json data/
           cp google_doc_url.txt data/ 2>/dev/null || true
           cp client_doc_url.txt data/ 2>/dev/null || true
+          cp google_doc_verification.json data/ 2>/dev/null || true
           mv mailjet_*_receipt.json data/ 2>/dev/null || true
 
       - name: Commit results
