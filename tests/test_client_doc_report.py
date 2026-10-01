@@ -41,7 +41,11 @@ class ClientDocReportTests(unittest.TestCase):
             with ZipFile(out) as z:
                 document_xml = z.read("word/document.xml").decode("utf-8")
                 rels = z.read("word/_rels/document.xml.rels").decode("utf-8")
-            self.assertIn("View source", document_xml)
+            self.assertIn("Segment", document_xml)
+            self.assertIn("Reported price", document_xml)
+            self.assertIn("Range", document_xml)
+            self.assertIn("Listings (n)", document_xml)
+            self.assertIn("PropertyPro.ng", document_xml)
             self.assertIn("propertypro.ng/property/lekki-phase-1-example-listing", rels)
             self.assertIn("D9D9D9", document_xml)
 
@@ -101,6 +105,22 @@ class ClientDocReportTests(unittest.TestCase):
         self.assertTrue(any("deleteContentRange" in request for request in requests))
 
 
+    def test_source_breakdown_matches_sample_table_shape(self):
+        rows = client_doc_report._source_breakdown_rows(
+            self.sample_rows(),
+            "Lekki Phase 1",
+            "sale",
+            "3",
+        )
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["label"], "3-bedroom")
+        self.assertEqual(rows[0]["value"], "₦700,000,000 (median)")
+        self.assertEqual(rows[0]["range"], "₦700,000,000 – ₦700,000,000")
+        self.assertEqual(rows[0]["sample"], "1")
+        self.assertEqual(rows[0]["source"], "PropertyPro.ng")
+        self.assertEqual(rows[0]["as_of"], "2026-09-29")
+
+
     def test_google_doc_is_created_new_and_has_requested_table_styles(self):
         source = Path(client_doc_report.__file__).read_text(encoding="utf-8")
         import re
@@ -119,9 +139,12 @@ class ClientDocReportTests(unittest.TestCase):
         self.assertIn("send_message(", source)
         self.assertIn("MAILJET_API_KEY", mailjet)
         self.assertIn("MAILJET_SECRET_KEY", mailjet)
-        self.assertIn('"How to Read This Report"', source)
-        self.assertIn('"What This Snapshot Covers — and What\'s Next"', source)
+        self.assertIn('"1. What This Report Is"', source)
+        self.assertIn('"7. What Happens Next"', source)
+        self.assertIn('"8. Sources & Definitions"', source)
         self.assertIn('"Estate Intel — Public Research Context"', source)
+        self.assertIn('"Range"', source)
+        self.assertIn('"Listings (n)"', source)
 
     def test_narrative_discloses_missing_port_harcourt_and_estate_intel_context(self):
         from market_analysis import clean_rows
@@ -134,8 +157,9 @@ class ClientDocReportTests(unittest.TestCase):
         rendered = "\n".join(value for kind, value in narrative if kind != "table")
         self.assertIn("Port Harcourt is not currently tracked", rendered)
         self.assertIn("Estate Intel", rendered)
-        self.assertIn("How to Read This Report", rendered)
-        self.assertIn("What This Snapshot Covers — and What's Next", rendered)
+        self.assertIn("1. What This Report Is", rendered)
+        self.assertIn("7. What Happens Next", rendered)
+        self.assertIn("8. Sources & Definitions", rendered)
 
     def test_scraper_rejects_promo_copy_from_listing_cards(self):
         import scraper
