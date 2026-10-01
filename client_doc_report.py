@@ -407,6 +407,7 @@ def _coverage_summary(listings):
     return covered, missing_nodes, missing_beds
 
 
+
 def _research_table_rows(research):
     out = []
 
@@ -460,8 +461,10 @@ def _research_table_rows(research):
                     f"— {title}"
                 ),
                 "value": value,
+                "range": "—",
                 "sample": "Public research; not a listing",
-                "source_date": f"Estate Intel; {updated}",
+                "source": "Estate Intel",
+                "as_of": updated,
                 "link": row.get("url", ""),
             }
         )
@@ -469,27 +472,170 @@ def _research_table_rows(research):
     return out
 
 
+def _source_breakdown_rows(listings, node, txn_type, beds=None):
+    group = _category_group(
+        listings,
+        node,
+        txn_type,
+        beds,
+    )
+
+    by_source = {}
+
+    for row in group:
+        source = row.get("source") or "Unknown"
+        by_source.setdefault(source, []).append(row)
+
+    out = []
+
+    for source, source_rows in sorted(
+        by_source.items(),
+        key=lambda item: item[0].lower(),
+    ):
+        prices = [
+            fnum(r.get("asking_price_ngn"))
+            for r in source_rows
+        ]
+        prices = [
+            p
+            for p in prices
+            if p is not None and p > 0
+        ]
+
+        if not prices:
+            continue
+
+        latest = sorted(
+            source_rows,
+            key=lambda r: (
+                r.get("date_scraped")
+                or r.get("last_updated")
+                or ""
+            ),
+            reverse=True,
+        )[0]
+
+        label = (
+            f"{beds}-bedroom"
+            if beds is not None
+            else "Land"
+        )
+
+        out.append(
+            {
+                "label": label,
+                "value": (
+                    f"{fmt_naira(statistics.median(prices))} "
+                    "(median)"
+                ),
+                "range": (
+                    f"{fmt_naira(min(prices))} – "
+                    f"{fmt_naira(max(prices))}"
+                ),
+                "sample": str(len(prices)),
+                "source": source,
+                "as_of": (
+                    latest.get("date_scraped")
+                    or latest.get("last_updated")
+                    or "date unavailable"
+                ),
+                "link": latest.get("source_url", ""),
+            }
+        )
+
+    return out
+
+
+def _node_transaction_rows(listings, node, txn_type):
+    out = []
+
+    if txn_type == "land":
+        return _source_breakdown_rows(
+            listings,
+            node,
+            "land",
+        )
+
+    for beds in range(1, 6):
+        out.extend(
+            _source_breakdown_rows(
+                listings,
+                node,
+                txn_type,
+                str(beds),
+            )
+        )
+
+    return out
+
+
+def _table_has_rows(listings, node, txn_type):
+    return bool(
+        _node_transaction_rows(
+            listings,
+            node,
+            txn_type,
+        )
+    )
+
+
 def _narrative_lines(listings, summary, research=None):
     lines = [
-        ("h1", "How to Read This Report"),
+        ("h1", "1. What This Report Is"),
         (
             "body",
-            "Every price in the tables is a median calculated from "
-            "validated, auditable asking-price listings in the current "
-            "tracker—not a confirmed closed sale or rental transaction. "
-            "The sample count is shown so you can judge how much weight "
-            "to place on each figure; use View source to inspect a "
-            "representative listing from that group.",
+            "This is the current weekly market report generated from "
+            "validated, auditable listing-level observations collected "
+            "for the live tracker. Each reported price is a median for "
+            "the stated source and segment, with the observed range, "
+            "listing count, source, and collection date shown so the "
+            "figure can be checked rather than read in isolation.",
         ),
         (
             "body",
-            "Source medians can differ because platforms may contain "
-            "different property mixes, price points, and listing coverage. "
-            "Where the observed difference exceeds 15%, the report calls "
-            "it out beside the relevant table. Figures supported by fewer "
-            "than three listings are marked as small samples; freshness "
-            "caveats appear only when the source data actually contains "
-            "an age older than 60 days.",
+            "Important: every price in this report is an online asking "
+            "price published by an agent, developer, or listing platform. "
+            "It is not a confirmed closed rent or sale transaction. "
+            "Advertised prices may be negotiated away from the published "
+            "figure. Where client closed-deal data becomes available, it "
+            "can be incorporated as a ground-truth comparison.",
+        ),
+        ("h1", "2. Coverage & Method"),
+        (
+            "bullet",
+            "Locations: Banana Island, Old Ikoyi, Lekki Phase 1, "
+            "Victoria Island, Eko Atlantic, Ikeja GRA, Asokoro, Maitama, "
+            "and Wuse.",
+        ),
+        (
+            "bullet",
+            "Property types: validated flats/apartments and selected "
+            "land; bedroom-level tables cover 1–5 bedrooms where usable "
+            "comparable listings exist.",
+        ),
+        (
+            "bullet",
+            "Transaction types: annual rent, sale, and land sale.",
+        ),
+        (
+            "bullet",
+            "Live comparable sources: Nigeria Property Centre and "
+            "PropertyPro.ng. Estate Intel is used only for public "
+            "research/project context; premium or login-gated content "
+            "is not bypassed.",
+        ),
+        (
+            "bullet",
+            "Method: source-by-source medians from listing-level "
+            "asking prices, with observed min–max ranges and sample "
+            "counts. Sources are kept separate because platforms can "
+            "contain different property mixes and price points.",
+        ),
+        (
+            "bullet",
+            "Current validation checks source URLs and market-node "
+            "evidence. Cross-source matching of the same physical "
+            "property is not guaranteed in this weekly snapshot.",
         ),
     ]
 
@@ -497,252 +643,312 @@ def _narrative_lines(listings, summary, research=None):
         ("Lagos", LAGOS_NODES),
         ("Abuja", ABUJA_NODES),
     ):
-        lines.append(("h1", city))
-
-        standout = _city_standout(
-            listings,
-            nodes,
-            city,
-        )
-
-        if standout:
-            lines.append(("body", standout))
-
-        for node in nodes:
-            rents = bedroom_breakdown(
+        rentable = [
+            node
+            for node in nodes
+            if _table_has_rows(
                 listings,
                 node,
                 "rent",
             )
+        ]
 
-            sales = bedroom_breakdown(
+        if not rentable:
+            continue
+
+        lines.append(("h1", "3. Rental Market"))
+
+        lines.append(("h2", city))
+
+        for node in rentable:
+            lines.append(
+                (
+                    "h3",
+                    f"{node} — Flats/Apartments (per annum)",
+                )
+            )
+            lines.append(
+                ("table", f"{node}_rent")
+            )
+
+    for city, nodes in (
+        ("Lagos", LAGOS_NODES),
+        ("Abuja", ABUJA_NODES),
+    ):
+        salable = [
+            node
+            for node in nodes
+            if _table_has_rows(
                 listings,
                 node,
                 "sale",
             )
+        ]
 
-            land = land_breakdown(
-                listings,
-                node,
-            )
+        if not salable:
+            continue
 
-            if not (rents or sales or land):
-                continue
+        lines.append(("h1", "4. Sales Market"))
+        lines.append(("h2", city))
 
-            lines.append(("h2", node))
-
-            for txn, label, rows in (
-                ("rent", "Rental Market (per annum)", rents),
-                ("sale", "Sales Market", sales),
-                ("land", "Land", land),
-            ):
-                if not rows:
-                    continue
-
-                lines.append(("h3", label))
-                lines.append(("table", f"{node}_{txn}"))
-
-                for item in rows:
-                    import re
-
-                    m = re.match(
-                        r"(\d+)\s+Bedroom",
-                        item["label"],
-                    )
-
-                    beds = (
-                        m.group(1)
-                        if m and txn != "land"
-                        else None
-                    )
-
-                    analysis = _category_analysis(
-                        listings,
-                        node,
-                        txn,
-                        beds,
-                    )
-
-                    if analysis:
-                        note = _discrepancy_note(
-                            analysis,
-                            node,
-                        )
-
-                        if note:
-                            lines.append(("body", note))
-
-                        for caveat in _caveat_notes(
-                            analysis
-                        ):
-                            lines.append(("body", caveat))
-
-    lines.append(
-        ("h1", "What Stands Out This Week")
-    )
-
-    sig = summary.get("signals", {})
-
-    for label, obj, caveat in [
-        (
-            "Most expensive area",
-            sig.get("most_expensive"),
-            "This describes the current tracked asking-price mix, "
-            "not every property in the area.",
-        ),
-        (
-            "Rental / investment screen",
-            sig.get("investment")
-            or sig.get("strongest_rental"),
-            "Any yield proxy is indicative only; it is not net yield "
-            "and excludes vacancy, fees, maintenance, and tax.",
-        ),
-        (
-            "Buyer value screen",
-            sig.get("buyer_value")
-            or sig.get("best_relative_value"),
-            "Relative value compares only the available sample; "
-            "it does not guarantee a bargain.",
-        ),
-        (
-            "Land price screen",
-            sig.get("land_opportunity"),
-            "Land conclusions depend on comparable land listings "
-            "and usable size/price fields.",
-        ),
-    ]:
-        if obj:
+        for node in salable:
             lines.append(
                 (
-                    "bullet",
-                    f"{label}: "
-                    f"{obj.get('market_node', 'not identified')}, "
-                    f"supported by "
-                    f"{obj.get('listing_count', 'an available')} "
-                    f"tracked listings. {caveat}",
+                    "h3",
+                    f"{node} — Flats/Apartments & Houses (sale)",
                 )
             )
-
-    covered, missing_nodes, missing_beds = _coverage_summary(
-        listings
-    )
-
-    coverage = (
-        f"Comparable rental, sale, or land data was available for "
-        f"{len(covered)} of 9 tracked nodes this week."
-    )
-
-    if missing_nodes:
-        coverage += (
-            " Nodes with no usable comparable data: "
-            + ", ".join(missing_nodes)
-            + "."
-        )
-
-    lines.append(("bullet", coverage))
-
-    lines.append(
-        ("h1", "Estate Intel — Public Research Context")
-    )
-
-    research_rows = _research_table_rows(
-        research or []
-    )
-
-    if research_rows:
-        lines.append(
-            (
-                "body",
-                f"The tracker collected {len(research_rows)} public "
-                "Estate Intel research/project records. These provide "
-                "context and links for further diligence; they are not "
-                "comparable listing rows. Where a public page did not "
-                "expose a price or size that could be parsed, this report "
-                "says so rather than substituting a premium or guessed "
-                "figure. No login or premium restriction is bypassed.",
+            lines.append(
+                ("table", f"{node}_sale")
             )
-        )
 
-        lines.append(
-            ("table", "estate_intel_public")
-        )
-    else:
-        lines.append(
-            (
-                "body",
-                "No Estate Intel public-research records were returned "
-                "in this run. That does not prove the platform has no "
-                "data; check the scrape run report for access or parsing "
-                "errors. Premium/login-gated content is not collected "
-                "or bypassed.",
-            )
-        )
+            for beds in range(1, 6):
+                analysis = _category_analysis(
+                    listings,
+                    node,
+                    "sale",
+                    str(beds),
+                )
+                if not analysis:
+                    continue
 
-    lines.append(
-        ("h1", "What This Snapshot Covers — and What's Next")
-    )
-
-    cover = (
-        f"This snapshot covers validated, linked residential "
-        f"asking-price listings across {len(covered)} of the 9 "
-        "tracked nodes in Lagos and Abuja, with rental, sale, "
-        "and land tables shown only where usable comparable "
-        "listings exist."
-    )
-
-    if missing_beds:
-        cover += (
-            " Bedroom categories not represented anywhere in this "
-            "week's usable listings: "
-            + ", ".join(missing_beds)
-            + "."
-        )
-
-    if missing_nodes:
-        cover += (
-            " Nodes needing more coverage: "
-            + ", ".join(missing_nodes)
-            + "."
-        )
-
-    lines.append(("body", cover))
+                note = _discrepancy_note(
+                    analysis,
+                    node,
+                )
+                if note:
+                    lines.append(("body", note))
 
     lines.append(
         (
-            "body",
-            "Port Harcourt is not currently tracked by the live scraper, "
-            "so this report makes no Port Harcourt price claim. The next "
-            "useful improvements are to widen comparable listing samples, "
-            "retain enough dated snapshots for trend analysis, and check "
-            "public-source accessibility and data quality each week.",
+            "h1",
+            "5. Land Market — and Cross-Source Discrepancies",
         )
     )
 
-    lines.append(
-        ("h1", "Sources Used in This Report")
-    )
+    any_land = False
 
-    source_names = sorted(
-        set(summary.get("source_names", []))
-        | ({"Estate Intel"} if research_rows else set())
+    for city, nodes in (
+        ("Lagos", LAGOS_NODES),
+        ("Abuja", ABUJA_NODES),
+    ):
+        land_nodes = [
+            node
+            for node in nodes
+            if _table_has_rows(
+                listings,
+                node,
+                "land",
+            )
+        ]
+
+        if not land_nodes:
+            continue
+
+        any_land = True
+        lines.append(("h2", city))
+
+        for node in land_nodes:
+            lines.append(
+                (
+                    "h3",
+                    f"{node} — Land for sale",
+                )
+            )
+            lines.append(
+                ("table", f"{node}_land")
+            )
+
+            analysis = _category_analysis(
+                listings,
+                node,
+                "land",
+            )
+            if analysis:
+                note = _discrepancy_note(
+                    analysis,
+                    node,
+                )
+                if note:
+                    lines.append(("body", note))
+
+    if not any_land:
+        lines.append(
+            (
+                "body",
+                "No validated land-for-sale rows were returned for "
+                "this snapshot.",
+            )
+        )
+
+    wow = summary.get("week_on_week", {})
+
+    lines.append(
+        ("h1", "6. Data Quality Notes")
     )
 
     lines.append(
         (
             "bullet",
-            ", ".join(source_names)
-            if source_names
-            else "No sources recorded",
+            "Asking price versus transaction price: these figures "
+            "describe advertised prices, not confirmed completed deals.",
+        )
+    )
+
+    lines.append(
+        (
+            "bullet",
+            "Sample size: source-level listing counts are shown "
+            "beside every comparable figure; thin samples should be "
+            "treated as directional rather than definitive market rates.",
+        )
+    )
+
+    lines.append(
+        (
+            "bullet",
+            "Cross-source differences are retained and flagged where "
+            "the observed source medians differ materially; this can "
+            "reflect different inventory rather than an error by a source.",
+        )
+    )
+
+    lines.append(
+        (
+            "bullet",
+            "Deduplication: the same physical property may still appear "
+            "on more than one platform. Cross-source matching remains a "
+            "separate data-quality improvement.",
+        )
+    )
+
+    lines.append(
+        (
+            "bullet",
+            "Freshness: the report uses the collection date shown in "
+            "each row and flags stale source observations rather than "
+            "silently presenting them as current.",
+        )
+    )
+
+    lines.append(
+        ("h1", "7. What Happens Next")
+    )
+
+    changes = summary.get("changes", {})
+
+    if any(changes.values()):
+        lines.append(
+            (
+                "body",
+                "Weekly pulse: "
+                f"{changes.get('new_listings', 0)} new listings, "
+                f"{changes.get('price_increases', 0)} price increases, "
+                f"{changes.get('price_reductions', 0)} price reductions, "
+                f"and {changes.get('delisted', 0)} delisted listings "
+                "were recorded in the latest comparison where a prior "
+                "snapshot was available.",
+            )
+        )
+
+    if wow.get("available"):
+        for item in wow.get("narrative", []):
+            lines.append(("bullet", item))
+    else:
+        lines.append(
+            (
+                "body",
+                "Week-on-week comparison will become more informative "
+                "as the tracker retains additional dated snapshots.",
+            )
+        )
+
+    lines.append(
+        (
+            "bullet",
+            "Continue the weekly pulse: new listings, removed listings, "
+            "price moves, sample growth, source health, and source "
+            "discrepancies.",
+        )
+    )
+
+    lines.append(
+        (
+            "bullet",
+            "Build the monthly report from the same historical snapshots "
+            "once enough observations exist for a stable month-on-month "
+            "comparison.",
+        )
+    )
+
+    lines.append(
+        (
+            "bullet",
+            "Widen comparable samples, strengthen cross-source "
+            "deduplication, and expand city coverage only after source "
+            "accessibility and data quality are validated.",
         )
     )
 
     lines.append(
         (
             "body",
-            "Each comparable listing table links to a real source "
-            "listing. Estate Intel links point to public research/"
-            "project pages and should not be interpreted as listing-price "
-            "sources unless a public price is explicitly shown in that row.",
+            "Port Harcourt is not currently part of the live validated "
+            "scraper scope, so this report makes no Port Harcourt price "
+            "claim. The system is structured so additional city/source "
+            "adapters can be added without changing the reporting model.",
+        )
+    )
+
+    lines.append(
+        ("h1", "8. Sources & Definitions")
+    )
+
+    source_names = sorted(
+        set(summary.get("source_names", []))
+    )
+
+    lines.append(
+        (
+            "bullet",
+            "Live comparable listing sources: "
+            + (
+                ", ".join(source_names)
+                if source_names
+                else "none recorded"
+            ),
+        )
+    )
+
+    lines.append(
+        (
+            "body",
+            "Estate Intel public-research pages are contextual "
+            "references only and are not treated as comparable "
+            "listing-price observations unless a public price is "
+            "explicitly shown in the row.",
+        )
+    )
+
+    if research:
+        lines.append(
+            (
+                "h2",
+                "Estate Intel — Public Research Context",
+            )
+        )
+        lines.append(
+            ("table", "estate_intel_public")
+        )
+
+    lines.append(
+        (
+            "body",
+            "Definitions: asking price is the price published at the "
+            "time of listing; median is the middle value in the ordered "
+            "set and is less distorted by extreme outliers than a mean; "
+            "the listing count (n) is the number of validated comparable "
+            "rows supporting that source-level figure at collection time.",
         )
     )
 
@@ -852,20 +1058,21 @@ def build_docx(
 
         t = doc.add_table(
             rows=1,
-            cols=5,
+            cols=6,
         )
-
+        t.style = "Table Grid"
         t.autofit = True
 
-        for i, label in enumerate(
-            [
-                "Metric",
-                "Value",
-                "Sample",
-                "Source & Date",
-                "Link",
-            ]
-        ):
+        headers = [
+            "Segment",
+            "Reported price",
+            "Range",
+            "Listings (n)",
+            "Source",
+            "As of",
+        ]
+
+        for i, label in enumerate(headers):
             cell = t.rows[0].cells[i]
             p = cell.paragraphs[0]
             r = p.add_run(label)
@@ -875,37 +1082,41 @@ def build_docx(
             shd = OxmlElement("w:shd")
             shd.set(qn("w:val"), "clear")
             shd.set(qn("w:fill"), HEADER_FILL)
-
             cell._tc.get_or_add_tcPr().append(shd)
 
         for item in rows:
             cells = t.add_row().cells
 
-            for i, key in enumerate(
-                (
-                    "label",
-                    "value",
-                    "sample",
-                    "source_date",
-                )
-            ):
+            values = [
+                item.get("label", ""),
+                item.get("value", ""),
+                item.get("range", "—"),
+                item.get("sample", ""),
+            ]
+
+            for i, value in enumerate(values):
                 p = cells[i].paragraphs[0]
-                r = p.add_run(
-                    str(item.get(key, ""))
-                )
+                r = p.add_run(str(value))
                 set_font(r, 9)
 
             p = cells[4].paragraphs[0]
+            source = item.get("source", "") or "Unknown"
 
             if item.get("link"):
                 add_hyperlink(
                     p,
                     item["link"],
-                    "View source",
+                    source,
                 )
             else:
-                r = p.add_run("—")
+                r = p.add_run(source)
                 set_font(r, 9)
+
+            p = cells[5].paragraphs[0]
+            r = p.add_run(
+                str(item.get("as_of", "date unavailable"))
+            )
+            set_font(r, 9)
 
         doc.add_paragraph()
 
@@ -913,29 +1124,30 @@ def build_docx(
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
     r = title.add_run(
-        "Nigeria Real Estate Market Snapshot"
+        "LAGOS PROPERTY MARKET INTELLIGENCE"
     )
-
-    set_font(r, 28, "000000")
+    set_font(r, 20, "000000")
+    r.bold = True
 
     sub = doc.add_paragraph()
     sub.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
     r = sub.add_run(
-        "Lagos & Abuja — Tracked Listings, Public Research "
-        "& Current Asking Prices"
+        "Weekly Market Report — Lagos & Abuja"
     )
-
-    set_font(r, 12)
+    set_font(r, 13)
+    r.bold = True
 
     date_p = doc.add_paragraph()
     date_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
     r = date_p.add_run(
-        f"Data captured "
-        f"{datetime.now(timezone.utc):%d %B %Y}"
+        f"Collection date: "
+        f"{datetime.now(timezone.utc):%d %B %Y}  |  "
+        f"Report version: Weekly-"
+        f"{datetime.now(timezone.utc):%Y-%m-%d}  |  "
+        "Prepared for: Client"
     )
-
     set_font(r, 10, GRAY)
 
     for kind, value in _narrative_lines(
@@ -1335,7 +1547,7 @@ def publish_google_doc(
         )
 
     title = (
-        "Nigeria Real Estate Market Snapshot — "
+        "LAGOS PROPERTY MARKET INTELLIGENCE — "
         f"{datetime.now(timezone.utc):%Y-%m-%d}"
     )
 
@@ -1356,8 +1568,12 @@ def publish_google_doc(
 
     lines = [
         title,
-        "Lagos & Abuja — Tracked Listings, Public Research & Current Asking Prices",
-        f"Data captured {datetime.now(timezone.utc):%d %B %Y}",
+        "Weekly Market Report — Lagos & Abuja",
+        (
+            f"Collection date: {datetime.now(timezone.utc):%d %B %Y}  |  "
+            f"Report version: Weekly-{datetime.now(timezone.utc):%Y-%m-%d}  |  "
+            "Prepared for: Client"
+        ),
         "",
     ]
 
@@ -1385,17 +1601,10 @@ def publish_google_doc(
                     1,
                 )
 
-                table_data[value] = (
-                    bedroom_breakdown(
-                        listings,
-                        node,
-                        txn,
-                    )
-                    if txn != "land"
-                    else land_breakdown(
-                        listings,
-                        node,
-                    )
+                table_data[value] = _node_transaction_rows(
+                    listings,
+                    node,
+                    txn,
                 )
 
         elif kind == "bullet":
@@ -1425,23 +1634,31 @@ def publish_google_doc(
     ).execute()
 
     heading1 = {
-        "How to Read This Report",
-        "Lagos",
-        "Abuja",
-        "What Stands Out This Week",
-        "Estate Intel — Public Research Context",
-        "What This Snapshot Covers — and What's Next",
-        "Sources Used in This Report",
+        "1. What This Report Is",
+        "2. Coverage & Method",
+        "3. Rental Market",
+        "4. Sales Market",
+        "5. Land Market — and Cross-Source Discrepancies",
+        "6. Data Quality Notes",
+        "7. What Happens Next",
+        "8. Sources & Definitions",
     }
 
-    heading2 = set(
-        LAGOS_NODES + ABUJA_NODES
-    )
+    heading2 = {
+        "Lagos",
+        "Abuja",
+        "Estate Intel — Public Research Context",
+    }
 
     heading3 = {
-        "Rental Market (per annum)",
-        "Sales Market",
-        "Land",
+        f"{node} — Flats/Apartments (per annum)"
+        for node in LAGOS_NODES + ABUJA_NODES
+    } | {
+        f"{node} — Flats/Apartments & Houses (sale)"
+        for node in LAGOS_NODES + ABUJA_NODES
+    } | {
+        f"{node} — Land for sale"
+        for node in LAGOS_NODES + ABUJA_NODES
     }
 
     requests = [
@@ -1535,7 +1752,7 @@ def publish_google_doc(
             )
 
         elif raw_line.startswith(
-            "Lagos & Abuja —"
+            "Weekly Market Report —"
         ):
             requests.append(
                 {
@@ -1730,11 +1947,12 @@ def publish_google_doc(
             continue
 
         headers = [
-            "Metric",
-            "Value",
-            "Sample",
-            "Source & Date",
-            "Link",
+            "Segment",
+            "Reported price",
+            "Range",
+            "Listings (n)",
+            "Source",
+            "As of",
         ]
 
         docs.documents().batchUpdate(
@@ -1827,13 +2045,10 @@ def publish_google_doc(
             [
                 r.get("label", ""),
                 r.get("value", ""),
+                r.get("range", "—"),
                 r.get("sample", ""),
-                r.get("source_date", ""),
-                (
-                    "View source"
-                    if r.get("link")
-                    else "—"
-                ),
+                r.get("source", "Unknown"),
+                r.get("as_of", "date unavailable"),
             ]
             for r in rows
         ]
@@ -1943,7 +2158,7 @@ def publish_google_doc(
                                     "columnIndex": 0,
                                 },
                                 "rowSpan": 1,
-                                "columnSpan": 5,
+                                "columnSpan": 6,
                             },
                             "tableCellStyle": {
                                 "backgroundColor": {
@@ -2051,7 +2266,7 @@ def main():
     if len(sys.argv) < 2:
         raise SystemExit(
             "Usage: python client_doc_report.py "
-            "<listings.csv> [estateintel_research.csv]"
+            "<listings.csv> [estateintel_research.csv] [changes.csv]"
         )
 
     raw = load_csv(
@@ -2087,9 +2302,24 @@ def main():
         f"Estate Intel public research rows: {len(research)}"
     )
 
+    changes_path = (
+        sys.argv[3]
+        if len(sys.argv) > 3
+        else "none"
+    )
+
+    changes = (
+        load_csv(changes_path)
+        if (
+            changes_path.lower() != "none"
+            and Path(changes_path).exists()
+        )
+        else []
+    )
+
     summary = build_summary(
         listings,
-        [],
+        changes,
         sys.argv[1],
     )
 
