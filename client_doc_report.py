@@ -23,7 +23,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from market_analysis import (
+from mailjet_sender import recipients_from_values, send_message\n\nfrom market_analysis import (
     clean_rows,
     fnum,
     fmt_naira,
@@ -2025,100 +2025,26 @@ def publish_google_doc(
     return doc_id, url
 
 
+
 def send_notification_email(doc_url):
-    import requests as req
-
-    pub = os.environ.get(
-        "MAILJET_API_KEY"
+    recipients = recipients_from_values(
+        os.environ.get("REPORT_CLIENT_EMAIL", ""),
+        os.environ.get("REPORT_TO_EMAIL", ""),
     )
 
-    priv = os.environ.get(
-        "MAILJET_SECRET_KEY"
+    send_message(
+        to=recipients,
+        subject="Your Weekly Lagos & Abuja Property Market Snapshot",
+        text_body=(
+            "This week's market snapshot document is ready.\n\n"
+            f"Open the report: {doc_url}"
+        ),
+        html_body=(
+            "<p>This week's market snapshot document is ready.</p>"
+            f"<p><a href='{doc_url}'>Open the report</a></p>"
+        ),
+        layer="client-doc",
     )
-
-    if not (pub and priv):
-        raise RuntimeError(
-            "MAILJET_API_KEY and MAILJET_SECRET_KEY "
-            "are required for the client-document notification."
-        )
-
-    recipients = []
-
-    for key in (
-        "REPORT_CLIENT_EMAIL",
-        "REPORT_TO_EMAIL",
-    ):
-        recipients += [
-            {
-                "Email": x.strip()
-            }
-            for x in os.environ.get(
-                key,
-                "",
-            ).split(",")
-            if "@" in x
-        ]
-
-    if not recipients:
-        raise RuntimeError(
-            "REPORT_CLIENT_EMAIL or REPORT_TO_EMAIL "
-            "is required for notification."
-        )
-
-    sender = os.environ.get(
-        "MAILJET_FROM_EMAIL",
-        "",
-    ).strip()
-
-    if not sender or "@" not in sender:
-        raise RuntimeError(
-            "MAILJET_FROM_EMAIL is missing or invalid."
-        )
-
-    payload = {
-        "Messages": [
-            {
-                "From": {
-                    "Email": sender,
-                    "Name": (
-                        os.environ.get(
-                            "MAILJET_FROM_NAME",
-                            "Master Builder",
-                        ).strip()
-                        or "Master Builder"
-                    ),
-                },
-                "To": recipients,
-                "Subject": (
-                    "Your Weekly Lagos & Abuja "
-                    "Property Market Snapshot"
-                ),
-                "HTMLPart": (
-                    "<p>This week's market snapshot "
-                    "document is ready.</p>"
-                    f"<p><a href='{doc_url}'>"
-                    "Open the report"
-                    "</a></p>"
-                ),
-            }
-        ]
-    }
-
-    resp = req.post(
-        "https://api.mailjet.com/v3.1/send",
-        auth=(pub, priv),
-        json=payload,
-        timeout=30,
-    )
-
-    resp.raise_for_status()
-
-    print(
-        "Notification email accepted by Mailjet: "
-        f"HTTP {resp.status_code}"
-    )
-
-
 def main():
     if len(sys.argv) < 2:
         raise SystemExit(
