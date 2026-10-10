@@ -54,7 +54,7 @@ def run():
         # row/column drift, and stale-tab updates before the run is reported
         # as successful.
         written = ws.get(f"A1:{gspread.utils.rowcol_to_a1(len(values), max(len(r) for r in values))}")
-        expected = [[str(cell.value if cell.value is not None else "") for cell in row] for row in values]
+        expected = [[str(value if value is not None else "") for value in row] for row in values]
         actual = [[str(v or "") for v in row] for row in written]
         if actual != expected:
             raise RuntimeError(f"Google Sheet readback mismatch in worksheet '{name}'")
