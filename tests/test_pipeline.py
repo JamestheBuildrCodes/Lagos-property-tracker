@@ -65,7 +65,9 @@ class PipelineTests(unittest.TestCase):
         text = (ROOT / ".github/workflows/weekly-scan.yml").read_text()
         self.assertIn("property_listings_", text)
         self.assertNotIn("lagos_listings_*.csv", text)
-        self.assertIn("Create and email a new client-preferred weekly document", text)
+        self.assertIn("Publish client-preferred weekly document", text)
+        self.assertIn("Send final executive email with report links", text)
+        self.assertLess(text.index("Publish client-preferred weekly document"), text.index("Send final executive email with report links"))
         self.assertIn("python client_doc_report.py", text)
         self.assertIn("MAILJET_SECRET_KEY: ${{ secrets.MAILJET_SECRET_KEY }}", text)
 
