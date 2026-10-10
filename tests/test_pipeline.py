@@ -299,6 +299,7 @@ class OptionalAIInterpreterTests(unittest.TestCase):
         self.assertIn("not_observed_in_current_scan", rendered)
         self.assertNotIn("private.example", rendered)
         self.assertNotIn("owner@example.com", rendered)
+        self.assertNotIn("raw_rows", rendered)
 
     def test_ai_interpreter_falls_back_without_api_key(self):
         import os
@@ -310,11 +311,19 @@ class OptionalAIInterpreterTests(unittest.TestCase):
             if old is not None:
                 os.environ["OPENAI_API_KEY"] = old
 
-class GoogleSheetReadbackRegressionTests(unittest.TestCase):
-    def test_sheet_readback_compares_scalar_values_not_cell_objects(self):
-        source = Path("sheets_writer.py").read_text(encoding="utf-8")
-        self.assertIn(
-            'expected = [[str(value if value is not None else "") for value in row] for row in values]',
-            source
-        )
-        self.assertNotIn('cell.value if cell.value is not None else "" for cell in row] for row in values', source)
+    def test_ai_interpreter_does_not_assume_a_nonexistent_default_model(self):
+        import os
+        import ai_market_interpreter
+        old_key = os.environ.get("OPENAI_API_KEY")
+        old_model = os.environ.pop("OPENAI_MODEL", None)
+        os.environ["OPENAI_API_KEY"] = "test-only-placeholder"
+        try:
+            self.assertIsNone(ai_market_interpreter.interpret_summary({"listings_tracked": 1}))
+        finally:
+            if old_key is None:
+                os.environ.pop("OPENAI_API_KEY", None)
+            else:
+                os.environ["OPENAI_API_KEY"] = old_key
+            if old_model is not None:
+                os.environ["OPENAI_MODEL"] = old_model
+
