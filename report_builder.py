@@ -67,7 +67,7 @@ def build_executive_html_from_summary(s,date=None,doc_url="",sheet_url=""):
     reductions=int(changes.get("price_reductions") or 0)
     increases=int(changes.get("price_increases") or 0)
     new_count=int(changes.get("new_listings") or 0)
-    delisted=int(changes.get("delisted") or 0)
+    not_observed=int(changes.get("not_observed", changes.get("delisted", 0)) or 0)
     populated=[x for x in s.get("scorecard",[]) if int(x.get("listing_count") or 0)>0]
     thin=[x.get("market_node","Unknown") for x in sorted(populated,key=lambda x:int(x.get("listing_count") or 0))[:3]]
     # Build cautious statements from the actual data, never a generic claim about all of Lagos.
@@ -84,8 +84,8 @@ def build_executive_html_from_summary(s,date=None,doc_url="",sheet_url=""):
         takeaway.append("No price reductions were verified in the comparison file. Do not infer that sellers are not negotiating; the scan may not have captured a price change.")
     if increases:
         takeaway.append(f"{increases:,} listings have a recorded asking-price increase in the available comparison.")
-    if delisted:
-        takeaway.append(f"{delisted:,} previous URLs were not observed in this scan. This does not prove that the properties sold or were delisted; it may also reflect coverage or extraction differences.")
+    if not_observed:
+        takeaway.append(f"{not_observed:,} previous URLs were not observed in this scan. This does not prove that the properties sold or were delisted; it may also reflect coverage or extraction differences.")
     if thin:
         takeaway.append("Sample caution: the thinnest covered locations are "+", ".join(thin)+". Treat these as watchlist observations, not reliable area-wide benchmarks.")
     investment=sig.get("investment")
@@ -129,7 +129,7 @@ def build_executive_html_from_summary(s,date=None,doc_url="",sheet_url=""):
     html_parts.append("</ul><h2 style=\"font-size:19px\">Recommended actions</h2><ol>")
     actions=[]
     if reductions: actions.append(f"Review the {reductions:,} recorded price reductions first and confirm the seller's current price directly.")
-    if delisted: actions.append("Treat previously observed URLs missing this week as 'not observed'; verify status directly before calling any property sold or delisted.")
+    if not_observed: actions.append("Treat previously observed URLs missing this week as 'not observed'; verify status directly before calling any property sold or delisted.")
     actions.append("Compare like-for-like listings by location, transaction type, bedroom count, size and source update date.")
     actions.append("Click the original listing for every high-value or unusual figure. Confirm the price, status, fees, title and exact location with the advertiser.")
     actions.append("Use the Area Scorecard only where sample counts are adequate; commission additional checks where the sample is thin.")
