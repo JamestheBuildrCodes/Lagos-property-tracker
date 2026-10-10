@@ -129,21 +129,19 @@ jobs:
           test -s Lagos_Abuja_Property_Market_Intelligence_*.docx
           test -s market_intelligence.json
 
-      - name: Write Layer 2 to existing Google Sheet
+      - name: Write and verify Layer 2 in the existing Google Sheet
         env:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
           REPORT_CLIENT_EMAIL: ${{ secrets.REPORT_CLIENT_EMAIL }}
         run: |
-          if [ -n "$GOOGLE_SERVICE_ACCOUNT_JSON" ] && [ -n "$GOOGLE_SHEET_ID" ]; then
-            CURR=$(ls -t property_listings_*.csv | head -n 1)
-            CHANGES=$(ls -t changes_*.csv 2>/dev/null | head -n 1)
-            RESEARCH=$(ls -t estateintel_public_research_*.csv 2>/dev/null | head -n 1)
-            XLSX=$(ls -t market_intelligence_*.xlsx | head -n 1)
-            python sheets_writer.py "$CURR" "${CHANGES:-none}" "${RESEARCH:-none}" "$XLSX"
-          else
-            echo "Google Sheets secrets not configured; Layer 2 mirror skipped."
-          fi
+          test -n "$GOOGLE_SERVICE_ACCOUNT_JSON" || { echo "GOOGLE_SERVICE_ACCOUNT_JSON is required; refusing to send an incomplete report."; exit 1; }
+          test -n "$GOOGLE_SHEET_ID" || { echo "GOOGLE_SHEET_ID is required; refusing to send an invalid Sheet link."; exit 1; }
+          CURR=$(ls -t property_listings_*.csv | head -n 1)
+          CHANGES=$(ls -t changes_*.csv 2>/dev/null | head -n 1)
+          RESEARCH=$(ls -t estateintel_public_research_*.csv 2>/dev/null | head -n 1)
+          XLSX=$(ls -t market_intelligence_*.xlsx | head -n 1)
+          python sheets_writer.py "$CURR" "${CHANGES:-none}" "${RESEARCH:-none}" "$XLSX"
 
       - name: Publish Layer 3 as Google Doc
         env:
@@ -181,7 +179,7 @@ jobs:
           MAILJET_API_KEY: ${{ secrets.MAILJET_API_KEY }}
           MAILJET_SECRET_KEY: ${{ secrets.MAILJET_SECRET_KEY }}
           MAILJET_FROM_EMAIL: ${{ secrets.MAILJET_FROM_EMAIL }}
-          MAILJET_FROM_NAME: ${{ secrets.MAILJET_FROM_NAME }}
+          MAILJET_FROM_NAME: "Master Builder Inc."
           REPORT_TO_EMAIL: ${{ secrets.REPORT_TO_EMAIL }}
           REPORT_CLIENT_EMAIL: ${{ secrets.REPORT_CLIENT_EMAIL }}
           GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
@@ -191,6 +189,15 @@ jobs:
           test -n "$MAILJET_FROM_EMAIL" || { echo "MAILJET_FROM_EMAIL is required and must be approved in Mailjet."; exit 1; }
           test -n "$REPORT_CLIENT_EMAIL" || { echo "REPORT_CLIENT_EMAIL must be the client recipient."; exit 1; }
           test -n "$REPORT_TO_EMAIL" || { echo "REPORT_TO_EMAIL must contain the internal report recipient."; exit 1; }
+          test -n "$GOOGLE_SHEET_ID" || { echo "GOOGLE_SHEET_ID is required for the report link."; exit 1; }
+          python - <<'PY'
+          import os
+          from mailjet_sender import valid_email
+          for key in ("MAILJET_FROM_EMAIL", "REPORT_CLIENT_EMAIL", "REPORT_TO_EMAIL"):
+              if not valid_email(os.environ.get(key, "")):
+                  raise SystemExit(f"{key} is missing or malformed; check the GitHub Actions secret.")
+          print("Sender, client-recipient, and internal-copy email formats validated.")
+          PY
           CURR=$(ls -t property_listings_*.csv | head -n 1)
           CHANGES=$(ls -t changes_*.csv 2>/dev/null | head -n 1)
           HTML=$(ls -t executive_brief_*.html | head -n 1)
