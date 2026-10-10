@@ -52,11 +52,11 @@ Separately, `client_doc_report.py` creates a **brand-new Google Doc every run**
 for the client-preferred market snapshot. It never reads or reuses `GOOGLE_DOC_ID`.
 The document uses Times New Roman, a black 28pt title, blue #2E74B5 city/area
 headings, gray #D9D9D9 table headers, and clickable `View source` links. The
-final executive email is sent only after this URL is ready, so the client receives
-one message containing the executive interpretation plus both the new report and
-property data Sheet links. It only covers the nine tracked Lagos/Abuja nodes; it
-does not invent Port Harcourt data. Optional AI commentary is driven by aggregate
-metrics; the deterministic interpretation remains if the AI key is absent or fails.
+final executive email is sent only after the new Doc and verified Sheet are ready,
+so the client receives one message with the interpretation plus the report and
+Sheet links. It covers only the nine tracked Lagos/Abuja nodes; it does not invent
+Port Harcourt data. Optional AI commentary interprets whitelisted aggregate metrics;
+the deterministic narrative remains if the AI key is absent or the API fails.
 
 ## Coverage
 
@@ -94,15 +94,14 @@ Set these GitHub Actions repository secrets:
 | `MAILJET_SECRET_KEY` | Mailjet secret key |
 | `MAILJET_FROM_EMAIL` | Active/validated Mailjet sender address |
 | `MAILJET_FROM_NAME` | Optional sender display name |
-| `REPORT_TO_EMAIL` | Your internal verification email (CC); this is not the sender address |
-| `OPENAI_API_KEY` | Optional API key for the aggregate-metrics AI interpretation layer |
-| `OPENAI_MODEL` | Optional model override; defaults to `gpt-6-luna` |
-
-**Mailjet production sending:** `MAILJET_FROM_EMAIL` must be an active/validated Mailjet sender address. An individually validated Gmail/Outlook/Yahoo sender is supported; a custom domain is not required for this setup.
 | `REPORT_CLIENT_EMAIL` | Client recipient (To) and Google Sheet/Doc Viewer |
-| `GOOGLE_DOC_ID` | Optional Google Doc to update in place; blank creates a new Doc |
-| `GOOGLE_SERVICE_ACCOUNT_JSON` | Existing Google Sheet authentication |
-| `GOOGLE_SHEET_ID` | Existing Sheet ID |
+| `REPORT_TO_EMAIL` | Your internal verification email (Cc); not the sender address |
+| `GOOGLE_DOC_ID` | Optional existing analyst Google Doc to update in place |
+| `GOOGLE_SERVICE_ACCOUNT_JSON` | Google Sheets service-account credentials (Editor access to the existing Sheet required) |
+| `GOOGLE_SHEET_ID` | Existing client data Sheet ID |
+| `GOOGLE_OAUTH_TOKEN_JSON` | Required OAuth token for creating the new client-preferred Google Doc each week |
+| `OPENAI_API_KEY` | Optional key for AI interpretation of aggregate metrics only |
+| `OPENAI_MODEL` | Optional model override; defaults to `gpt-6-luna` |
 
 For the Google Sheet, share the existing spreadsheet with the service account's
 `client_email` as **Editor**. Do not create a replacement spreadsheet.
