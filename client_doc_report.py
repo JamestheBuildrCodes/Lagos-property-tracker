@@ -866,9 +866,8 @@ def _narrative_lines(listings, summary, research=None):
                 f"{changes.get('new_listings', 0)} new listings, "
                 f"{changes.get('price_increases', 0)} price increases, "
                 f"{changes.get('price_reductions', 0)} price reductions, "
-                f"and {changes.get('delisted', 0)} delisted listings "
-                "were recorded in the latest comparison where a prior "
-                "snapshot was available.",
+                f"and {changes.get('not_observed', changes.get('delisted', 0))} previous URLs were not observed in the latest scan. "
+                "This is not proof those properties sold or were delisted; the source may not have returned them during this scan.",
             )
         )
 
