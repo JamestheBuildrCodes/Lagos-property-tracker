@@ -2506,7 +2506,10 @@ def main():
             research=research,
         )
 
-        send_notification_email(url)
+        if os.environ.get("SUPPRESS_REPORT_NOTIFICATION_EMAIL", "").strip() != "1":
+            send_notification_email(url)
+        else:
+            print("Separate document notification suppressed; executive email will include the report link.")
 
     else:
         print(
