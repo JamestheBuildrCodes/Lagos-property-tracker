@@ -3,7 +3,7 @@ Lagos Property Price Tracker — Change Detector v0.1
 Compares this week's scraped CSV to last week's and flags:
   - price changes on listings that appear in both (matched by URL)
   - new listings that weren't there last time
-  - listings that disappeared (rented/sold/delisted)
+  - previous URLs not observed in the latest scan (status not confirmed)
 
 Usage:
     python detect_changes.py lagos_listings_2026-08-14.csv lagos_listings_2026-08-21.csv
@@ -68,7 +68,7 @@ def detect_changes(old_path, new_path):
     for url, old_row in old_data.items():
         if url not in new_data:
             changes.append({
-                "type": "delisted",
+                "type": "not_observed",
                 "location": old_row.get("location") or old_row.get("market_node", "N/A"),
                 "bedrooms": old_row.get("bedrooms", "-"),
                 "title": old_row.get("title", "Listing"),
