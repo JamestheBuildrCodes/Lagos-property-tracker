@@ -11,6 +11,6 @@ This patch is intended to overlay the existing `JamestheBuildrCodes/Lagos-proper
 5. Review `git diff`, commit, and push `main`.
 6. Only after verifying the required GitHub secrets, manually run **Actions → Nigeria Property Market Scan → Run workflow**. This starts the paid Zyte collection. Do not use `scraper.py` for local testing.
 
-Required existing secrets include `ZYTE_API_KEY`, `GOOGLE_SERVICE_ACCOUNT_JSON`, `GOOGLE_SHEET_ID`, `REPORT_CLIENT_EMAIL`, `REPORT_TO_EMAIL`, `MAILJET_API_KEY`, `MAILJET_SECRET_KEY`, and `MAILJET_FROM_EMAIL`; `MAILJET_FROM_NAME` is optional. The sender must be active/validated in Mailjet.
+Required live secrets include `ZYTE_API_KEY`, `GOOGLE_SERVICE_ACCOUNT_JSON`, `GOOGLE_SHEET_ID`, `GOOGLE_OAUTH_TOKEN_JSON`, `REPORT_CLIENT_EMAIL`, `REPORT_TO_EMAIL`, `MAILJET_API_KEY`, `MAILJET_SECRET_KEY`, and `MAILJET_FROM_EMAIL`; `OPENAI_API_KEY` is optional and enables AI interpretation. The workflow displays the sender as `Master Builder Inc.`. `MAILJET_FROM_EMAIL` must be the actual corporate sender address and must be approved in Mailjet; `REPORT_TO_EMAIL` is your internal Cc, and `REPORT_CLIENT_EMAIL` is the client To recipient.
 
 The first live workflow run is still required to verify Google Docs API table insertion/styling and Mailjet delivery. Local tests do not claim live API verification.
