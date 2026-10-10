@@ -201,7 +201,7 @@ jobs:
           test -s mailjet_layer1_receipt.json
           python - <<'PY'
           import json
-          for path in ("mailjet_layer1_receipt.json",)
+          for path in ("mailjet_layer1_receipt.json",):
               data = json.load(open(path, encoding="utf-8"))
               statuses = [
                   result.get("status")
