@@ -51,9 +51,12 @@ that existing analyst document be updated in place.
 Separately, `client_doc_report.py` creates a **brand-new Google Doc every run**
 for the client-preferred market snapshot. It never reads or reuses `GOOGLE_DOC_ID`.
 The document uses Times New Roman, a black 28pt title, blue #2E74B5 city/area
-headings, gray #D9D9D9 table headers, and clickable `View source` links. It then
-sends a separate Mailjet notification email with the new document URL. It only
-covers the nine real Lagos/Abuja tracked nodes; it does not invent Port Harcourt data.
+headings, gray #D9D9D9 table headers, and clickable `View source` links. The
+final executive email is sent only after this URL is ready, so the client receives
+one message containing the executive interpretation plus both the new report and
+property data Sheet links. It only covers the nine tracked Lagos/Abuja nodes; it
+does not invent Port Harcourt data. Optional AI commentary is driven by aggregate
+metrics; the deterministic interpretation remains if the AI key is absent or fails.
 
 ## Coverage
 
@@ -91,7 +94,9 @@ Set these GitHub Actions repository secrets:
 | `MAILJET_SECRET_KEY` | Mailjet secret key |
 | `MAILJET_FROM_EMAIL` | Active/validated Mailjet sender address |
 | `MAILJET_FROM_NAME` | Optional sender display name |
-| `REPORT_TO_EMAIL` | Your internal verification email (CC) |
+| `REPORT_TO_EMAIL` | Your internal verification email (CC); this is not the sender address |
+| `OPENAI_API_KEY` | Optional API key for the aggregate-metrics AI interpretation layer |
+| `OPENAI_MODEL` | Optional model override; defaults to `gpt-6-luna` |
 
 **Mailjet production sending:** `MAILJET_FROM_EMAIL` must be an active/validated Mailjet sender address. An individually validated Gmail/Outlook/Yahoo sender is supported; a custom domain is not required for this setup.
 | `REPORT_CLIENT_EMAIL` | Client recipient (To) and Google Sheet/Doc Viewer |
@@ -116,18 +121,16 @@ Sheet ID.
 The workflow installs production dependencies on Ubuntu/Python 3.11, not on
 Termux. It then:
 
-1. builds the deterministic manifest;
-2. runs architecture/security tests;
-3. runs Zyte preflight;
-4. collects current data;
-5. validates the normalized snapshot;
-6. detects listing changes and metric-level week-on-week movement;
-7. builds the executive email, polished workbook and analyst report from one analysis pass;
-8. sends Layer 1 to the configured distribution;
-9. mirrors and styles the existing Layer 2 Google Sheet and can grant the client Viewer access;
-10. publishes Layer 3 as the analyst Google Doc and archives its DOCX;
-11. creates a new client snapshot Google Doc, grants viewer access, and sends its separate notification email;
-12. commits the archive back to GitHub.
+1. builds the deterministic source manifest and runs architecture/data-quality tests;
+2. runs Zyte authentication/connectivity preflight;
+3. collects current data, then applies quality gates and location validation;
+4. compares against the previous archived snapshot, labelling absent URLs as "not observed" rather than confirming a sale or withdrawal;
+5. builds the executive email, workbook and analyst report from the same aggregate analysis; optional AI commentary is produced only when `OPENAI_API_KEY` is configured;
+6. mirrors the workbook into the existing Google Sheet and verifies its cells by readback;
+7. publishes the analyst Google Doc and archives its DOCX;
+8. creates a new client snapshot Google Doc and verifies its URL;
+9. sends one final executive email to `REPORT_CLIENT_EMAIL`, copying `REPORT_TO_EMAIL`, with report and Sheet links;
+10. verifies Mailjet's message-level acceptance receipt, archives outputs and commits the result.
 
 ## Local checks
 
@@ -147,7 +150,11 @@ Set these GitHub Actions secrets:
 - `MAILJET_API_KEY` — Mailjet API key.
 - `MAILJET_SECRET_KEY` — Mailjet secret key.
 - `MAILJET_FROM_EMAIL` — active/validated Mailjet sender address.
-- `MAILJET_FROM_NAME` — optional display name; defaults to `Master Builder`.
+- `MAILJET_FROM_NAME` — sender display name; defaults to `Master Builder Inc.`.
+- `REPORT_CLIENT_EMAIL` — client To recipient.
+- `REPORT_TO_EMAIL` — internal owner copy (Cc), not the sender.
+- `OPENAI_API_KEY` — optional; without it, reports use deterministic analysis.
+- `OPENAI_MODEL` — optional model override; the code default is `gpt-6-luna`.
 - `REPORT_CLIENT_EMAIL` — client recipient (To).
 - `REPORT_TO_EMAIL` — internal verification recipient (Cc).
 
