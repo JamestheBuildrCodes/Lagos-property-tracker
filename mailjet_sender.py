@@ -170,7 +170,7 @@ def send_message(
     sender = os.environ.get("MAILJET_FROM_EMAIL", "").strip()
     sender_name = (
         os.environ.get("MAILJET_FROM_NAME", "Master Builder Inc.").strip()
-        or "Master Builder"
+        or "Master Builder Inc."
     )
 
     if not api_key or not secret_key:
