@@ -181,6 +181,7 @@ def change_counts(changes):
         "price_reductions": sum(1 for c in changes if c.get("type")=="price_change" and fnum(c.get("pct_change")) is not None and fnum(c.get("pct_change"))<0),
         "price_increases": sum(1 for c in changes if c.get("type")=="price_change" and fnum(c.get("pct_change")) is not None and fnum(c.get("pct_change"))>0),
         "not_observed": sum(1 for c in changes if c.get("type") in {"not_observed", "delisted"}),
+        "delisted": 0,  # No property is confirmed sold/delisted from absence in a snapshot alone.
     }
 
 
