@@ -239,3 +239,28 @@ class ClientReportingTests(unittest.TestCase):
     def test_sheet_and_doc_client_viewer_hooks_exist(self):
         self.assertIn("permissions().create", Path("sheets_writer.py").read_text(encoding="utf-8"))
         self.assertIn("REPORT_CLIENT_EMAIL", Path("sheets_writer.py").read_text(encoding="utf-8"))
+
+
+class FinalPresentationRegressionTests(unittest.TestCase):
+    def test_executive_email_contains_actions_links_and_currency(self):
+        import report_builder
+        summary = {
+            "listings_tracked": 90, "areas_monitored": 9, "sources": 3,
+            "changes": {"new_listings": 5, "price_reductions": 0, "price_increases": 2, "not_observed": 14},
+            "median_apartment_sale": 550000000, "median_annual_rent": 15000000,
+            "median_land_ppsqm": 3700000, "scorecard": [{"market_node":"Wuse","listing_count":1}],
+            "signals": {"investment":None,"buyer_value":None,"land_opportunity":None},
+            "week_on_week": {"available":False,"metrics":{}},
+            "analysis_notes": ["Only a small sample was retained."],
+        }
+        rendered = report_builder.build_executive_html_from_summary(
+            summary, "5 October 2026", "https://example.com/doc", "https://example.com/sheet"
+        )
+        for term in ("Executive takeaway", "What this means for the business", "Recommended actions", "₦550.0 million", "not observed", "https://example.com/doc", "https://example.com/sheet"):
+            self.assertIn(term.lower(), rendered.lower())
+        self.assertNotIn("$550 million", rendered)
+
+    def test_missing_previous_urls_are_not_asserted_as_delisted(self):
+        text = Path("detect_changes.py").read_text(encoding="utf-8")
+        self.assertIn('"type": "not_observed"', text)
+        self.assertNotIn('"type": "delisted"', text)
