@@ -100,8 +100,8 @@ Set these GitHub Actions repository secrets:
 | `GOOGLE_SERVICE_ACCOUNT_JSON` | Google Sheets service-account credentials (Editor access to the existing Sheet required) |
 | `GOOGLE_SHEET_ID` | Existing client data Sheet ID |
 | `GOOGLE_OAUTH_TOKEN_JSON` | Required OAuth token for creating the new client-preferred Google Doc each week |
-| `OPENAI_API_KEY` | Optional key for AI interpretation of aggregate metrics only |
-| `OPENAI_MODEL` | Optional model override; defaults to `gpt-6-luna` |
+| `OPENAI_API_KEY` | Optional key for AI interpretation of aggregate metrics only; omit it to use free deterministic analysis |
+| `OPENAI_MODEL` | Explicit compatible model name required only when enabling the optional paid API |
 
 For the Google Sheet, share the existing spreadsheet with the service account's
 `client_email` as **Editor**. Do not create a replacement spreadsheet.
