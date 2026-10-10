@@ -273,3 +273,43 @@ class ReportConsistencyTests(unittest.TestCase):
         text=Path("client_doc_report.py").read_text(encoding="utf-8")
         self.assertIn("not observed in the latest scan", text)
         self.assertIn("not proof those properties sold or were delisted", text)
+
+
+class OptionalAIInterpreterTests(unittest.TestCase):
+    def test_ai_interpreter_whitelists_aggregate_data_only(self):
+        import ai_market_interpreter
+        payload = ai_market_interpreter._safe_payload({
+            "listings_tracked": 12,
+            "changes": {"new_listings": 2, "delisted": 7},
+            "scorecard": [{
+                "market_node": "Lekki Phase 1",
+                "listing_count": 4,
+                "sale_3br_median": 550000000,
+                "source_url": "https://private.example/listing",
+                "contact_email": "owner@example.com",
+            }],
+            "raw_rows": [{"source_url": "https://private.example"}],
+        })
+        rendered = json.dumps(payload)
+        self.assertIn("not_observed_in_current_scan", rendered)
+        self.assertNotIn("private.example", rendered)
+        self.assertNotIn("owner@example.com", rendered)
+
+    def test_ai_interpreter_falls_back_without_api_key(self):
+        import os
+        import ai_market_interpreter
+        old = os.environ.pop("OPENAI_API_KEY", None)
+        try:
+            self.assertIsNone(ai_market_interpreter.interpret_summary({"listings_tracked": 1}))
+        finally:
+            if old is not None:
+                os.environ["OPENAI_API_KEY"] = old
+
+class GoogleSheetReadbackRegressionTests(unittest.TestCase):
+    def test_sheet_readback_compares_scalar_values_not_cell_objects(self):
+        source = Path("sheets_writer.py").read_text(encoding="utf-8")
+        self.assertIn(
+            'expected = [[str(value if value is not None else "") for value in row] for row in values]',
+            source
+        )
+        self.assertNotIn('cell.value if cell.value is not None else "" for cell in row] for row in values', source)
