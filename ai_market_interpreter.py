@@ -13,7 +13,7 @@ from typing import Any
 import requests
 
 RESPONSES_URL = "https://api.openai.com/v1/responses"
-DEFAULT_MODEL = "gpt-6-luna"
+DEFAULT_MODEL = ""
 
 
 def _response_text(payload: dict[str, Any]) -> str:
@@ -84,6 +84,9 @@ def interpret_summary(summary: dict[str, Any]) -> dict[str, Any] | None:
         return None
 
     model = os.environ.get("OPENAI_MODEL", DEFAULT_MODEL).strip() or DEFAULT_MODEL
+    if not model:
+        print("[AI analysis disabled; set OPENAI_MODEL explicitly only if a compatible API model is configured]")
+        return None
     instructions = (
         "Act as a cautious Nigerian property-market research analyst. Interpret only "
         "the aggregate JSON provided; do not invent events, causes, prices, comps, or "
