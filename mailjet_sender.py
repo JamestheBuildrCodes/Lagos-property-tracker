@@ -169,7 +169,7 @@ def send_message(
     secret_key = os.environ.get("MAILJET_SECRET_KEY", "").strip()
     sender = os.environ.get("MAILJET_FROM_EMAIL", "").strip()
     sender_name = (
-        os.environ.get("MAILJET_FROM_NAME", "Master Builder").strip()
+        os.environ.get("MAILJET_FROM_NAME", "Master Builder Inc.").strip()
         or "Master Builder"
     )
 
