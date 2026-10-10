@@ -9,15 +9,24 @@ from mailjet_sender import recipients_from_values, send_message
 from report_builder import build_executive_html
 
 
-def send_report(client_email: str, cc_email: str, html_body: str) -> None:
+def send_report(client_email: str, cc_email: str, html_body: str, doc_url: str = "", sheet_url: str = "") -> None:
     to = recipients_from_values(client_email)
     cc = recipients_from_values(cc_email)
+
+    if doc_url or sheet_url:
+        html_body += '<div style="margin:24px 0;padding:16px;background:#f6f8fb;border-top:3px solid #0d2340"><h2>Full report and evidence</h2><p>Open the analyst report for context and the Google Sheet for property-level evidence.</p>'
+        if doc_url:
+            html_body += f'<p><a href="{doc_url}">Open the full weekly report</a></p>'
+        if sheet_url:
+            html_body += f'<p><a href="{sheet_url}">Open the property data sheet</a></p>'
+        html_body += '</div>'
 
     text_body = (
         "Lagos & Abuja Property Market — Weekly Intelligence Brief\n\n"
         "This week's property market intelligence brief is ready. "
-        "The HTML version contains the complete executive summary and "
-        "auditable source references."
+        "The HTML version contains the executive summary and recommended actions. "
+        + (f"Full report: {doc_url}. " if doc_url else "")
+        + (f"Property data sheet: {sheet_url}." if sheet_url else "")
     )
 
     send_message(
@@ -45,6 +54,8 @@ def run() -> None:
         else os.environ.get("REPORT_CLIENT_EMAIL", "")
     )
     html_path = sys.argv[4] if len(sys.argv) > 4 else ""
+    doc_url = sys.argv[5] if len(sys.argv) > 5 else ""
+    sheet_url = sys.argv[6] if len(sys.argv) > 6 else ""
 
     html = (
         Path(html_path).read_text(encoding="utf-8")
@@ -56,6 +67,8 @@ def run() -> None:
         client_email,
         os.environ.get("REPORT_TO_EMAIL", ""),
         html,
+        doc_url=doc_url,
+        sheet_url=sheet_url,
     )
 
 
