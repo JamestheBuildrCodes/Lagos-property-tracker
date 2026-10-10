@@ -264,3 +264,10 @@ class FinalPresentationRegressionTests(unittest.TestCase):
         text = Path("detect_changes.py").read_text(encoding="utf-8")
         self.assertIn('"type": "not_observed"', text)
         self.assertNotIn('"type": "delisted"', text)
+
+
+class ReportConsistencyTests(unittest.TestCase):
+    def test_doc_does_not_claim_missing_listing_was_delisted(self):
+        text=Path("client_doc_report.py").read_text(encoding="utf-8")
+        self.assertIn("not observed in the latest scan", text)
+        self.assertIn("not proof those properties sold or were delisted", text)
