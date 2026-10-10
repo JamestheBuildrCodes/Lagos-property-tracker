@@ -180,7 +180,7 @@ def change_counts(changes):
         "new_listings": sum(1 for c in changes if c.get("type")=="new_listing"),
         "price_reductions": sum(1 for c in changes if c.get("type")=="price_change" and fnum(c.get("pct_change")) is not None and fnum(c.get("pct_change"))<0),
         "price_increases": sum(1 for c in changes if c.get("type")=="price_change" and fnum(c.get("pct_change")) is not None and fnum(c.get("pct_change"))>0),
-        "delisted": sum(1 for c in changes if c.get("type")=="delisted"),
+        "not_observed": sum(1 for c in changes if c.get("type") in {"not_observed", "delisted"}),
     }
 
 
