@@ -34,43 +34,113 @@ def _wow_text(metric):
     if p<0:return f"↓ {abs(p):.1f}%"
     return "→ 0.0%"
 
-def build_executive_html_from_summary(s,date=None):
-    date=date or datetime.now(timezone.utc).strftime("%d %b %Y")
-    h=["""<!doctype html><html><body style="font-family:Arial,sans-serif;color:#172033;line-height:1.5;max-width:760px;margin:auto">"""]
-    h.append(f"<div style='padding:24px;background:#0d2340;color:white'><div style='font-size:12px;letter-spacing:1.5px'>MASTER BUILDER • MARKET INTELLIGENCE</div><h1 style='margin:8px 0'>Lagos & Abuja Property Market — Weekly Intelligence Brief</h1><div>{esc(date)}</div></div>")
-    h.append("<h2>Market snapshot</h2><table style='width:100%;border-collapse:collapse'>")
-    h.append("<tr style='background:#e8eef5'><th align='left' style='padding:9px'>Metric</th><th align='left' style='padding:9px'>Current</th><th align='left' style='padding:9px'>WoW</th></tr>")
-    wow=s.get("week_on_week",{})
-    metric_map=[("Listings tracked","listings",s["listings_tracked"]),
-                ("Areas monitored",None,s["areas_monitored"]),("Sources",None,s["sources"]),
-                ("New listings",None,s["changes"]["new_listings"]),("Price reductions",None,s["changes"]["price_reductions"]),
-                ("Price increases",None,s["changes"]["price_increases"]),
-                ("Median apartment sale", "sale",fmt_naira(s["median_apartment_sale"])),
-                ("Median annual rent","rent",fmt_naira(s["median_annual_rent"])),
-                ("Median land ₦/sqm","land_ppsqm",fmt_naira(s["median_land_ppsqm"]))]
-    for label,key,current in metric_map:
-        w=_wow_text(wow.get("metrics",{}).get(key,{})) if key and wow.get("available") else "—"
-        h.append(f"<tr><td style='padding:8px;border-bottom:1px solid #ddd'>{esc(label)}</td><td style='padding:8px;border-bottom:1px solid #ddd'><b>{esc(current)}</b></td><td style='padding:8px;border-bottom:1px solid #ddd'>{esc(w)}</td></tr>")
-    h.append("</table>")
-    h.append("<h2>What changed this week?</h2>")
-    notes=s.get("analysis_notes",[])
-    for n in notes[:5]: h.append(f"<p>{esc(n)}</p>")
-    h.append("<h2>Decision signals</h2><ul>")
-    sig=s["signals"]
-    pairs=[("Most expensive",sig.get("most_expensive")),("Rental / investment screen",sig.get("investment")),
-           ("Best buyer value screen",sig.get("buyer_value")),("Lowest observed land ₦/sqm",sig.get("land_opportunity"))]
-    for label,obj in pairs:
-        h.append(f"<li><b>{esc(label)}:</b> {esc(obj['market_node'] if obj else 'N/A')}</li>")
-    monitors=", ".join(x["market_node"] for x in sig.get("monitoring",[])) or "N/A"
-    h.append(f"<li><b>Watch closely:</b> {esc(monitors)}</li></ul>")
-    h.append("<h2>Why it matters</h2>")
-    if wow.get("available"):
-        h.append("<p>The week-on-week view shows whether the market is moving, while the area scorecard shows where the movement and relative pricing are concentrated. Use the Sheet for the underlying comparables and the analyst report for context.</p>")
+def build_executive_html_from_summary(s,date=None,doc_url="",sheet_url=""):
+    """Render an executive brief that explains implications and actions, not just metrics."""
+    date=date or datetime.now(timezone.utc).strftime("%d %B %Y")
+    wow=s.get("week_on_week",{}) or {}
+    changes=s.get("changes",{}) or {}
+    sig=s.get("signals",{}) or {}
+    def money(v, compact=True):
+        if v in (None,""): return "Not enough comparable data"
+        try:
+            n=float(str(v).replace(",",""))
+        except (TypeError,ValueError):
+            return str(v)
+        if compact and abs(n)>=1_000_000_000:
+            return f"₦{n/1_000_000_000:,.2f} billion"
+        if compact and abs(n)>=1_000_000:
+            return f"₦{n/1_000_000:,.1f} million"
+        return f"₦{n:,.0f}"
+    def pct(key):
+        if not wow.get("available"): return "Baseline unavailable"
+        metric=wow.get("metrics",{}).get(key,{})
+        value=metric.get("pct_change")
+        if value is None: return "Not comparable"
+        direction="increased" if value>0 else "decreased" if value<0 else "was unchanged"
+        return f"{direction} {abs(value):.1f}% in the tracked sample"
+    def node(obj): return esc(obj.get("market_node","Area not available")) if obj else "Not enough comparable data"
+    def link(url,label):
+        if not url: return ""
+        return f"<a href=\"{esc(url)}\" style=\"display:inline-block;padding:10px 14px;background:#0d2340;color:#ffffff;text-decoration:none;margin:4px 8px 4px 0\">{esc(label)}</a>"
+    notes=s.get("analysis_notes",[]) or []
+    valid_count=int(s.get("listings_tracked") or 0)
+    reductions=int(changes.get("price_reductions") or 0)
+    increases=int(changes.get("price_increases") or 0)
+    new_count=int(changes.get("new_listings") or 0)
+    delisted=int(changes.get("delisted") or 0)
+    populated=[x for x in s.get("scorecard",[]) if int(x.get("listing_count") or 0)>0]
+    thin=[x.get("market_node","Unknown") for x in sorted(populated,key=lambda x:int(x.get("listing_count") or 0))[:3]]
+    # Build cautious statements from the actual data, never a generic claim about all of Lagos.
+    takeaway=[]
+    if valid_count==0:
+        takeaway.append("No validated comparable listings passed the current quality gate. This run must not be used to draw market conclusions.")
     else:
-        h.append("<p>This is the first comparable snapshot available to the reporting layer. Future weekly runs will establish the week-on-week baseline.</p>")
-    h.append("<p style='font-size:12px;color:#667085;border-top:1px solid #ddd;padding-top:12px'>Data is based on current asking prices from Nigeria Property Centre and PropertyPro Nigeria. Asking prices are not confirmed closed transactions. Estate Intel is public research only; premium/login-gated data is never collected or bypassed.</p></body></html>")
-    return "".join(h)
-
+        takeaway.append(f"This scan retained {valid_count:,} listings that passed the current source and location checks across {s.get('areas_monitored',0)} monitored locations.")
+    if wow.get("available"):
+        takeaway.append(f"The tracked sample shows apartment sale asking prices {pct('sale')}; annual rent asking prices {pct('rent')}; land asking price per square metre {pct('land_ppsqm')}. These movements are sample-level signals, not market-wide changes.")
+    if reductions:
+        takeaway.append(f"{reductions:,} listings have a recorded asking-price reduction and should be reviewed as potential negotiation leads.")
+    else:
+        takeaway.append("No price reductions were verified in the comparison file. Do not infer that sellers are not negotiating; the scan may not have captured a price change.")
+    if increases:
+        takeaway.append(f"{increases:,} listings have a recorded asking-price increase in the available comparison.")
+    if delisted:
+        takeaway.append(f"{delisted:,} previous URLs were not observed in this scan. This does not prove that the properties sold or were delisted; it may also reflect coverage or extraction differences.")
+    if thin:
+        takeaway.append("Sample caution: the thinnest covered locations are "+", ".join(thin)+". Treat these as watchlist observations, not reliable area-wide benchmarks.")
+    investment=sig.get("investment")
+    buyer=sig.get("buyer_value")
+    land=sig.get("land_opportunity")
+    html_parts=[
+      "<!doctype html><html><body style=\"font-family:Arial,sans-serif;color:#172033;line-height:1.55;max-width:760px;margin:0 auto\">",
+      f"<header style=\"padding:24px;background:#0d2340;color:#fff\"><div style=\"font-size:11px;letter-spacing:1.5px\">MASTER BUILDER INC. | MARKET INTELLIGENCE</div><h1 style=\"font-size:26px;line-height:1.2;margin:10px 0 4px\">Lagos &amp; Abuja Property Market</h1><div style=\"font-size:17px\">Weekly Intelligence Brief</div><div style=\"margin-top:8px\">{esc(date)}</div></header>",
+      "<main style=\"padding:18px 4px\">",
+      "<h2 style=\"font-size:19px\">Executive takeaway</h2>",
+      "<p>This brief separates verified observations from tentative market signals. Use it to decide which listings and locations deserve follow-up, then use the linked property records to verify any material figure before committing funds.</p>",
+      "<h2 style=\"font-size:19px\">Market snapshot</h2>",
+      "<table role=\"presentation\" style=\"width:100%;border-collapse:collapse\"><tr style=\"background:#e8eef5\"><th align=\"left\" style=\"padding:9px\">Indicator</th><th align=\"left\" style=\"padding:9px\">This week</th><th align=\"left\" style=\"padding:9px\">Change vs previous scan</th></tr>"
+    ]
+    metrics=[
+      ("Validated comparable listings",f"{valid_count:,}",pct("listings")),
+      ("Locations monitored",f"{int(s.get('areas_monitored') or 0):,}","Coverage scope"),
+      ("Sources represented",f"{int(s.get('sources') or 0):,}","See methodology"),
+      ("Newly observed listings",f"{new_count:,}","Newly observed, not necessarily newly posted"),
+      ("Price reductions recorded",f"{reductions:,}","Potential negotiation leads"),
+      ("Price increases recorded",f"{increases:,}","Check source history"),
+      ("Median apartment asking sale price",money(s.get("median_apartment_sale")),"Asking prices, not transaction prices"),
+      ("Median annual apartment asking rent",money(s.get("median_annual_rent")),"Per year, where source states annual rent"),
+      ("Median land asking price / sqm",money(s.get("median_land_ppsqm")),"Only valid when price-per-sqm and land area are parsed consistently"),
+    ]
+    for label,value,context in metrics:
+        html_parts.append(f"<tr><td style=\"padding:9px;border-bottom:1px solid #d9e1ea\">{esc(label)}</td><td style=\"padding:9px;border-bottom:1px solid #d9e1ea\"><b>{esc(value)}</b></td><td style=\"padding:9px;border-bottom:1px solid #d9e1ea\">{esc(context)}</td></tr>")
+    html_parts.append("</table><h2 style=\"font-size:19px\">What changed this week?</h2>")
+    html_parts.append("<ul>"+ "".join(f"<li style=\"margin:6px 0\">{esc(n)}</li>" for n in notes[:5]) +"</ul>" if notes else "<p>No market narrative was produced because the available evidence is insufficient.</p>")
+    html_parts.append("<h2 style=\"font-size:19px\">What this means for the business</h2><ul>")
+    html_parts.extend(f"<li style=\"margin:7px 0\">{esc(x)}</li>" for x in takeaway)
+    if investment:
+        y=investment.get("gross_rent_yield_proxy_pct")
+        if y is not None:
+            html_parts.append(f"<li><b>Rental screening:</b> {node(investment)} has an indicative gross asking-rent yield proxy of {float(y):.2f}%. It is a screening ratio, not net return, and should be relied on only with a sufficiently large and comparable sample.</li>")
+    if buyer:
+        sample=int(buyer.get("sale_count") or 0)
+        html_parts.append(f"<li><b>Buyer screening:</b> {node(buyer)} is the current lowest observed sale-price-per-square-metre screen among qualifying locations (sale sample: {sample}). Check that property type, condition, size and tenure are comparable before interpreting this as value.</li>")
+    if land:
+        html_parts.append(f"<li><b>Land screening:</b> {node(land)} has the lowest observed land asking price per sqm in the current sample. This is a lead for due diligence, not a recommendation to buy.</li>")
+    html_parts.append("</ul><h2 style=\"font-size:19px\">Recommended actions</h2><ol>")
+    actions=[]
+    if reductions: actions.append(f"Review the {reductions:,} recorded price reductions first and confirm the seller's current price directly.")
+    if delisted: actions.append("Treat previously observed URLs missing this week as 'not observed'; verify status directly before calling any property sold or delisted.")
+    actions.append("Compare like-for-like listings by location, transaction type, bedroom count, size and source update date.")
+    actions.append("Click the original listing for every high-value or unusual figure. Confirm the price, status, fees, title and exact location with the advertiser.")
+    actions.append("Use the Area Scorecard only where sample counts are adequate; commission additional checks where the sample is thin.")
+    html_parts.extend(f"<li style=\"margin:7px 0\">{esc(x)}</li>" for x in actions[:5])
+    html_parts.append("</ol>")
+    if doc_url or sheet_url:
+        html_parts.append("<h2 style=\"font-size:19px\">Full report and evidence</h2><p>The email is the executive briefing; use these links for the analyst report and property-level source trail.</p>")
+        html_parts.append(link(doc_url,"Open full weekly report"))
+        html_parts.append(link(sheet_url,"Open property data sheet"))
+    html_parts.append("<p style=\"font-size:12px;color:#667085;border-top:1px solid #d9e1ea;padding-top:12px\">All figures are in Nigerian naira (₦). Amounts such as ₦450 million are rounded for readability; detailed sheets retain numeric values with comma separators. Prices are online asking prices, not confirmed transaction prices. Week-on-week percentages describe this tracked sample only. Missing URLs in the next scan do not, by themselves, prove a property has sold or been removed. Indicative gross yield excludes vacancy, service charges, repairs, taxes, financing and other costs.</p></main></body></html>")
+    return "".join(html_parts)
 def build_executive_html(listings_path,changes_path="none"):
     return build_executive_html_from_summary(_load_inputs(listings_path,changes_path)[-1])
 
