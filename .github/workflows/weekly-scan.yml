@@ -126,25 +126,6 @@ jobs:
           test -s Lagos_Abuja_Property_Market_Intelligence_*.docx
           test -s market_intelligence.json
 
-      - name: Send Layer 1 executive email
-        env:
-          MAILJET_API_KEY: ${{ secrets.MAILJET_API_KEY }}
-          MAILJET_SECRET_KEY: ${{ secrets.MAILJET_SECRET_KEY }}
-          MAILJET_FROM_EMAIL: ${{ secrets.MAILJET_FROM_EMAIL }}
-          MAILJET_FROM_NAME: ${{ secrets.MAILJET_FROM_NAME }}
-          REPORT_TO_EMAIL: ${{ secrets.REPORT_TO_EMAIL }}
-          REPORT_CLIENT_EMAIL: ${{ secrets.REPORT_CLIENT_EMAIL }}
-        run: |
-          if [ -n "$MAILJET_API_KEY" ] && [ -n "$MAILJET_SECRET_KEY" ] && [ -n "$REPORT_CLIENT_EMAIL" ]; then
-            test -n "$MAILJET_FROM_EMAIL" || { echo "MAILJET_FROM_EMAIL is not configured; use an active Mailjet sender address."; exit 1; }
-            CURR=$(ls -t property_listings_*.csv | head -n 1)
-            CHANGES=$(ls -t changes_*.csv 2>/dev/null | head -n 1)
-            HTML=$(ls -t executive_brief_*.html | head -n 1)
-            python email_report.py "$CURR" "${CHANGES:-none}" "$REPORT_CLIENT_EMAIL" "$HTML"
-          else
-            echo "Mailjet secrets not configured; Layer 1 email skipped."
-          fi
-
       - name: Write Layer 2 to existing Google Sheet
         env:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
@@ -175,16 +156,11 @@ jobs:
             echo "Google service account secret not configured; Google Doc publication skipped."
           fi
 
-      - name: Create and email a new client-preferred weekly document
+      - name: Publish client-preferred weekly document
         env:
           GOOGLE_OAUTH_TOKEN_JSON: ${{ secrets.GOOGLE_OAUTH_TOKEN_JSON }}
           GOOGLE_WEEKLY_REPORT_FOLDER_ID: "1pwAwektfnA52XkHzTIDkLGLHG0q_R1t3"
-          MAILJET_API_KEY: ${{ secrets.MAILJET_API_KEY }}
-          MAILJET_SECRET_KEY: ${{ secrets.MAILJET_SECRET_KEY }}
-          MAILJET_FROM_EMAIL: ${{ secrets.MAILJET_FROM_EMAIL }}
-          MAILJET_FROM_NAME: ${{ secrets.MAILJET_FROM_NAME }}
-          REPORT_CLIENT_EMAIL: ${{ secrets.REPORT_CLIENT_EMAIL }}
-          REPORT_TO_EMAIL: ${{ secrets.REPORT_TO_EMAIL }}
+          SUPPRESS_REPORT_NOTIFICATION_EMAIL: "1"
         run: |
           CURR=$(ls -t property_listings_*.csv | head -n 1)
           RESEARCH=$(ls -t estateintel_public_research_*.csv 2>/dev/null | head -n 1)
@@ -197,14 +173,35 @@ jobs:
           test -s client_doc_url.txt
           test -s google_doc_verification.json
 
+      - name: Send final executive email with report links
+        env:
+          MAILJET_API_KEY: ${{ secrets.MAILJET_API_KEY }}
+          MAILJET_SECRET_KEY: ${{ secrets.MAILJET_SECRET_KEY }}
+          MAILJET_FROM_EMAIL: ${{ secrets.MAILJET_FROM_EMAIL }}
+          MAILJET_FROM_NAME: ${{ secrets.MAILJET_FROM_NAME }}
+          REPORT_TO_EMAIL: ${{ secrets.REPORT_TO_EMAIL }}
+          REPORT_CLIENT_EMAIL: ${{ secrets.REPORT_CLIENT_EMAIL }}
+          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+        run: |
+          test -n "$MAILJET_API_KEY" || { echo "MAILJET_API_KEY is required."; exit 1; }
+          test -n "$MAILJET_SECRET_KEY" || { echo "MAILJET_SECRET_KEY is required."; exit 1; }
+          test -n "$MAILJET_FROM_EMAIL" || { echo "MAILJET_FROM_EMAIL is required and must be approved in Mailjet."; exit 1; }
+          test -n "$REPORT_CLIENT_EMAIL" || { echo "REPORT_CLIENT_EMAIL must be the client recipient."; exit 1; }
+          test -n "$REPORT_TO_EMAIL" || { echo "REPORT_TO_EMAIL must contain the internal report recipient."; exit 1; }
+          CURR=$(ls -t property_listings_*.csv | head -n 1)
+          CHANGES=$(ls -t changes_*.csv 2>/dev/null | head -n 1)
+          HTML=$(ls -t executive_brief_*.html | head -n 1)
+          DOC_URL=$(cat client_doc_url.txt)
+          SHEET_URL="https://docs.google.com/spreadsheets/d/$GOOGLE_SHEET_ID/edit"
+          python email_report.py "$CURR" "${CHANGES:-none}" "$REPORT_CLIENT_EMAIL" "$HTML" "$DOC_URL" "$SHEET_URL"
+
       - name: Verify Mailjet send receipts
         shell: bash
         run: |
           test -s mailjet_layer1_receipt.json
-          test -s mailjet_client-doc_receipt.json
           python - <<'PY'
           import json
-          for path in ("mailjet_layer1_receipt.json", "mailjet_client-doc_receipt.json"):
+          for path in ("mailjet_layer1_receipt.json",)
               data = json.load(open(path, encoding="utf-8"))
               statuses = [
                   result.get("status")
