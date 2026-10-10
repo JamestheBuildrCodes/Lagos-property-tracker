@@ -852,6 +852,26 @@ def _narrative_lines(listings, summary, research=None):
         )
     )
 
+    ai_commentary = summary.get("ai_commentary") or {}
+    if ai_commentary:
+        lines.append(("h1", "Executive Interpretation"))
+        if ai_commentary.get("executive_takeaway"):
+            lines.append(("body", ai_commentary["executive_takeaway"]))
+        for item in ai_commentary.get("key_findings", []):
+            lines.append(("bullet", item))
+        if ai_commentary.get("business_implications"):
+            lines.append(("h2", "Business Implications"))
+            for item in ai_commentary["business_implications"]:
+                lines.append(("bullet", item))
+        if ai_commentary.get("recommended_actions"):
+            lines.append(("h2", "AI-Supported Recommended Actions"))
+            for item in ai_commentary["recommended_actions"]:
+                lines.append(("bullet", item))
+        if ai_commentary.get("limitations"):
+            lines.append(("h2", "AI Interpretation Limitations"))
+            for item in ai_commentary["limitations"]:
+                lines.append(("bullet", item))
+
     lines.append(
         ("h1", "7. What Happens Next")
     )
@@ -2474,6 +2494,17 @@ def main():
         changes,
         sys.argv[1],
     )
+    # Reuse the model interpretation from the bundle to avoid a second paid API call.
+    try:
+        saved_analysis_path = Path("market_intelligence.json")
+        if saved_analysis_path.exists():
+            saved_analysis = json.loads(saved_analysis_path.read_text(encoding="utf-8"))
+            summary["ai_commentary"] = (saved_analysis.get("summary") or {}).get("ai_commentary")
+        else:
+            from ai_market_interpreter import interpret_summary
+            summary["ai_commentary"] = interpret_summary(summary)
+    except Exception as exc:
+        print(f"[AI analysis unavailable; using deterministic narrative] {type(exc).__name__}: {exc}")
 
     if research:
         summary["source_names"] = sorted(
