@@ -25,6 +25,13 @@ def _load_inputs(listings_path,changes_path="none",research_path=None):
     if research_sources:
         summary["sources"]=len(set(summary.get("source_names",[])) | research_sources)
         summary["source_names"]=sorted(set(summary.get("source_names",[])) | research_sources)
+    try:
+        from ai_market_interpreter import interpret_summary
+        ai_commentary=interpret_summary(summary)
+        if ai_commentary:
+            summary["ai_commentary"]=ai_commentary
+    except Exception as exc:
+        print(f"[AI analysis unavailable; using deterministic narrative] {type(exc).__name__}: {exc}")
     return listings,changes,research,summary
 
 def _wow_text(metric):
@@ -63,6 +70,7 @@ def build_executive_html_from_summary(s,date=None,doc_url="",sheet_url=""):
         if not url: return ""
         return f"<a href=\"{esc(url)}\" style=\"display:inline-block;padding:10px 14px;background:#0d2340;color:#ffffff;text-decoration:none;margin:4px 8px 4px 0\">{esc(label)}</a>"
     notes=s.get("analysis_notes",[]) or []
+    ai_commentary=s.get("ai_commentary") or {}
     valid_count=int(s.get("listings_tracked") or 0)
     reductions=int(changes.get("price_reductions") or 0)
     increases=int(changes.get("price_increases") or 0)
@@ -96,7 +104,7 @@ def build_executive_html_from_summary(s,date=None,doc_url="",sheet_url=""):
       f"<header style=\"padding:24px;background:#0d2340;color:#fff\"><div style=\"font-size:11px;letter-spacing:1.5px\">MASTER BUILDER INC. | MARKET INTELLIGENCE</div><h1 style=\"font-size:26px;line-height:1.2;margin:10px 0 4px\">Lagos &amp; Abuja Property Market</h1><div style=\"font-size:17px\">Weekly Intelligence Brief</div><div style=\"margin-top:8px\">{esc(date)}</div></header>",
       "<main style=\"padding:18px 4px\">",
       "<h2 style=\"font-size:19px\">Executive takeaway</h2>",
-      "<p>This brief separates verified observations from tentative market signals. Use it to decide which listings and locations deserve follow-up, then use the linked property records to verify any material figure before committing funds.</p>",
+      f"<p>{esc(ai_commentary.get('executive_takeaway') or 'This brief separates verified observations from tentative market signals. Use it to decide which listings and locations deserve follow-up, then use the linked property records to verify any material figure before committing funds.')}</p>",
       "<h2 style=\"font-size:19px\">Market snapshot</h2>",
       "<table role=\"presentation\" style=\"width:100%;border-collapse:collapse\"><tr style=\"background:#e8eef5\"><th align=\"left\" style=\"padding:9px\">Indicator</th><th align=\"left\" style=\"padding:9px\">This week</th><th align=\"left\" style=\"padding:9px\">Change vs previous scan</th></tr>"
     ]
@@ -114,7 +122,12 @@ def build_executive_html_from_summary(s,date=None,doc_url="",sheet_url=""):
     for label,value,context in metrics:
         html_parts.append(f"<tr><td style=\"padding:9px;border-bottom:1px solid #d9e1ea\">{esc(label)}</td><td style=\"padding:9px;border-bottom:1px solid #d9e1ea\"><b>{esc(value)}</b></td><td style=\"padding:9px;border-bottom:1px solid #d9e1ea\">{esc(context)}</td></tr>")
     html_parts.append("</table><h2 style=\"font-size:19px\">What changed this week?</h2>")
-    html_parts.append("<ul>"+ "".join(f"<li style=\"margin:6px 0\">{esc(n)}</li>" for n in notes[:5]) +"</ul>" if notes else "<p>No market narrative was produced because the available evidence is insufficient.</p>")
+    if ai_commentary.get("key_findings"):
+        html_parts.append("<ul>")
+        html_parts.extend(f"<li style=\"margin:6px 0\">{esc(x)}</li>" for x in ai_commentary["key_findings"])
+        html_parts.append("</ul>")
+    else:
+        html_parts.append("<ul>"+ "".join(f"<li style=\"margin:6px 0\">{esc(n)}</li>" for n in notes[:5]) +"</ul>" if notes else "<p>No market narrative was produced because the available evidence is insufficient.</p>")
     html_parts.append("<h2 style=\"font-size:19px\">What this means for the business</h2><ul>")
     html_parts.extend(f"<li style=\"margin:7px 0\">{esc(x)}</li>" for x in takeaway)
     if investment:
@@ -126,6 +139,10 @@ def build_executive_html_from_summary(s,date=None,doc_url="",sheet_url=""):
         html_parts.append(f"<li><b>Buyer screening:</b> {node(buyer)} is the current lowest observed sale-price-per-square-metre screen among qualifying locations (sale sample: {sample}). Check that property type, condition, size and tenure are comparable before interpreting this as value.</li>")
     if land:
         html_parts.append(f"<li><b>Land screening:</b> {node(land)} has the lowest observed land asking price per sqm in the current sample. This is a lead for due diligence, not a recommendation to buy.</li>")
+    if ai_commentary.get("business_implications"):
+        html_parts.append("<h2 style=\"font-size:19px\">Business implications</h2><ul>")
+        html_parts.extend(f"<li style=\"margin:7px 0\">{esc(x)}</li>" for x in ai_commentary["business_implications"])
+        html_parts.append("</ul>")
     html_parts.append("</ul><h2 style=\"font-size:19px\">Recommended actions</h2><ol>")
     actions=[]
     if reductions: actions.append(f"Review the {reductions:,} recorded price reductions first and confirm the seller's current price directly.")
@@ -133,7 +150,8 @@ def build_executive_html_from_summary(s,date=None,doc_url="",sheet_url=""):
     actions.append("Compare like-for-like listings by location, transaction type, bedroom count, size and source update date.")
     actions.append("Click the original listing for every high-value or unusual figure. Confirm the price, status, fees, title and exact location with the advertiser.")
     actions.append("Use the Area Scorecard only where sample counts are adequate; commission additional checks where the sample is thin.")
-    html_parts.extend(f"<li style=\"margin:7px 0\">{esc(x)}</li>" for x in actions[:5])
+    ai_actions=ai_commentary.get("recommended_actions") or []
+    html_parts.extend(f"<li style=\"margin:7px 0\">{esc(x)}</li>" for x in (ai_actions[:5] or actions[:5]))
     html_parts.append("</ol>")
     if doc_url or sheet_url:
         html_parts.append("<h2 style=\"font-size:19px\">Full report and evidence</h2><p>The email is the executive briefing; use these links for the analyst report and property-level source trail.</p>")
