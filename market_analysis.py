@@ -162,15 +162,14 @@ def area_scorecard(rows):
         sale_ppsqm = median([r.get("price_per_sqm_ngn") for r in sales])
         rent_ppsqm = median([r.get("price_per_sqm_ngn") for r in rents])
         land_ppsqm = median([r.get("price_per_sqm_ngn") for r in land])
-        sale_med = median([r.get("asking_price_ngn") for r in sales3]) or median([r.get("asking_price_ngn") for r in sales])
-        rent_med = median([r.get("asking_price_ngn") for r in rents3]) or median([r.get("asking_price_ngn") for r in rents])
+        # The fields are explicitly 3-bedroom benchmarks. Never silently fall back\n        # to a different bedroom mix when the 3BR sample is missing.\n        sale_med = median([r.get("asking_price_ngn") for r in sales3])\n        rent_med = median([r.get("asking_price_ngn") for r in rents3])
         yield_proxy = (rent_med/sale_med*100) if rent_med and sale_med else None
         result.append({
             "market_node": node, "listing_count": len(rs), "sale_3br_median": sale_med,
             "rent_3br_median": rent_med, "sale_ppsqm_median": sale_ppsqm,
             "rent_ppsqm_median": rent_ppsqm, "land_ppsqm_median": land_ppsqm,
             "gross_rent_yield_proxy_pct": round(yield_proxy,2) if yield_proxy is not None else None,
-            "sale_count": len(sales), "rent_count": len(rents), "land_count": len(land),
+            "sale_count": len(sales), "rent_count": len(rents), "land_count": len(land),\n            "sale_3br_count": sum(1 for r in sales3 if (fnum(r.get("asking_price_ngn")) or 0) > 0),\n            "rent_3br_count": sum(1 for r in rents3 if (fnum(r.get("asking_price_ngn")) or 0) > 0),
         })
     return result
 
