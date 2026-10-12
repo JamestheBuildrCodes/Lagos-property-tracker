@@ -23,11 +23,11 @@ SUPPLEMENTAL_SOURCE_ASSESSMENTS = [
     },
     {
         "Source": "Cushman & Wakefield (C&W)",
-        "Official page": "https://www.cushmanwakefield.com/en/insights",
-        "Source type": "Commercial real estate research / global insights",
-        "Assessment": "Official global insights hub identified; a current Nigeria/Lagos-specific public report or comparable listing feed was not verified in this review.",
-        "Use in report": "Potential future commercial-market context after local coverage is confirmed; not a current comparable listing source.",
-        "Next step / limitation": "Confirm local/regional Nigeria coverage, data definitions and reuse/access permissions before adding any figures to market analysis.",
+        "Official page": "https://www.cushmanwakefield.com/en/insights/global-data-center-market-comparison",
+        "Source type": "Commercial real estate research / data centres",
+        "Assessment": "Current official public research references Lagos in a global data-centre comparison; this is a commercial infrastructure segment, not a residential listing feed.",
+        "Use in report": "Context only for future commercial-property research; do not blend data-centre indicators with residential sale/rental medians.",
+        "Next step / limitation": "Confirm local/regional Nigeria research coverage and reuse/access permissions before including comparable commercial property figures.",
     },
     {
         "Source": "Estate Intel commercial arrangement status",
