@@ -52,7 +52,7 @@ FIELDNAMES = [
     "property_type", "bedrooms", "title", "asking_price_ngn", "size_sqm",
     "price_per_sqm_ngn", "location", "listing_date", "listing_age_days",
     "listing_date_type", "freshness_band", "is_within_max_age",
-    "source", "source_url",
+    "source", "source_url", "source_excerpt",
 ]
 RESEARCH_FIELDS = [
     "date_scraped", "market", "market_node", "title", "url", "date_added",
@@ -556,6 +556,7 @@ def parse_card(card_text: str, listing_url: str, target: dict) -> Optional[dict]
         "is_within_max_age": recent,
         "source": target["source"],
         "source_url": listing_url,
+        "source_excerpt": text[:1200],
     }
 
 
