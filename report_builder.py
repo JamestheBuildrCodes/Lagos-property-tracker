@@ -175,6 +175,7 @@ def _xlsx_lib():
 
 def build_xlsx_from_data(listings,changes,research,s,output=None):
     Workbook,Font,PatternFill,Alignment,Border,Side,get_column_letter,CellIsRule=_xlsx_lib()
+    from openpyxl.chart import BarChart, Reference
     output=output or f"market_intelligence_{TODAY}.xlsx"
     wb=Workbook()
     navy="0D2340"; light="E8EEF5"; pale="F6F8FB"; green="E7F6EC"; red="FDECEC"; grey="667085"
@@ -226,6 +227,31 @@ def build_xlsx_from_data(listings,changes,research,s,output=None):
         tr=s.get("trends",{}).get(x["market_node"],{})
         ws.append([x["market_node"],x["listing_count"],x["sale_3br_median"],x["rent_3br_median"],x["gross_rent_yield_proxy_pct"],x["sale_ppsqm_median"],x["rent_ppsqm_median"],x["land_ppsqm_median"],tr.get("sale_pct"),tr.get("rent_pct"),tr.get("land_ppsqm_pct"),x["sale_count"],x["rent_count"],x["land_count"]])
     headers(ws,1); polish(ws)
+
+    # Visual trend chart: only chart observed historical percentages; never
+    # synthesize missing periods or fill absent values with zero.
+    trend_columns = (9, 10, 11)
+    has_numeric_trend = any(
+        isinstance(ws.cell(row=r, column=col).value, (int, float))
+        for r in range(2, ws.max_row + 1)
+        for col in trend_columns
+    )
+    if has_numeric_trend and ws.max_row > 1:
+        chart = BarChart()
+        chart.type = "bar"
+        chart.style = 10
+        chart.title = "Observed Asking-Price Change by Area (%)"
+        chart.y_axis.title = "Area"
+        chart.x_axis.title = "Change (%)"
+        chart.height = 8
+        chart.width = 17
+        data = Reference(ws, min_col=9, max_col=11, min_row=1, max_row=ws.max_row)
+        categories = Reference(ws, min_col=1, min_row=2, max_row=ws.max_row)
+        chart.add_data(data, titles_from_data=True)
+        chart.set_categories(categories)
+        chart.legend.position = "b"
+        ws.add_chart(chart, "A12")
+
     # Data tabs
     def add_data(name,data):
         sh=wb.create_sheet(name)
