@@ -2,3 +2,4 @@ live scan trigger refreshed for reporting cadence and Estate Intel commercial-st
 manual verification run after JSON-mode and comparable-data fixes — 2026-10-12
 rerun after free deterministic verification and optional Groq fallback — 2026-10-12
 live scan after Google Sheets merged-cell readback fix — 2026-10-12
+re-run after Google Sheets quota-aware retry fix — 2026-10-12
