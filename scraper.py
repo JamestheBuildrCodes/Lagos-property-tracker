@@ -485,9 +485,56 @@ def candidate_cards(html: str, source: str, base_url: str) -> list[tuple[str, st
         cards.append((href, best))
     return cards
 
+
+def transaction_consistent_with_evidence(transaction: str, listing_url: str, card_text: str = "") -> tuple[bool, str]:
+    """Reject a listing whose detail URL/card identifies the opposite transaction.
+
+    Search-category membership alone is not evidence that an individual result is
+    for rent or for sale. This guard prevents sale asking prices leaking into
+    rental medians (and vice versa) before normalization and reporting.
+    """
+    transaction = str(transaction or "").strip().lower()
+    expected = "rent" if "rent" in transaction or "let" in transaction else "sale" if "sale" in transaction else None
+    if expected is None:
+        return True, ""
+
+    path = urlparse(str(listing_url or "")).path.lower()
+    sale_url = bool(re.search(r"(?:^|[/_-])for[-_]?sale(?:$|[/_-])", path))
+    rent_url = bool(re.search(r"(?:^|[/_-])(?:for[-_]?rent|to[-_]?rent|for[-_]?let|to[-_]?let)(?:$|[/_-])", path))
+
+    if sale_url and rent_url:
+        return False, "detail URL contains conflicting sale and rental markers"
+    if expected == "rent" and sale_url:
+        return False, "rental category contains a sale listing detail URL"
+    if expected == "sale" and rent_url:
+        return False, "sale category contains a rental listing detail URL"
+    if sale_url or rent_url:
+        return True, ""
+
+    text = str(card_text or "").lower()
+    sale_text = bool(re.search(r"\\bfor[\\s_-]+sale\\b", text))
+    rent_text = bool(re.search(
+        r"\\b(?:for[\\s_-]+rent|to[\\s_-]+rent|for[\\s_-]+let|to[\\s_-]+let|"
+        r"annual\\s+rent|rent(?:al)?\\s+per\\s+(?:annum|year)|per\\s+annum)\\b",
+        text,
+    ))
+    if sale_text and rent_text:
+        return False, "card text contains conflicting sale and rental markers"
+    if expected == "rent" and sale_text:
+        return False, "rental category card text identifies a sale listing"
+    if expected == "sale" and rent_text:
+        return False, "sale category card text identifies a rental listing"
+    return True, ""
+
+
 def parse_card(card_text: str, listing_url: str, target: dict) -> Optional[dict]:
     text = clean_text(card_text)
     if len(text) < 20:
+        return None
+    transaction_ok, _transaction_reason = transaction_consistent_with_evidence(
+        target.get("transaction", ""), listing_url, text
+    )
+    if not transaction_ok:
         return None
     consistent, _reason = node_consistent_with_evidence(target["node"], listing_url, text)
     if not consistent:
