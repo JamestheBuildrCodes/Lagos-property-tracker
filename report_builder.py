@@ -268,10 +268,10 @@ def build_xlsx_from_data(listings,changes,research,s,output=None):
     ws=wb.create_sheet("Area Scorecard")
     has_full_six_month=any(t.get("full_six_month") for t in s.get("trends",{}).values())
     trend_prefix="6-mo" if has_full_six_month else "Historical"
-    ws.append(["Area","Listings","3BR Sale","3BR Rent","Yield Proxy","Sale ₦/sqm","Rent ₦/sqm","Land ₦/sqm",f"{trend_prefix} Sale",f"{trend_prefix} Rent",f"{trend_prefix} Land ₦/sqm","Sale Data","Rent Data","Land Data"])
+    ws.append(["Area","Listings","3BR Sale","3BR Rent","Yield Proxy","Sale ₦/sqm","Rent ₦/sqm","Land ₦/sqm",f"{trend_prefix} Sale",f"{trend_prefix} Rent",f"{trend_prefix} Land ₦/sqm","Sale Data","Rent Data","Land Data","3BR Sale n","3BR Rent n"])
     for x in s["scorecard"]:
         tr=s.get("trends",{}).get(x["market_node"],{})
-        ws.append([x["market_node"],x["listing_count"],x["sale_3br_median"],x["rent_3br_median"],x["gross_rent_yield_proxy_pct"],x["sale_ppsqm_median"],x["rent_ppsqm_median"],x["land_ppsqm_median"],tr.get("sale_pct"),tr.get("rent_pct"),tr.get("land_ppsqm_pct"),x["sale_count"],x["rent_count"],x["land_count"]])
+        ws.append([x["market_node"],x["listing_count"],x["sale_3br_median"],x["rent_3br_median"],x["gross_rent_yield_proxy_pct"],x["sale_ppsqm_median"],x["rent_ppsqm_median"],x["land_ppsqm_median"],tr.get("sale_pct"),tr.get("rent_pct"),tr.get("land_ppsqm_pct"),x["sale_count"],x["rent_count"],x["land_count"],x.get("sale_3br_count",0),x.get("rent_3br_count",0)])
     headers(ws,1); polish(ws)
 
     # Visual trend chart: only chart observed historical percentages; never
