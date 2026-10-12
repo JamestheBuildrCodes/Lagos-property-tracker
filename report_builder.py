@@ -252,6 +252,36 @@ def build_xlsx_from_data(listings,changes,research,s,output=None):
         chart.legend.position = "b"
         ws.add_chart(chart, "A12")
 
+    # Current market snapshots are charted separately because sale prices,
+    # annual rents, and land unit prices have very different scales.
+    def add_area_chart(column, title_text, anchor):
+        if not any(
+            isinstance(ws.cell(row=r, column=column).value, (int, float))
+            and ws.cell(row=r, column=column).value > 0
+            for r in range(2, ws.max_row + 1)
+        ):
+            return
+        current_chart = BarChart()
+        current_chart.type = "bar"
+        current_chart.style = 10
+        current_chart.title = title_text
+        current_chart.y_axis.title = "Area"
+        current_chart.x_axis.title = "Naira (NGN)"
+        current_chart.height = 7
+        current_chart.width = 15
+        current_data = Reference(
+            ws, min_col=column, max_col=column, min_row=1, max_row=ws.max_row
+        )
+        current_categories = Reference(ws, min_col=1, min_row=2, max_row=ws.max_row)
+        current_chart.add_data(current_data, titles_from_data=True)
+        current_chart.set_categories(current_categories)
+        current_chart.legend = None
+        ws.add_chart(current_chart, anchor)
+
+    add_area_chart(3, "Three-Bedroom Apartment Sale Asking Price by Area", "I12")
+    add_area_chart(4, "Three-Bedroom Annual Rental Asking Price by Area", "A28")
+    add_area_chart(8, "Land Asking Price per Square Metre by Area", "I28")
+
     # Data tabs
     def add_data(name,data):
         sh=wb.create_sheet(name)
