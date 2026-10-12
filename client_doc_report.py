@@ -1058,6 +1058,31 @@ def _narrative_lines(listings, summary, research=None):
         )
     )
 
+    lines.append(("h2", "Supplementary Sources & Commercial Status"))
+    lines.append((
+        "bullet",
+        "Knight Frank Nigeria: the official Lagos Market Update H1 2026 page was identified "
+        "(https://www.knightfrank.com.ng/research/lagos-market-update-13035.aspx). "
+        "The full report download requests contact details, so its published figures are not "
+        "yet mixed into current listing-level medians. Any future comparison must align dates, "
+        "asset class, geography, and methodology.",
+    ))
+    lines.append((
+        "bullet",
+        "Cushman & Wakefield: official public research references Lagos in a global data-centre "
+        "comparison (https://www.cushmanwakefield.com/en/insights/global-data-center-market-comparison), "
+        "but this is not a comparable residential apartment/land listing feed. No like-for-like "
+        "Lagos residential source was verified for the current snapshot; C&W figures are therefore "
+        "not included in residential medians.",
+    ))
+    lines.append((
+        "bullet",
+        "Estate Intel commercial arrangement: subscription, contract, or negotiation status cannot "
+        "be verified from this repository. The tracker uses public pages only and excludes "
+        "premium/login-gated values. The account owner must confirm any outstanding commercial "
+        "arrangement directly with Estate Intel.",
+    ))
+
     if research:
         lines.append(
             (
