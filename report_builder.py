@@ -21,6 +21,16 @@ def _load_inputs(listings_path,changes_path="none",research_path=None):
     changes=load_csv(changes_path) if changes_path and changes_path.lower()!="none" and os.path.exists(changes_path) else []
     research=load_csv(research_path) if research_path and research_path.lower()!="none" and os.path.exists(research_path) else []
     summary=build_summary(listings,changes,listings_path)
+    try:
+        quality = json.loads(Path("market_output_quality.json").read_text(encoding="utf-8"))
+        summary["data_quality"] = {
+            "input_rows": quality.get("input_rows"),
+            "ai_verified_rows": quality.get("ai_verified_rows", quality.get("output_rows")),
+            "quarantined_for_review": quality.get("quarantined_for_review", 0),
+            "duplicates_removed": quality.get("duplicates_removed", 0),
+        }
+    except (OSError, json.JSONDecodeError):
+        summary["data_quality"] = {}
     research_sources={"Estate Intel"} if research else set()
     if research_sources:
         summary["sources"]=len(set(summary.get("source_names",[])) | research_sources)
@@ -98,6 +108,13 @@ def build_executive_html_from_summary(s,date=None,doc_url="",sheet_url=""):
         takeaway.append(f"{not_observed:,} previous URLs were not observed in this scan. This does not prove that the properties sold or were delisted; it may also reflect coverage or extraction differences.")
     if thin:
         takeaway.append("Sample caution: the thinnest covered locations are "+", ".join(thin)+". Treat these as watchlist observations, not reliable area-wide benchmarks.")
+    dq = s.get("data_quality", {}) or {}
+    if dq:
+        takeaway.append(
+            f"Listing-card cross-check: {dq.get('ai_verified_rows', 0)} rows passed the AI evidence-consistency check; "
+            f"{dq.get('quarantined_for_review', 0)} rows were excluded from comparable statistics for review. "
+            "This check tests consistency with captured public listing text; it does not prove ownership or a closed transaction."
+        )
     investment=sig.get("investment")
     buyer=sig.get("buyer_value")
     land=sig.get("land_opportunity")
