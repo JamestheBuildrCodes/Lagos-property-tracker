@@ -30,11 +30,38 @@ def process(path):
         key=row.get("record_id") or row.get("source_url")
         if key in unique:duplicates+=1;continue
         unique[key]=row
-    kept=list(unique.values());fields=list(rows[0].keys()) if rows else []
+    kept=list(unique.values())
+
+    # Second-pass evidence check against the exact captured listing-card text.
+    # If AI is required but unavailable, fail the workflow rather than silently
+    # publish unverified rows. Rows needing review are preserved separately.
+    from ai_listing_verifier import verify_rows
+    verification = verify_rows(kept)
+    verified_rows=[];review_rows=[]
+    for row in kept:
+        rid=str(row.get("record_id") or "")
+        result=verification.get(rid, {"status":"review","issues":["No verifier result returned"]})
+        row["ai_verification_status"]=result.get("status","review")
+        row["ai_verification_issues"]="; ".join(result.get("issues",[]))
+        if row["ai_verification_status"] == "pass":
+            verified_rows.append(row)
+        else:
+            review_rows.append(row)
+
+    fields=list(rows[0].keys()) if rows else []
+    for extra in ("ai_verification_status","ai_verification_issues"):
+        if extra not in fields:
+            fields.append(extra)
     with open(path,"w",newline="",encoding="utf-8") as f:
-        w=csv.DictWriter(f,fieldnames=fields,extrasaction="ignore");w.writeheader();w.writerows(kept)
-    report={"input_rows":len(rows),"output_rows":len(kept),"removed_rows":len(removed),"fixed_rows":len(fixed),"duplicates_removed":duplicates,"removals":removed[:200],"fixes":fixed[:200]}
+        w=csv.DictWriter(f,fieldnames=fields,extrasaction="ignore");w.writeheader();w.writerows(verified_rows)
+    review_fields=list(dict.fromkeys(fields + ["review_reason"]))
+    with open("market_output_review.csv","w",newline="",encoding="utf-8") as f:
+        w=csv.DictWriter(f,fieldnames=review_fields,extrasaction="ignore");w.writeheader()
+        for row in review_rows:
+            w.writerow({**row,"review_reason":row.get("ai_verification_issues","AI review required")})
+    report={"input_rows":len(rows),"output_rows":len(verified_rows),"ai_verified_rows":len(verified_rows),"quarantined_for_review":len(review_rows),"removed_rows":len(removed),"fixed_rows":len(fixed),"duplicates_removed":duplicates,"removals":removed[:200],"fixes":fixed[:200],"ai_review_sample":[{"record_id":r.get("record_id"),"source":r.get("source"),"source_url":r.get("source_url"),"issues":r.get("ai_verification_issues")} for r in review_rows[:100]]}
     Path("market_output_quality.json").write_text(json.dumps(report,indent=2,ensure_ascii=False),encoding="utf-8");print(json.dumps(report,indent=2))
+
 if __name__=="__main__":
     if len(sys.argv)!=2:raise SystemExit("Usage: python quality_gate.py property_listings_YYYY-MM-DD.csv")
     process(sys.argv[1])
