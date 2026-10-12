@@ -81,6 +81,10 @@ jobs:
           PY
 
       - name: Apply market data quality gate
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL || 'gpt-4.1-mini' }}
+          OPENAI_REQUIRED: "true"
         run: |
           CURR=$(ls -t property_listings_*.csv | head -n 1)
           test -s "$CURR"
@@ -237,6 +241,7 @@ jobs:
           mv Lagos_Abuja_Property_Market_Intelligence_*.docx data/ 2>/dev/null || true
           mv Lagos_Property_Market_Snapshot_*.docx data/ 2>/dev/null || true
           mv executive_brief_*.html data/ 2>/dev/null || true
+          mv market_output_review.csv data/ 2>/dev/null || true
           cp scrape_run_report.json data/
           cp market_output_validation.json data/
           cp market_output_quality.json data/ 2>/dev/null || true
