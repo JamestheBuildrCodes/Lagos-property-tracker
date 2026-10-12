@@ -9,7 +9,7 @@ from sheets_writer import _retry_sheets_write, _verify_sheet_readback
 class FakeSheetsResponse:
     def __init__(self, status_code, message):
         self.status_code = status_code
-        self._payload = {"error": {"message": message, "status": "RESOURCE_EXHAUSTED"}}
+        self._payload = {"error": {"code": status_code, "message": message, "status": "RESOURCE_EXHAUSTED"}}
 
     def json(self):
         return self._payload
