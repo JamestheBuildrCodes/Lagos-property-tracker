@@ -50,9 +50,9 @@ def process(path):
         unique[key]=row
     kept=list(unique.values())
 
-    # Second-pass evidence check against the exact captured listing-card text.
-    # If AI is required but unavailable, fail the workflow rather than silently
-    # publish unverified rows. Rows needing review are preserved separately.
+    # Free deterministic evidence check against the exact captured listing-card text.
+    # Optional AI is disabled by default. Rows with missing or conflicting evidence
+    # are preserved in a separate review file rather than included in comparisons.
     from ai_listing_verifier import verify_rows
     verification = verify_rows(kept)
     verified_rows=[];review_rows=[]
