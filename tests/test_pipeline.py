@@ -311,14 +311,36 @@ class OptionalAIInterpreterTests(unittest.TestCase):
             if old is not None:
                 os.environ["OPENAI_API_KEY"] = old
 
-    def test_ai_interpreter_does_not_assume_a_nonexistent_default_model(self):
+    def test_ai_interpreter_uses_configured_cost_effective_default_model(self):
+        import json
         import os
+        from unittest.mock import patch, Mock
         import ai_market_interpreter
         old_key = os.environ.get("OPENAI_API_KEY")
         old_model = os.environ.pop("OPENAI_MODEL", None)
         os.environ["OPENAI_API_KEY"] = "test-only-placeholder"
+        payload = {
+            "output": [{
+                "type": "message",
+                "content": [{
+                    "type": "output_text",
+                    "text": json.dumps({
+                        "executive_takeaway": "Limited sample.",
+                        "key_findings": [],
+                        "business_implications": [],
+                        "recommended_actions": [],
+                        "limitations": [],
+                    }),
+                }],
+            }]
+        }
+        response = Mock(status_code=200)
+        response.json.return_value = payload
         try:
-            self.assertIsNone(ai_market_interpreter.interpret_summary({"listings_tracked": 1}))
+            with patch.object(ai_market_interpreter.requests, "post", return_value=response) as mocked_post:
+                result = ai_market_interpreter.interpret_summary({"listings_tracked": 1})
+            self.assertEqual(result["model"], "gpt-4.1-mini")
+            self.assertEqual(mocked_post.call_args.kwargs["json"]["model"], "gpt-4.1-mini")
         finally:
             if old_key is None:
                 os.environ.pop("OPENAI_API_KEY", None)
