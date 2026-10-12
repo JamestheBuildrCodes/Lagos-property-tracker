@@ -1167,8 +1167,6 @@ def build_docx(
                 item.get("plot_size", "—"),
                 item.get("price_per_sqm", "—"),
                 item.get("sample", ""),
-                item.get("source", ""),
-                item.get("as_of", ""),
             ]
 
             for i, value in enumerate(values):
@@ -1176,23 +1174,16 @@ def build_docx(
                 r = p.add_run(str(value))
                 set_font(r, 9)
 
-            p = cells[4].paragraphs[0]
+            p = cells[6].paragraphs[0]
             source = item.get("source", "") or "Unknown"
-
             if item.get("link"):
-                add_hyperlink(
-                    p,
-                    item["link"],
-                    source,
-                )
+                add_hyperlink(p, item["link"], source)
             else:
                 r = p.add_run(source)
                 set_font(r, 9)
 
-            p = cells[5].paragraphs[0]
-            r = p.add_run(
-                str(item.get("as_of", "date unavailable"))
-            )
+            p = cells[7].paragraphs[0]
+            r = p.add_run(str(item.get("as_of", "date unavailable")))
             set_font(r, 9)
 
         doc.add_paragraph()
