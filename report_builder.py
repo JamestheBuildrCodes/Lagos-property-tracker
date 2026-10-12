@@ -31,6 +31,8 @@ def _load_inputs(listings_path,changes_path="none",research_path=None):
         if ai_commentary:
             summary["ai_commentary"]=ai_commentary
     except Exception as exc:
+        if os.environ.get("OPENAI_REQUIRED", "false").strip().lower() == "true":
+            raise RuntimeError(f"Required OpenAI analysis failed; refusing to publish report: {type(exc).__name__}: {exc}") from exc
         print(f"[AI analysis unavailable; using deterministic narrative] {type(exc).__name__}: {exc}")
     return listings,changes,research,summary
 
