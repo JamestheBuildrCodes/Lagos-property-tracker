@@ -105,6 +105,52 @@ class AIListingVerifierTests(unittest.TestCase):
         self.assertEqual(result["no-evidence"]["status"], "review")
         mocked.assert_not_called()
 
+    def test_groq_optional_second_pass_uses_openai_compatible_json_api(self):
+        row = {
+            "record_id": "groq-1",
+            "source_url": "https://propertypro.ng/property/3-bedroom-flat-for-sale-banana-island-lagos-abc123",
+            "source_excerpt": "3 bedroom apartment for sale in Banana Island. Asking price ₦500,000,000.",
+            "transaction": "sale",
+            "property_type": "flat_apartment",
+            "bedrooms": "3",
+            "asking_price_ngn": "500000000",
+        }
+        response = Mock(status_code=200)
+        response.json.return_value = {
+            "choices": [{
+                "message": {
+                    "content": json.dumps({
+                        "results": [{
+                            "record_id": "groq-1",
+                            "status": "pass",
+                            "issues": [],
+                        }]
+                    })
+                }
+            }]
+        }
+        old_mode = os.environ.get("EVIDENCE_VERIFICATION_MODE")
+        old_key = os.environ.get("GROQ_API_KEY")
+        os.environ["EVIDENCE_VERIFICATION_MODE"] = "groq"
+        os.environ["GROQ_API_KEY"] = "test-only-placeholder"
+        try:
+            with patch.object(ai_listing_verifier.requests, "post", return_value=response) as mocked:
+                result = ai_listing_verifier.verify_rows([row])
+            self.assertEqual(result["groq-1"]["status"], "pass")
+            self.assertEqual(result["groq-1"]["method"], "deterministic+groq")
+            self.assertIn("api.groq.com/openai/v1/chat/completions", mocked.call_args.args[0])
+            self.assertEqual(mocked.call_args.kwargs["json"]["model"], "openai/gpt-oss-20b")
+            self.assertEqual(mocked.call_args.kwargs["json"]["response_format"]["type"], "json_object")
+        finally:
+            if old_mode is None:
+                os.environ.pop("EVIDENCE_VERIFICATION_MODE", None)
+            else:
+                os.environ["EVIDENCE_VERIFICATION_MODE"] = old_mode
+            if old_key is None:
+                os.environ.pop("GROQ_API_KEY", None)
+            else:
+                os.environ["GROQ_API_KEY"] = old_key
+
     def test_api_quota_failure_falls_back_to_deterministic_evidence_check(self):
         row = {
             "record_id": "fallback-1",
