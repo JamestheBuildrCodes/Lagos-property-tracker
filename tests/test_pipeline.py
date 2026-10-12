@@ -75,6 +75,9 @@ class PipelineTests(unittest.TestCase):
         self.assertIn("GOOGLE_SHEET_ID is required; refusing to send an invalid Sheet link.", text)
         self.assertLess(text.index("Write and verify Layer 2 in the existing Google Sheet"), text.index("Send final executive email with report links"))
         self.assertIn("from mailjet_sender import valid_email", text)
+        self.assertIn("Inspect Mailjet delivery state (diagnostic)", text)
+        self.assertIn("continue-on-error: true", text)
+        self.assertIn("run: python mailjet_delivery_diagnostic.py", text)
 
 
 
