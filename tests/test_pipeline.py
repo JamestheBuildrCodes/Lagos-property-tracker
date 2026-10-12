@@ -342,8 +342,10 @@ class OptionalAIInterpreterTests(unittest.TestCase):
         from unittest.mock import patch, Mock
         import ai_market_interpreter
         old_key = os.environ.get("OPENAI_API_KEY")
+        old_enabled = os.environ.get("OPENAI_AI_COMMENTARY_ENABLED")
         old_model = os.environ.pop("OPENAI_MODEL", None)
         os.environ["OPENAI_API_KEY"] = "test-only-placeholder"
+        os.environ["OPENAI_AI_COMMENTARY_ENABLED"] = "true"
         payload = {
             "output": [{
                 "type": "message",
@@ -373,4 +375,8 @@ class OptionalAIInterpreterTests(unittest.TestCase):
                 os.environ["OPENAI_API_KEY"] = old_key
             if old_model is not None:
                 os.environ["OPENAI_MODEL"] = old_model
+            if old_enabled is None:
+                os.environ.pop("OPENAI_AI_COMMENTARY_ENABLED", None)
+            else:
+                os.environ["OPENAI_AI_COMMENTARY_ENABLED"] = old_enabled
 
