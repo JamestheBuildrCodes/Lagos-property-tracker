@@ -79,11 +79,14 @@ def _safe_payload(summary: dict[str, Any]) -> dict[str, Any]:
 
 
 def interpret_summary(summary: dict[str, Any]) -> dict[str, Any] | None:
+    # Paid API commentary is opt-in. The report builder already creates a
+    # deterministic evidence-based narrative when this function returns None.
+    enabled = os.environ.get("OPENAI_AI_COMMENTARY_ENABLED", "false").strip().lower() == "true"
+    if not enabled:
+        return None
     api_key = os.environ.get("OPENAI_API_KEY", "").strip()
-    required = os.environ.get("OPENAI_REQUIRED", "false").strip().lower() == "true"
     if not api_key:
-        if required:
-            raise RuntimeError("OPENAI_REQUIRED=true but OPENAI_API_KEY is missing")
+        print("[AI commentary] No OpenAI API key; using deterministic report narrative.")
         return None
 
     model = os.environ.get("OPENAI_MODEL", DEFAULT_MODEL).strip() or DEFAULT_MODEL
