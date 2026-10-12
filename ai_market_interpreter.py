@@ -104,7 +104,7 @@ def interpret_summary(summary: dict[str, Any]) -> dict[str, Any] | None:
     body = {
         "model": model,
         "instructions": instructions,
-        "input": json.dumps(_safe_payload(summary), ensure_ascii=False),
+        "input": "Interpret the following aggregate JSON data and return one JSON object:\n" + json.dumps(_safe_payload(summary), ensure_ascii=False),
         "max_output_tokens": 1400,
         "store": False,
         "text": {"format": {"type": "json_object"}},
