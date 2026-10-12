@@ -55,8 +55,19 @@ def verify_rows(rows: list[dict], chunk_size: int = 20) -> dict[str, dict]:
 
     model = os.environ.get("OPENAI_MODEL", DEFAULT_MODEL).strip() or DEFAULT_MODEL
     results: dict[str, dict] = {}
-    for start in range(0, len(rows), chunk_size):
-        chunk = rows[start : start + chunk_size]
+    eligible_rows = []
+    for row in rows:
+        rid = str(row.get("record_id") or "")
+        if not str(row.get("source_excerpt") or "").strip():
+            results[rid] = {
+                "status": "review",
+                "issues": ["No captured source-card excerpt available to cross-check"],
+            }
+        else:
+            eligible_rows.append(row)
+
+    for start in range(0, len(eligible_rows), chunk_size):
+        chunk = eligible_rows[start : start + chunk_size]
         payload_rows = []
         for row in chunk:
             rid = str(row.get("record_id") or "")
