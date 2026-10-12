@@ -12,15 +12,21 @@ class AIListingVerifierTests(unittest.TestCase):
         self.old_key = os.environ.get("OPENAI_API_KEY")
         self.old_model = os.environ.get("OPENAI_MODEL")
         self.old_required = os.environ.get("OPENAI_REQUIRED")
+        self.old_mode = os.environ.get("EVIDENCE_VERIFICATION_MODE")
+        self.old_commentary_enabled = os.environ.get("OPENAI_AI_COMMENTARY_ENABLED")
         os.environ["OPENAI_API_KEY"] = "test-only-placeholder"
         os.environ["OPENAI_MODEL"] = "gpt-4.1-mini"
         os.environ["OPENAI_REQUIRED"] = "true"
+        os.environ["EVIDENCE_VERIFICATION_MODE"] = "openai"
+        os.environ["OPENAI_AI_COMMENTARY_ENABLED"] = "true"
 
     def tearDown(self):
         for key, value in (
             ("OPENAI_API_KEY", self.old_key),
             ("OPENAI_MODEL", self.old_model),
             ("OPENAI_REQUIRED", self.old_required),
+            ("EVIDENCE_VERIFICATION_MODE", self.old_mode),
+            ("OPENAI_AI_COMMENTARY_ENABLED", self.old_commentary_enabled),
         ):
             if value is None:
                 os.environ.pop(key, None)
@@ -30,6 +36,7 @@ class AIListingVerifierTests(unittest.TestCase):
     def test_verified_result_is_mapped_by_record_id(self):
         row = {
             "record_id": "abc123",
+            "source_url": "https://propertypro.ng/property/3-bedroom-flat-for-sale-banana-island-lagos-abc123",
             "source_excerpt": "3 bedroom apartment for sale in Banana Island. Asking price ₦500,000,000.",
             "market_node": "Banana Island",
             "transaction": "sale",
@@ -98,13 +105,45 @@ class AIListingVerifierTests(unittest.TestCase):
         self.assertEqual(result["no-evidence"]["status"], "review")
         mocked.assert_not_called()
 
-    def test_required_verification_fails_if_api_key_missing(self):
+    def test_api_quota_failure_falls_back_to_deterministic_evidence_check(self):
+        row = {
+            "record_id": "fallback-1",
+            "source_url": "https://propertypro.ng/property/3-bedroom-flat-for-sale-banana-island-lagos-abc123",
+            "source_excerpt": "3 bedroom apartment for sale in Banana Island. Asking price ₦500,000,000.",
+            "transaction": "sale",
+            "property_type": "flat_apartment",
+            "bedrooms": "3",
+            "asking_price_ngn": "500000000",
+        }
+        response = Mock(status_code=429, text='{"error":{"message":"credit_balance_exhausted"}}')
+        with patch.object(ai_listing_verifier.requests, "post", return_value=response):
+            result = ai_listing_verifier.verify_rows([row])
+        self.assertEqual(result["fallback-1"]["status"], "pass")
+        self.assertEqual(result["fallback-1"]["method"], "deterministic")
+
+    def test_deterministic_default_does_not_call_paid_api(self):
+        old_mode = os.environ.get("EVIDENCE_VERIFICATION_MODE")
+        os.environ["EVIDENCE_VERIFICATION_MODE"] = "deterministic"
         os.environ.pop("OPENAI_API_KEY", None)
-        with self.assertRaisesRegex(RuntimeError, "OPENAI_API_KEY is missing"):
-            ai_listing_verifier.verify_rows([{
-                "record_id": "abc123",
-                "source_excerpt": "Public listing text",
-            }])
+        row = {
+            "record_id": "free-1",
+            "source_url": "https://propertypro.ng/property/3-bedroom-flat-for-sale-banana-island-lagos-abc123",
+            "source_excerpt": "3 bedroom apartment for sale in Banana Island. Asking price ₦500,000,000.",
+            "transaction": "sale",
+            "property_type": "flat_apartment",
+            "bedrooms": "3",
+            "asking_price_ngn": "500000000",
+        }
+        try:
+            with patch.object(ai_listing_verifier.requests, "post") as mocked:
+                result = ai_listing_verifier.verify_rows([row])
+            mocked.assert_not_called()
+            self.assertEqual(result["free-1"]["status"], "pass")
+        finally:
+            if old_mode is None:
+                os.environ.pop("EVIDENCE_VERIFICATION_MODE", None)
+            else:
+                os.environ["EVIDENCE_VERIFICATION_MODE"] = old_mode
 
 
 if __name__ == "__main__":
