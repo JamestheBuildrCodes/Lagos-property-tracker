@@ -114,18 +114,22 @@ def bedroom_rows(listings, node, txn_type):
             reverse=True,
         )[0]
 
+        count = len(prices)
+        if count == 1:
+            reported_price = f"{fmt_naira(prices[0])} (single observed asking price)"
+        elif count == 2:
+            reported_price = f"{fmt_naira(statistics.median(prices))} (midpoint of 2 listings; not a stable median)"
+        else:
+            reported_price = f"{fmt_naira(statistics.median(prices))} (median)"
+        if txn_type == "rent":
+            reported_price += "/yr"
+
         out.append(
             {
-                "label": (
-                    f"{beds} Bedroom — median asking "
-                    f"{'rent' if txn_type == 'rent' else 'sale price'}"
-                ),
-                "value": fmt_naira(statistics.median(prices))
-                + ("/yr" if txn_type == "rent" else ""),
-                "sample": (
-                    f"{len(prices)} listing"
-                    f"{'s' if len(prices) != 1 else ''}"
-                ),
+                "label": f"{beds} Bedroom — asking {'rent' if txn_type == 'rent' else 'sale price'}",
+                "value": reported_price,
+                "range": f"{fmt_naira(min(prices))} – {fmt_naira(max(prices))}",
+                "sample": f"{count} listing{'s' if count != 1 else ''}",
                 "source_date": (
                     f"{example.get('source', 'Unknown')}, "
                     f"{source_as_of(example)}"
@@ -178,14 +182,40 @@ def land_rows(listings, node):
         reverse=True,
     )[0]
 
+    sizes = [
+        fnum(r.get("size_sqm") or r.get("land_area_sqm"))
+        for r in group
+    ]
+    sizes = [size for size in sizes if size is not None and size > 0]
+    unit_prices = [
+        fnum(r.get("asking_price_ngn")) / size
+        for r in group
+        for size in [fnum(r.get("size_sqm") or r.get("land_area_sqm"))]
+        if fnum(r.get("asking_price_ngn")) and size is not None and size > 0
+    ]
+    count = len(prices)
+    if count == 1:
+        reported_price = f"{fmt_naira(prices[0])} (single observed asking price)"
+    elif count == 2:
+        reported_price = f"{fmt_naira(statistics.median(prices))} (midpoint of 2 listings; not a stable median)"
+    else:
+        reported_price = f"{fmt_naira(statistics.median(prices))} (median)"
+
     return [
         {
-            "label": "Land — median asking price",
-            "value": fmt_naira(statistics.median(prices)),
-            "sample": (
-                f"{len(prices)} listing"
-                f"{'s' if len(prices) != 1 else ''}"
+            "label": "Land — asking price",
+            "value": reported_price,
+            "range": f"{fmt_naira(min(prices))} – {fmt_naira(max(prices))}",
+            "plot_size": (
+                f"{min(sizes):,.0f}–{max(sizes):,.0f} sqm"
+                if len(sizes) > 1 and min(sizes) != max(sizes)
+                else f"{sizes[0]:,.0f} sqm" if sizes else "Not stated by source"
             ),
+            "price_per_sqm": (
+                f"{fmt_naira(statistics.median(unit_prices))}/sqm"
+                if unit_prices else "Not calculable: plot size missing"
+            ),
+            "sample": f"{count} listing{'s' if count != 1 else ''}",
             "source_date": (
                 f"{example.get('source', 'Unknown')}, "
                 f"{source_as_of(example)}"
@@ -1382,7 +1412,7 @@ def _report_text(listings, summary):
 
                 lines += [
                     title,
-                    "Metric | Value | Sample | Source & Date | Link",
+                    "Metric | Reported price | Observed range | Plot size | Asking price/sqm | Sample | Source & Date | Link",
                 ]
 
                 for row in rows:
@@ -1391,6 +1421,9 @@ def _report_text(listings, summary):
                             [
                                 row["label"],
                                 row["value"],
+                                row.get("range", "—"),
+                                row.get("plot_size", "—"),
+                                row.get("price_per_sqm", "—"),
                                 row["sample"],
                                 row["source_date"],
                                 row.get("link", ""),
