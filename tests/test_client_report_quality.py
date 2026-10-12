@@ -50,5 +50,40 @@ class ClientReportQualityTests(unittest.TestCase):
         self.assertEqual(result[0]["price_per_sqm"], "₦506,667/sqm")
 
 
+    def test_area_scorecard_does_not_substitute_other_bedroom_prices_for_3br(self):
+        import market_analysis
+
+        rows = [
+            {
+                "market_node": "Victoria Island",
+                "transaction": "rent",
+                "property_type": "flat_apartment",
+                "bedrooms": "1",
+                "asking_price_ngn": "590000000",
+                "source": "Nigeria Property Centre",
+                "source_url": "https://nigeriapropertycentre.com/for-rent/flats-apartments/lagos/victoria-island/one-bedroom-a",
+                "title": "1 bedroom apartment in Victoria Island",
+            },
+            {
+                "market_node": "Victoria Island",
+                "transaction": "sale",
+                "property_type": "flat_apartment",
+                "bedrooms": "1",
+                "asking_price_ngn": "350000000",
+                "source": "Nigeria Property Centre",
+                "source_url": "https://nigeriapropertycentre.com/for-sale/flats-apartments/lagos/victoria-island/one-bedroom-b",
+                "title": "1 bedroom apartment in Victoria Island",
+            },
+        ]
+        vi = next(
+            row for row in market_analysis.area_scorecard(rows)
+            if row["market_node"] == "Victoria Island"
+        )
+        self.assertIsNone(vi["rent_3br_median"])
+        self.assertIsNone(vi["sale_3br_median"])
+        self.assertEqual(vi["rent_3br_count"], 0)
+        self.assertEqual(vi["sale_3br_count"], 0)
+
+
 if __name__ == "__main__":
     unittest.main()
