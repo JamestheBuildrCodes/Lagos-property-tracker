@@ -79,6 +79,25 @@ class PipelineTests(unittest.TestCase):
 
 
 class DataQualityTests(unittest.TestCase):
+    def test_sale_detail_url_is_rejected_from_rental_category(self):
+        import scraper
+        ok, reason = scraper.transaction_consistent_with_evidence(
+            "rent",
+            "https://propertypro.ng/property/1-bedroom-flat-for-sale-victoria-island-lagos-ABC12",
+            "1 bedroom flat for sale in Victoria Island; asking price ₦590,000,000",
+        )
+        self.assertFalse(ok)
+        self.assertIn("sale listing", reason)
+
+    def test_rental_detail_url_is_rejected_from_sale_category(self):
+        import scraper
+        ok, reason = scraper.transaction_consistent_with_evidence(
+            "sale",
+            "https://propertypro.ng/property/1-bedroom-flat-for-rent-victoria-island-lagos-ABC12",
+            "1 bedroom flat for rent in Victoria Island; ₦9,000,000 per annum",
+        )
+        self.assertFalse(ok)
+        self.assertIn("rental listing", reason)
     def test_propertypro_agent_urls_are_not_listing_urls(self):
         import scraper
         self.assertFalse(scraper.looks_like_listing_url("https://propertypro.ng/agent/example", "PropertyPro.ng"))
