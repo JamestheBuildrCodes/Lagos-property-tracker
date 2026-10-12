@@ -103,7 +103,7 @@ def verify_rows(rows: list[dict], chunk_size: int = 20) -> dict[str, dict]:
         body = {
             "model": model,
             "instructions": instructions,
-            "input": json.dumps(payload_rows, ensure_ascii=False),
+            "input": "Validate the following JSON listing data and return a JSON object of results:\n" + json.dumps(payload_rows, ensure_ascii=False),
             "max_output_tokens": max(1200, len(chunk) * 110),
             "store": False,
             "text": {"format": {"type": "json_object"}},
