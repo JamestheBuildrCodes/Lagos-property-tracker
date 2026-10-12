@@ -137,7 +137,7 @@ def verify_rows(rows: list[dict], chunk_size: int = 20) -> dict[str, dict]:
                 seen.add(rid)
                 status = str(item.get("status") or "").lower()
                 issues = item.get("issues") if isinstance(item.get("issues"), list) else []
-                if status != "pass":
+                if status != "pass" or issues:
                     status = "review"
                 results[rid] = {
                     "status": status,
