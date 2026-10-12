@@ -13,7 +13,7 @@ from typing import Any
 import requests
 
 RESPONSES_URL = "https://api.openai.com/v1/responses"
-DEFAULT_MODEL = ""
+DEFAULT_MODEL = "gpt-4.1-mini"
 
 
 def _response_text(payload: dict[str, Any]) -> str:
@@ -80,13 +80,13 @@ def _safe_payload(summary: dict[str, Any]) -> dict[str, Any]:
 
 def interpret_summary(summary: dict[str, Any]) -> dict[str, Any] | None:
     api_key = os.environ.get("OPENAI_API_KEY", "").strip()
+    required = os.environ.get("OPENAI_REQUIRED", "false").strip().lower() == "true"
     if not api_key:
+        if required:
+            raise RuntimeError("OPENAI_REQUIRED=true but OPENAI_API_KEY is missing")
         return None
 
     model = os.environ.get("OPENAI_MODEL", DEFAULT_MODEL).strip() or DEFAULT_MODEL
-    if not model:
-        print("[AI analysis disabled; set OPENAI_MODEL explicitly only if a compatible API model is configured]")
-        return None
     instructions = (
         "Act as a cautious Nigerian property-market research analyst. Interpret only "
         "the aggregate JSON provided; do not invent events, causes, prices, comps, or "
@@ -143,5 +143,7 @@ def interpret_summary(summary: dict[str, Any]) -> dict[str, Any] | None:
             "limitations": [str(x)[:400] for x in parsed["limitations"][:6]],
         }
     except Exception as exc:
+        if required:
+            raise RuntimeError(f"Required OpenAI market interpretation failed: {type(exc).__name__}: {exc}") from exc
         print(f"[AI analysis unavailable; using deterministic narrative] {type(exc).__name__}: {exc}")
         return None
