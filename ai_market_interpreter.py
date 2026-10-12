@@ -85,6 +85,7 @@ def interpret_summary(summary: dict[str, Any]) -> dict[str, Any] | None:
     if not enabled:
         return None
     api_key = os.environ.get("OPENAI_API_KEY", "").strip()
+    required = os.environ.get("OPENAI_AI_COMMENTARY_REQUIRED", "false").strip().lower() == "true"
     if not api_key:
         print("[AI commentary] No OpenAI API key; using deterministic report narrative.")
         return None
