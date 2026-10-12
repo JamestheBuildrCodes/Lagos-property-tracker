@@ -9,6 +9,7 @@ from mailjet_sender import send_message, valid_email
 
 
 def successful_report_receipt() -> bool:
+    current_run_id = os.environ.get("GITHUB_RUN_ID", "").strip()
     for path in (
         Path("mailjet_layer1_receipt.json"),
         Path("data/mailjet_layer1_receipt.json"),
@@ -17,6 +18,11 @@ def successful_report_receipt() -> bool:
             continue
         try:
             payload = json.loads(path.read_text(encoding="utf-8"))
+            custom_id = str(payload.get("custom_id") or "")
+            # Historical receipts are archived in data/. Only a successful
+            # receipt from THIS workflow run can suppress its failure alert.
+            if current_run_id and f"-{current_run_id}-" not in custom_id:
+                continue
             statuses = [
                 item.get("status")
                 for item in payload.get("message_results", [])
