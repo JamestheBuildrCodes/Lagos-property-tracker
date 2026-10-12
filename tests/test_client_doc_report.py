@@ -181,5 +181,59 @@ class ClientDocReportTests(unittest.TestCase):
         self.assertTrue(all("email you when a new listing matches" not in text.lower() for _, text in cards))
 
 
+    def test_revoked_oauth_token_falls_back_to_existing_layer3_doc(self):
+        import json
+        import os
+        from google.auth.exceptions import RefreshError
+
+        error = RefreshError(
+            "invalid_grant: Token has been expired or revoked."
+        )
+        self.assertTrue(client_doc_report._is_revoked_oauth_refresh_error(error))
+        self.assertFalse(
+            client_doc_report._is_revoked_oauth_refresh_error(
+                RuntimeError("Google Docs network timeout")
+            )
+        )
+
+        current_dir = Path.cwd()
+        try:
+            with tempfile.TemporaryDirectory() as td:
+                os.chdir(td)
+                fallback_url = "https://docs.google.com/document/d/layer3-report-id/edit"
+                Path("google_doc_url.txt").write_text(fallback_url + chr(10), encoding="utf-8")
+
+                result = client_doc_report._fallback_to_existing_google_doc(error)
+
+                self.assertEqual(result, fallback_url)
+                self.assertEqual(Path("client_doc_url.txt").read_text(encoding="utf-8").strip(), fallback_url)
+                verification = json.loads(
+                    Path("google_doc_verification.json").read_text(encoding="utf-8")
+                )
+                self.assertEqual(
+                    verification["publication_status"],
+                    "fallback_to_existing_layer3_google_doc",
+                )
+                self.assertFalse(verification["client_preferred_doc_created"])
+                self.assertFalse(verification["client_preferred_doc_content_verified"])
+                self.assertIn("GOOGLE_OAUTH_TOKEN_JSON", verification["action_required"])
+        finally:
+            os.chdir(current_dir)
+
+    def test_revoked_oauth_token_without_fallback_doc_fails_with_clear_action(self):
+        import os
+        from google.auth.exceptions import RefreshError
+
+        current_dir = Path.cwd()
+        error = RefreshError("invalid_grant: Token has been expired or revoked.")
+        try:
+            with tempfile.TemporaryDirectory() as td:
+                os.chdir(td)
+                with self.assertRaisesRegex(RuntimeError, "Re-authorize GOOGLE_OAUTH_TOKEN_JSON"):
+                    client_doc_report._fallback_to_existing_google_doc(error)
+        finally:
+            os.chdir(current_dir)
+
+
 if __name__ == "__main__":
     unittest.main()
