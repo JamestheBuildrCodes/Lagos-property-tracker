@@ -270,3 +270,15 @@ jobs:
             sleep 3
           done
           exit 1
+
+      - name: Alert internal owner if the scan failed before report delivery
+        if: failure() && !cancelled()
+        env:
+          MAILJET_API_KEY: ${{ secrets.MAILJET_API_KEY }}
+          MAILJET_SECRET_KEY: ${{ secrets.MAILJET_SECRET_KEY }}
+          MAILJET_FROM_EMAIL: ${{ secrets.MAILJET_FROM_EMAIL }}
+          MAILJET_FROM_NAME: "Master Builder Inc."
+          REPORT_TO_EMAIL: ${{ secrets.REPORT_TO_EMAIL }}
+          GITHUB_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          GITHUB_WORKFLOW: ${{ github.workflow }}
+        run: python workflow_failure_alert.py
