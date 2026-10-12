@@ -52,7 +52,7 @@ def _load_inputs(listings_path,changes_path="none",research_path=None):
         quality = json.loads(Path("market_output_quality.json").read_text(encoding="utf-8"))
         summary["data_quality"] = {
             "input_rows": quality.get("input_rows"),
-            "ai_verified_rows": quality.get("ai_verified_rows", quality.get("output_rows")),
+            "evidence_verified_rows": quality.get("evidence_verified_rows", quality.get("output_rows")),
             "quarantined_for_review": quality.get("quarantined_for_review", 0),
             "duplicates_removed": quality.get("duplicates_removed", 0),
         }
@@ -68,7 +68,7 @@ def _load_inputs(listings_path,changes_path="none",research_path=None):
         if ai_commentary:
             summary["ai_commentary"]=ai_commentary
     except Exception as exc:
-        if os.environ.get("OPENAI_REQUIRED", "false").strip().lower() == "true":
+        if os.environ.get("OPENAI_AI_COMMENTARY_REQUIRED", "false").strip().lower() == "true":
             raise RuntimeError(f"Required OpenAI analysis failed; refusing to publish report: {type(exc).__name__}: {exc}") from exc
         print(f"[AI analysis unavailable; using deterministic narrative] {type(exc).__name__}: {exc}")
     return listings,changes,research,summary
@@ -138,7 +138,7 @@ def build_executive_html_from_summary(s,date=None,doc_url="",sheet_url=""):
     dq = s.get("data_quality", {}) or {}
     if dq:
         takeaway.append(
-            f"Listing-card cross-check: {dq.get('ai_verified_rows', 0)} rows passed the AI evidence-consistency check; "
+            f"Listing-card cross-check: {dq.get('evidence_verified_rows', 0)} rows passed deterministic source-evidence checks; "
             f"{dq.get('quarantined_for_review', 0)} rows were excluded from comparable statistics for review. "
             "This check tests consistency with captured public listing text; it does not prove ownership or a closed transaction."
         )
