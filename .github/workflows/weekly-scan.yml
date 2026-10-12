@@ -231,6 +231,14 @@ jobs:
               )
           PY
 
+      - name: Inspect Mailjet delivery state (diagnostic)
+        if: success()
+        continue-on-error: true
+        env:
+          MAILJET_API_KEY: ${{ secrets.MAILJET_API_KEY }}
+          MAILJET_SECRET_KEY: ${{ secrets.MAILJET_SECRET_KEY }}
+        run: python mailjet_delivery_diagnostic.py
+
       - name: Archive intelligence outputs
         run: |
           mkdir -p data
