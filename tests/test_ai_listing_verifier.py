@@ -121,6 +121,34 @@ class AIListingVerifierTests(unittest.TestCase):
         self.assertEqual(result["fallback-1"]["status"], "pass")
         self.assertEqual(result["fallback-1"]["method"], "deterministic")
 
+    def test_mismatched_extracted_price_is_quarantined(self):
+        row = {
+            "record_id": "bad-price",
+            "source_url": "https://nigeriapropertycentre.com/for-rent/flats-apartments/lagos/victoria-island/listing-1",
+            "source_excerpt": "1 bedroom apartment for rent in Victoria Island. Asking rent ₦9,000,000 per annum.",
+            "transaction": "rent",
+            "property_type": "flat_apartment",
+            "bedrooms": "1",
+            "asking_price_ngn": "299500000",
+        }
+        result = ai_listing_verifier.deterministic_verify_row(row)
+        self.assertEqual(result["status"], "review")
+        self.assertTrue(any("asking price" in issue.lower() for issue in result["issues"]))
+
+    def test_land_total_can_be_verified_from_unit_price_and_plot_area(self):
+        row = {
+            "record_id": "land-unit-rate",
+            "source_url": "https://nigeriapropertycentre.com/for-sale/land/residential-land/lagos/ikoyi/banana-island/listing-2",
+            "source_excerpt": "Residential land for sale in Banana Island, 500 sqm. Asking price ₦90,000 per sqm.",
+            "transaction": "land_sale",
+            "property_type": "land",
+            "size_sqm": "500",
+            "asking_price_ngn": "45000000",
+            "price_per_sqm_ngn": "90000",
+        }
+        result = ai_listing_verifier.deterministic_verify_row(row)
+        self.assertEqual(result["status"], "pass", result["issues"])
+
     def test_deterministic_default_does_not_call_paid_api(self):
         old_mode = os.environ.get("EVIDENCE_VERIFICATION_MODE")
         os.environ["EVIDENCE_VERIFICATION_MODE"] = "deterministic"
