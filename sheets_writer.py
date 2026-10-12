@@ -5,7 +5,7 @@ from pathlib import Path
 import gspread
 from google.oauth2.service_account import Credentials
 SCOPES=["https://www.googleapis.com/auth/spreadsheets","https://www.googleapis.com/auth/drive"]
-DESIRED=["Executive Summary","Area Scorecard","Current Listings","Weekly Changes","Estate Intel Public","Source Health","Methodology"]
+DESIRED=["Executive Summary","Area Scorecard","Current Listings","Weekly Changes","Estate Intel Public","Additional Sources","Source Health","Methodology"]
 NAVY={"red":0.05,"green":0.14,"blue":0.25}; LIGHT={"red":0.91,"green":0.94,"blue":0.97}; WHITE={"red":1,"green":1,"blue":1}; TEXT={"red":0.09,"green":0.13,"blue":0.20}
 def get_client():
     raw=os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON","").strip()
@@ -31,6 +31,76 @@ def style(ws,name,rows,cols):
     if name=="Executive Summary": ws.format("B4:B12",{"textFormat":{"bold":True,"foregroundColor":NAVY}})
     try: ws.columns_auto_resize(0,cols)
     except Exception as exc: print(f"Column auto-resize skipped for {name}: {exc}")
+def add_live_chart_dashboard(sheet):
+    """Create real Google Sheets charts over the just-refreshed Area Scorecard."""
+    score = sheet.worksheet("Area Scorecard")
+    try:
+        dashboard = sheet.worksheet("Charts & Commentary")
+        dashboard.clear()
+    except gspread.WorksheetNotFound:
+        dashboard = sheet.add_worksheet(title="Charts & Commentary", rows=60, cols=16)
+    dashboard.resize(rows=60, cols=16)
+    dashboard.update([
+        ["Charts & Commentary — current asking-price observations"],
+        ["These graphs compare the validated listing sample; they are not closed transaction prices or a full-market census."],
+        ["Read with Area Scorecard sample counts. Segments with fewer than five comparables are thin and should be treated as directional."],
+        ["Source assessment: Knight Frank Nigeria research is contextual only; C&W Nigeria/Lagos comparable coverage remains unverified."],
+    ], "A1")
+    dashboard.format("A1:P1", {"backgroundColor": NAVY, "textFormat": {"foregroundColor": WHITE, "bold": True, "fontSize": 13}})
+    dashboard.format("A2:P4", {"wrapStrategy": "WRAP", "verticalAlignment": "TOP", "textFormat": {"foregroundColor": TEXT}})
+    try:
+        dashboard.columns_auto_resize(0, 8)
+    except Exception as exc:
+        print(f"Chart dashboard resize skipped: {exc}")
+
+    metadata = sheet.fetch_sheet_metadata()
+    requests = []
+    for tab in metadata.get("sheets", []):
+        if tab.get("properties", {}).get("sheetId") == dashboard.id:
+            for chart in tab.get("charts", []):
+                chart_id = chart.get("chartId")
+                if chart_id is not None:
+                    requests.append({"deleteEmbeddedObject": {"objectId": chart_id}})
+    chart_specs = [
+        ("Three-bedroom sale asking price by area", 2, 5, 0),
+        ("Three-bedroom annual rent asking price by area", 3, 23, 0),
+        ("Land asking price per sqm by area", 7, 43, 0),
+    ]
+    for title, source_col, anchor_row, anchor_col in chart_specs:
+        requests.append({
+            "addChart": {
+                "chart": {
+                    "spec": {
+                        "title": title,
+                        "basicChart": {
+                            "chartType": "BAR",
+                            "legendPosition": "NO_LEGEND",
+                            "headerCount": 1,
+                            "domains": [{"domain": {"sourceRange": {"sources": [{
+                                "sheetId": score.id, "startRowIndex": 0, "endRowIndex": 10,
+                                "startColumnIndex": 0, "endColumnIndex": 1,
+                            }]}}}],
+                            "series": [{"series": {"sourceRange": {"sources": [{
+                                "sheetId": score.id, "startRowIndex": 0, "endRowIndex": 10,
+                                "startColumnIndex": source_col, "endColumnIndex": source_col + 1,
+                            }]}}, "targetAxis": "BOTTOM_AXIS"}],
+                            "axis": [
+                                {"position": "BOTTOM_AXIS", "title": "Asking price (NGN)"},
+                                {"position": "LEFT_AXIS", "title": "Area"},
+                            ],
+                        },
+                    },
+                    "position": {"overlayPosition": {
+                        "anchorCell": {"sheetId": dashboard.id, "rowIndex": anchor_row, "columnIndex": anchor_col},
+                        "widthPixels": 620, "heightPixels": 340,
+                    }},
+                }
+            }
+        })
+    sheet.batch_update({"requests": requests})
+    print("Google Sheets chart dashboard updated with three live area-comparison charts.")
+
+
 def run():
     if len(sys.argv)<2: raise SystemExit("Usage: python sheets_writer.py <listings.csv> [changes.csv] [research.csv] [xlsx_path]")
     xlsx_path=sys.argv[4] if len(sys.argv)>4 else ""
@@ -66,6 +136,7 @@ def run():
                 for idx,h in enumerate(header,1):
                     if "asking_price" in h or "price_per_sqm" in h or "rent" in h: ws.format(f"{gspread.utils.rowcol_to_a1(1,idx).replace('1','')}2:{gspread.utils.rowcol_to_a1(rows,idx)}",{"numberFormat":{"type":"NUMBER","pattern":"₦#,##0"}})
             except Exception as exc: print(f"Currency formatting skipped: {exc}")
+    add_live_chart_dashboard(sheet)
     client_email=os.environ.get("REPORT_CLIENT_EMAIL","").strip()
     if client_email:
         try: share_viewer(sheet_id,client_email)

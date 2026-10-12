@@ -12,6 +12,25 @@ from market_analysis import build_summary, clean_rows, fmt_naira, load_csv
 
 TODAY=datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
+SUPPLEMENTAL_SOURCE_ASSESSMENTS = [
+    {
+        "Source": "Knight Frank Nigeria",
+        "Official page": "https://www.knightfrank.com.ng/research/lagos-market-update-13035.aspx",
+        "Source type": "Institutional market research",
+        "Assessment": "Official Lagos Market Update H1 2026 page identified.",
+        "Use in report": "Contextual triangulation for market commentary and broad trends only; do not mix publication-level estimates with current listing-level medians.",
+        "Next step / limitation": "Review the report period, sector definitions and methodology before comparing figures. The download flow may request contact details.",
+    },
+    {
+        "Source": "Cushman & Wakefield (C&W)",
+        "Official page": "https://www.cushmanwakefield.com/en/insights",
+        "Source type": "Commercial real estate research / global insights",
+        "Assessment": "Official global insights hub identified; a current Nigeria/Lagos-specific public report or comparable listing feed was not verified in this review.",
+        "Use in report": "Potential future commercial-market context after local coverage is confirmed; not a current comparable listing source.",
+        "Next step / limitation": "Confirm local/regional Nigeria coverage, data definitions and reuse/access permissions before adding any figures to market analysis.",
+    },
+]
+
 def esc(v):
     return (str(v if v is not None else "").replace("&","&amp;").replace("<","&lt;")
             .replace(">","&gt;").replace('"',"&quot;"))
@@ -309,6 +328,13 @@ def build_xlsx_from_data(listings,changes,research,s,output=None):
         else: sh.append(["No data returned"])
         polish(sh)
     add_data("Current Listings",listings); add_data("Weekly Changes",changes); add_data("Estate Intel Public",research)
+    add_data("Additional Sources",SUPPLEMENTAL_SOURCE_ASSESSMENTS)
+    source_ws=wb["Additional Sources"]
+    for row in range(2, source_ws.max_row + 1):
+        link_cell=source_ws.cell(row=row, column=2)
+        if link_cell.value and str(link_cell.value).startswith(("https://","http://")):
+            link_cell.hyperlink=str(link_cell.value)
+            link_cell.style="Hyperlink"
 
     # A separate health tab makes source coverage and failures visible instead
     # of mixing scraper errors with market-price data.
@@ -339,7 +365,7 @@ def build_xlsx_from_data(listings,changes,research,s,output=None):
     headers(ws,1); polish(ws)
 
     ws=wb.create_sheet("Methodology")
-    for row in [["Purpose","Decision-ready property market intelligence"],["Approved sources","Nigeria Property Centre; PropertyPro Nigeria; Estate Intel"],
+    for row in [["Purpose","Decision-ready property market intelligence"],["Comparable listing sources","Nigeria Property Centre; PropertyPro Nigeria"],["Research sources","Estate Intel public pages; Knight Frank Nigeria H1 2026 research reviewed as context; C&W Nigeria/Lagos-specific feed not yet verified"],
                 ["Freshness","Current listing data targeted to 31 days; weekly refresh"],["Coverage","9 nodes: Banana Island, Old Ikoyi, Lekki Phase 1, Victoria Island, Eko Atlantic, Ikeja GRA, Asokoro, Maitama, Wuse"],
                 ["Assets","Apartment sales/rentals 1–5BR; residential land; Estate Intel public research"],["Pricing","Asking prices; not confirmed closed transactions"],
                 ["Estate Intel","Public research only; premium/login-gated values excluded"],["Transport","NPC direct; PropertyPro and Estate Intel via Zyte browser HTML"],

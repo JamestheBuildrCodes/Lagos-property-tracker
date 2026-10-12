@@ -96,7 +96,7 @@ def verify_rows(rows: list[dict], chunk_size: int = 20) -> dict[str, dict]:
             "property type. If price, unit, transaction type, or bedroom evidence is "
             "ambiguous, missing, or contradictory, mark review. Do not reject a record "
             "just because optional plot size is absent. A listing-card check is not "
-            "proof of ownership or a closed deal. Return JSON object with a results "
+            "proof of ownership or a closed deal. Return a valid json object (JSON) with a results "
             "array; each item has record_id, status (pass or review), issues (array of "
             "short evidence-based strings). Include every input record_id exactly once."
         )

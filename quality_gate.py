@@ -1,18 +1,36 @@
 """Quality gate for normalized property listings."""
 from __future__ import annotations
-import csv,json,sys
+import csv,json,re,sys
 from pathlib import Path
 def num(v):
     try:return float(str(v).replace(",","").strip())
     except (TypeError,ValueError):return None
 def is_propertypro_agent(url):return "propertypro.ng/agent/" in (url or "").lower()
+
+def is_bulk_multi_unit_listing(row):
+    """Reject bulk blocks from per-apartment comparisons pending manual review."""
+    text = " ".join(str(row.get(key) or "") for key in ("title", "source_excerpt")).lower()
+    if not text.strip():
+        return False
+    return bool(re.search(
+        r"\b\d+\s+(?:units|apartments|flats)\b|"
+        r"\b(?:block of flats|block of apartments|entire block|whole building|"
+        r"multi[- ]unit|bulk (?:rent|sale|letting)|all units)\b",
+        text,
+    ))
 def process(path):
     with open(path,newline="",encoding="utf-8-sig") as f:rows=list(csv.DictReader(f))
-    kept=[];removed=[];fixed=[]
+    kept=[];removed=[];fixed=[];pre_review=[]
     for i,row in enumerate(rows,1):
         url=row.get("source_url","")
         if row.get("source")=="PropertyPro.ng" and is_propertypro_agent(url):
             removed.append({"row":i,"reason":"non-auditable PropertyPro agent/profile URL","url":url});continue
+        if (row.get("property_type") or "").lower() in {"flat_apartment","apartment","flat"} and is_bulk_multi_unit_listing(row):
+            row["_pre_review_reason"] = (
+                "Bulk multi-unit block listing is not comparable to a single-apartment bedroom segment; manual classification required."
+            )
+            pre_review.append(row)
+            continue
         if (row.get("property_type") or "").lower()=="land":
             if row.get("bedrooms") not in (None,"","0"):
                 row["bedrooms"]="";fixed.append({"row":i,"fix":"removed bedroom value from land record"})
@@ -38,6 +56,10 @@ def process(path):
     from ai_listing_verifier import verify_rows
     verification = verify_rows(kept)
     verified_rows=[];review_rows=[]
+    for row in pre_review:
+        row["ai_verification_status"]="review"
+        row["ai_verification_issues"]=row.pop("_pre_review_reason", "Bulk multi-unit listing needs manual review")
+        review_rows.append(row)
     for row in kept:
         rid=str(row.get("record_id") or "")
         result=verification.get(rid, {"status":"review","issues":["No verifier result returned"]})

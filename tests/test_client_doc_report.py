@@ -87,6 +87,10 @@ class ClientDocReportTests(unittest.TestCase):
             wb = load_workbook(out, data_only=True)
             self.assertIn("Estate Intel Public", wb.sheetnames)
             self.assertIn("Source Health", wb.sheetnames)
+            self.assertIn("Additional Sources", wb.sheetnames)
+            additional = wb["Additional Sources"]
+            self.assertIn("Knight Frank Nigeria", [additional.cell(i, 1).value for i in range(2, additional.max_row + 1)])
+            self.assertIn("Cushman & Wakefield (C&W)", [additional.cell(i, 1).value for i in range(2, additional.max_row + 1)])
             health = wb["Source Health"]
             row = next(i for i in range(2, health.max_row + 1) if health.cell(i, 1).value == "Estate Intel")
             self.assertEqual(health.cell(row, 2).value, 1)
@@ -115,7 +119,7 @@ class ClientDocReportTests(unittest.TestCase):
         self.assertEqual(len(rows), 1)
         self.assertEqual(rows[0]["label"], "3-bedroom")
         self.assertEqual(rows[0]["value"], "₦700,000,000 (single observed asking price)")
-        self.assertEqual(rows[0]["range"], "₦700,000,000 – ₦700,000,000")
+        self.assertEqual(rows[0]["range"], "Not meaningful with 1 listing")
         self.assertEqual(rows[0]["sample"], "1")
         self.assertEqual(rows[0]["source"], "PropertyPro.ng")
         self.assertEqual(rows[0]["as_of"], "2026-09-29")

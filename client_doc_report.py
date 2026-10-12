@@ -128,7 +128,7 @@ def bedroom_rows(listings, node, txn_type):
             {
                 "label": f"{beds} Bedroom — asking {'rent' if txn_type == 'rent' else 'sale price'}",
                 "value": reported_price,
-                "range": f"{fmt_naira(min(prices))} – {fmt_naira(max(prices))}",
+                "range": ("Not meaningful with 1 listing" if count == 1 else f"{fmt_naira(min(prices))} – {fmt_naira(max(prices))}"),
                 "sample": f"{count} listing{'s' if count != 1 else ''}",
                 "source_date": (
                     f"{example.get('source', 'Unknown')}, "
@@ -597,8 +597,9 @@ def _source_breakdown_rows(listings, node, txn_type, beds=None):
                 "label": label,
                 "value": reported_price,
                 "range": (
-                    f"{fmt_naira(min(prices))} – "
-                    f"{fmt_naira(max(prices))}"
+                    "Not meaningful with 1 listing"
+                    if count == 1
+                    else f"{fmt_naira(min(prices))} – {fmt_naira(max(prices))}"
                 ),
                 "plot_size": (
                     f"{min(plot_sizes):,.0f}–{max(plot_sizes):,.0f} sqm"
@@ -660,7 +661,7 @@ def _narrative_lines(listings, summary, research=None):
             "This is the current weekly market report generated from "
             "validated, auditable listing-level observations collected "
             "for the live tracker. Each reported price is a median for "
-            "the stated source and segment, with the observed range, "
+            "the stated source and segment, with the range shown only when more than one listing is observed, "
             "listing count, source, and collection date shown so the "
             "figure can be checked rather than read in isolation.",
         ),
@@ -700,10 +701,21 @@ def _narrative_lines(listings, summary, research=None):
         (
             "bullet",
             "Method: source-by-source medians from listing-level "
-            "asking prices, with observed min–max ranges and sample "
-            "counts. Only source observations from the last 7 days are "
+            "asking prices, with observed min–max ranges only where at least "
+            "two listings exist; a one-listing segment is explicitly not given a range. "
+            "Sample counts are shown. Only source observations from the last 7 days are "
             "included in the current snapshot. Sources are kept separate because "
             "platforms can contain different property mixes and price points.",
+        ),
+        (
+            "bullet",
+            "Additional research source assessed: Knight Frank Nigeria, Lagos Market Update H1 2026 "
+            "(https://www.knightfrank.com.ng/research/lagos-market-update-13035.aspx). It is market-level context, not a feed of current listing comparables; publication figures remain separate from the live listing sample.",
+        ),
+        (
+            "bullet",
+            "Cushman & Wakefield (C&W) official insights hub assessed "
+            "(https://www.cushmanwakefield.com/en/insights). A Nigeria/Lagos-specific public comparable feed was not verified in this review; local coverage and access remain to be confirmed before its figures are used.",
         ),
         (
             "bullet",

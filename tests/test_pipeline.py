@@ -246,6 +246,9 @@ class ClientReportingTests(unittest.TestCase):
     def test_sheet_and_doc_client_viewer_hooks_exist(self):
         self.assertIn("permissions().create", Path("sheets_writer.py").read_text(encoding="utf-8"))
         self.assertIn("REPORT_CLIENT_EMAIL", Path("sheets_writer.py").read_text(encoding="utf-8"))
+        self.assertIn("addChart", Path("sheets_writer.py").read_text(encoding="utf-8"))
+        self.assertIn("Charts & Commentary", Path("sheets_writer.py").read_text(encoding="utf-8"))
+        self.assertIn("Additional Sources", Path("sheets_writer.py").read_text(encoding="utf-8"))
 
 
 class FinalPresentationRegressionTests(unittest.TestCase):

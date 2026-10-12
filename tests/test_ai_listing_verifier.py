@@ -57,7 +57,10 @@ class AIListingVerifierTests(unittest.TestCase):
             result = ai_listing_verifier.verify_rows([row])
 
         self.assertEqual(result["abc123"]["status"], "pass")
-        sent = mocked.call_args.kwargs["json"]["input"]
+        body = mocked.call_args.kwargs["json"]
+        self.assertIn("json", body["instructions"])
+        self.assertEqual(body["text"]["format"]["type"], "json_object")
+        sent = body["input"]
         self.assertNotIn("source_url", sent)
         self.assertIn("source_card_text", sent)
 
