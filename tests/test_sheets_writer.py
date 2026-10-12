@@ -1,17 +1,23 @@
 """Regression tests for Google Sheets publication helpers."""
 import unittest
-from types import SimpleNamespace
 from unittest.mock import patch
 
 import gspread
 from sheets_writer import _retry_sheets_write, _verify_sheet_readback
 
 
+class FakeSheetsResponse:
+    def __init__(self, status_code, message):
+        self.status_code = status_code
+        self._payload = {"error": {"message": message, "status": "RESOURCE_EXHAUSTED"}}
+
+    def json(self):
+        return self._payload
+
+
 class FakeSheetsAPIError(gspread.exceptions.APIError):
     def __init__(self, status_code, message):
-        Exception.__init__(self, message)
-        self.response = SimpleNamespace(status_code=status_code)
-        self.code = status_code
+        super().__init__(FakeSheetsResponse(status_code, message))
 
 
 class SheetReadbackTests(unittest.TestCase):
