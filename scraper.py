@@ -512,10 +512,10 @@ def transaction_consistent_with_evidence(transaction: str, listing_url: str, car
         return True, ""
 
     text = str(card_text or "").lower()
-    sale_text = bool(re.search(r"\\bfor[\\s_-]+sale\\b", text))
+    sale_text = bool(re.search(r"\bfor[\s_-]+sale\b", text))
     rent_text = bool(re.search(
-        r"\\b(?:for[\\s_-]+rent|to[\\s_-]+rent|for[\\s_-]+let|to[\\s_-]+let|"
-        r"annual\\s+rent|rent(?:al)?\\s+per\\s+(?:annum|year)|per\\s+annum)\\b",
+        r"\b(?:for[\s_-]+rent|to[\s_-]+rent|for[\s_-]+let|to[\s_-]+let|"
+        r"annual\s+rent|rent(?:al)?\s+per\s+(?:annum|year)|per\s+annum)\b",
         text,
     ))
     if sale_text and rent_text:
