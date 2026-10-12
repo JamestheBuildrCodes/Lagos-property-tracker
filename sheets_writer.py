@@ -1,12 +1,42 @@
 """Mirror the reporting workbook into the existing Google Sheet with a client-first layout."""
 from __future__ import annotations
-import json, os, sys
+import json, os, sys, time
 from pathlib import Path
 import gspread
 from google.oauth2.service_account import Credentials
 SCOPES=["https://www.googleapis.com/auth/spreadsheets","https://www.googleapis.com/auth/drive"]
 DESIRED=["Executive Summary","Area Scorecard","Current Listings","Weekly Changes","Estate Intel Public","Additional Sources","Source Health","Methodology"]
 NAVY={"red":0.05,"green":0.14,"blue":0.25}; LIGHT={"red":0.91,"green":0.94,"blue":0.97}; WHITE={"red":1,"green":1,"blue":1}; TEXT={"red":0.09,"green":0.13,"blue":0.20}
+def _retry_sheets_write(label, operation, *args, max_attempts=6, **kwargs):
+    """Retry transient Google Sheets write failures with exponential backoff.
+
+    Sheets enforces per-user write quotas. Waiting for the quota window to roll
+    over is safer than failing the entire weekly report on a temporary HTTP 429.
+    Non-quota API errors are raised immediately.
+    """
+    for attempt in range(1, max_attempts + 1):
+        try:
+            return operation(*args, **kwargs)
+        except gspread.exceptions.APIError as exc:
+            response = getattr(exc, "response", None)
+            status = getattr(response, "status_code", None) or getattr(exc, "code", None)
+            message = str(exc).lower()
+            retryable = status in {429, 500, 502, 503, 504} or (
+                "quota exceeded" in message or "rate limit" in message
+            )
+            if not retryable or attempt >= max_attempts:
+                raise
+            # 5s, 10s, 20s, 40s, then up to 60s: lets a per-minute
+            # quota window reset while retaining a bounded overall wait.
+            delay = min(60, 5 * (2 ** (attempt - 1)))
+            print(
+                f"Google Sheets write '{label}' hit a temporary API limit "
+                f"(HTTP {status or 'unknown'}); retrying in {delay}s "
+                f"(attempt {attempt}/{max_attempts - 1})."
+            )
+            time.sleep(delay)
+
+
 def get_client():
     raw=os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON","").strip()
     if not raw: raise RuntimeError("GOOGLE_SERVICE_ACCOUNT_JSON is missing")
@@ -19,40 +49,86 @@ def share_viewer(sheet_id,email):
     client,_=get_client(); drive=build("drive","v3",credentials=client.auth,cache_discovery=False)
     drive.permissions().create(fileId=sheet_id,body={"type":"user","role":"reader","emailAddress":email},sendNotificationEmail=False).execute(); print(f"Google Sheet viewer access granted: {email}")
 def style(ws,name,rows,cols):
-    ws.clear_basic_filter(); ws.freeze(rows=3 if name=="Executive Summary" else 1)
-    ws.format(f"A1:{gspread.utils.rowcol_to_a1(1,cols)}",{"backgroundColor":NAVY,"textFormat":{"foregroundColor":WHITE,"bold":True,"fontSize":11},"verticalAlignment":"MIDDLE"})
+    _retry_sheets_write(f"{name}: clear filter", ws.clear_basic_filter)
+    _retry_sheets_write(
+        f"{name}: freeze header", ws.freeze,
+        rows=3 if name=="Executive Summary" else 1
+    )
+    _retry_sheets_write(
+        f"{name}: style title",
+        ws.format,
+        f"A1:{gspread.utils.rowcol_to_a1(1,cols)}",
+        {"backgroundColor":NAVY,"textFormat":{"foregroundColor":WHITE,"bold":True,"fontSize":11},"verticalAlignment":"MIDDLE"}
+    )
     if name=="Executive Summary":
-        ws.format("A2:C2",{"textFormat":{"foregroundColor":TEXT,"italic":True}})
-        ws.format("A3:C3",{"backgroundColor":LIGHT,"textFormat":{"foregroundColor":NAVY,"bold":True},"horizontalAlignment":"LEFT"})
-        ws.format("A14:C14",{"backgroundColor":LIGHT,"textFormat":{"foregroundColor":NAVY,"bold":True,"fontSize":12}})
-        ws.format("A21:C21",{"backgroundColor":LIGHT,"textFormat":{"foregroundColor":NAVY,"bold":True,"fontSize":12}})
-    ws.format(f"A1:{gspread.utils.rowcol_to_a1(rows,cols)}",{"wrapStrategy":"WRAP","verticalAlignment":"TOP","textFormat":{"foregroundColor":TEXT}})
+        _retry_sheets_write(
+            f"{name}: style date", ws.format, "A2:C2",
+            {"textFormat":{"foregroundColor":TEXT,"italic":True}}
+        )
+        _retry_sheets_write(
+            f"{name}: style column headings", ws.format, "A3:C3",
+            {"backgroundColor":LIGHT,"textFormat":{"foregroundColor":NAVY,"bold":True},"horizontalAlignment":"LEFT"}
+        )
+        _retry_sheets_write(
+            f"{name}: style decision signals", ws.format, "A14:C14",
+            {"backgroundColor":LIGHT,"textFormat":{"foregroundColor":NAVY,"bold":True,"fontSize":12}}
+        )
+        _retry_sheets_write(
+            f"{name}: style market interpretation", ws.format, "A21:C21",
+            {"backgroundColor":LIGHT,"textFormat":{"foregroundColor":NAVY,"bold":True,"fontSize":12}}
+        )
+    _retry_sheets_write(
+        f"{name}: wrap worksheet", ws.format,
+        f"A1:{gspread.utils.rowcol_to_a1(rows,cols)}",
+        {"wrapStrategy":"WRAP","verticalAlignment":"TOP","textFormat":{"foregroundColor":TEXT}}
+    )
     # Emphasise the headline metric values on the Executive Summary.
-    if name=="Executive Summary": ws.format("B4:B12",{"textFormat":{"bold":True,"foregroundColor":NAVY}})
-    try: ws.columns_auto_resize(0,cols)
-    except Exception as exc: print(f"Column auto-resize skipped for {name}: {exc}")
+    if name=="Executive Summary":
+        _retry_sheets_write(
+            f"{name}: emphasize headline metrics", ws.format, "B4:B12",
+            {"textFormat":{"bold":True,"foregroundColor":NAVY}}
+        )
+    try:
+        _retry_sheets_write(
+            f"{name}: auto resize columns", ws.columns_auto_resize, 0, cols
+        )
+    except Exception as exc:
+        print(f"Column auto-resize skipped for {name}: {exc}")
+
 def add_live_chart_dashboard(sheet):
-    """Create real Google Sheets charts over the just-refreshed Area Scorecard."""
+    """Create/update the chart dashboard with quota-aware Google Sheets writes."""
     score = sheet.worksheet("Area Scorecard")
     try:
         dashboard = sheet.worksheet("Charts & Commentary")
-        dashboard.clear()
     except gspread.WorksheetNotFound:
-        dashboard = sheet.add_worksheet(title="Charts & Commentary", rows=60, cols=16)
-    dashboard.resize(rows=60, cols=16)
-    dashboard.update([
-        ["Charts & Commentary — current asking-price observations"],
-        ["These graphs compare the validated listing sample; they are not closed transaction prices or a full-market census."],
-        ["Read with Area Scorecard sample counts. Segments with fewer than five comparables are thin and should be treated as directional."],
-        ["Source assessment: Knight Frank Nigeria research is contextual only; C&W Nigeria/Lagos comparable coverage remains unverified."],
-        ["Distribution: weekly Monday 08:00 Lagos time; the send receipt verifies provider acceptance, not final inbox placement. Estate Intel commercial status requires direct confirmation."],
-    ], "A1")
-    dashboard.format("A1:P1", {"backgroundColor": NAVY, "textFormat": {"foregroundColor": WHITE, "bold": True, "fontSize": 13}})
-    dashboard.format("A2:P5", {"wrapStrategy": "WRAP", "verticalAlignment": "TOP", "textFormat": {"foregroundColor": TEXT}})
-    try:
-        dashboard.columns_auto_resize(0, 8)
-    except Exception as exc:
-        print(f"Chart dashboard resize skipped: {exc}")
+        dashboard = _retry_sheets_write(
+            "create Charts & Commentary dashboard",
+            sheet.add_worksheet, title="Charts & Commentary", rows=60, cols=16
+        )
+
+    # The dashboard contains fixed explanatory copy and embedded charts. Do not
+    # clear or resize it on every weekly run; that adds two quota-consuming
+    # writes without changing the layout. Overwrite the five populated cells.
+    _retry_sheets_write(
+        "update dashboard commentary",
+        dashboard.update,
+        [
+            ["Charts & Commentary — current asking-price observations"],
+            ["These graphs compare the validated listing sample; they are not closed transaction prices or a full-market census."],
+            ["Read with Area Scorecard sample counts. Segments with fewer than five comparables are thin and should be treated as directional."],
+            ["Source assessment: Knight Frank Nigeria research is contextual only; C&W Nigeria/Lagos comparable coverage remains unverified."],
+            ["Distribution: weekly Monday 08:00 Lagos time; the send receipt verifies provider acceptance, not final inbox placement. Estate Intel commercial status requires direct confirmation."],
+        ],
+        "A1"
+    )
+    _retry_sheets_write(
+        "format dashboard title", dashboard.format, "A1:P1",
+        {"backgroundColor": NAVY, "textFormat": {"foregroundColor": WHITE, "bold": True, "fontSize": 13}}
+    )
+    _retry_sheets_write(
+        "format dashboard commentary", dashboard.format, "A2:P5",
+        {"wrapStrategy": "WRAP", "verticalAlignment": "TOP", "textFormat": {"foregroundColor": TEXT}}
+    )
 
     metadata = sheet.fetch_sheet_metadata()
     requests = []
@@ -98,7 +174,9 @@ def add_live_chart_dashboard(sheet):
                 }
             }
         })
-    sheet.batch_update({"requests": requests})
+    _retry_sheets_write(
+        "refresh dashboard charts", sheet.batch_update, {"requests": requests}
+    )
     print("Google Sheets chart dashboard updated with three live area-comparison charts.")
 
 
@@ -149,9 +227,18 @@ def run():
         if name not in wb.sheetnames: continue
         values=[[cell.value for cell in row] for row in wb[name].iter_rows()]
         if not values: continue
-        try: ws=sheet.worksheet(name); ws.clear()
-        except gspread.WorksheetNotFound: ws=sheet.add_worksheet(title=name,rows=max(len(values)+10,100),cols=max(max(len(r) for r in values),10))
-        rows=max(len(values)+5,20); cols=max(max((len(r) for r in values),default=1)+2,10); ws.resize(rows=rows,cols=cols); ws.update(values,"A1")
+        try:
+            ws=sheet.worksheet(name)
+            _retry_sheets_write(f"{name}: clear previous values", ws.clear)
+        except gspread.WorksheetNotFound:
+            ws=_retry_sheets_write(
+                f"{name}: create worksheet", sheet.add_worksheet,
+                title=name, rows=max(len(values)+10,100),
+                cols=max(max(len(r) for r in values),10)
+            )
+        rows=max(len(values)+5,25); cols=max(max((len(r) for r in values),default=1)+2,10)
+        _retry_sheets_write(f"{name}: resize worksheet", ws.resize, rows=rows, cols=cols)
+        _retry_sheets_write(f"{name}: write workbook values", ws.update, values, "A1")
         # Read back the written range from the live Google Sheet and compare
         # it with the exact workbook values. This catches partial writes,
         # row/column drift, and stale-tab updates before the run is reported
@@ -164,7 +251,13 @@ def run():
             try:
                 header=[str(x or "").lower() for x in values[0]]
                 for idx,h in enumerate(header,1):
-                    if "asking_price" in h or "price_per_sqm" in h or "rent" in h: ws.format(f"{gspread.utils.rowcol_to_a1(1,idx).replace('1','')}2:{gspread.utils.rowcol_to_a1(rows,idx)}",{"numberFormat":{"type":"NUMBER","pattern":"₦#,##0"}})
+                    if "asking_price" in h or "price_per_sqm" in h or "rent" in h:
+                        _retry_sheets_write(
+                            f"Current Listings: currency format column {idx}",
+                            ws.format,
+                            f"{gspread.utils.rowcol_to_a1(1,idx).replace('1','')}2:{gspread.utils.rowcol_to_a1(rows,idx)}",
+                            {"numberFormat":{"type":"NUMBER","pattern":"₦#,##0"}}
+                        )
             except Exception as exc: print(f"Currency formatting skipped: {exc}")
     add_live_chart_dashboard(sheet)
     client_email=os.environ.get("REPORT_CLIENT_EMAIL","").strip()
