@@ -27,7 +27,7 @@ _SIZE = re.compile(
     r"([\d,.]+)\s*(?:sqm|sq\.?\s*m|m²|m2)\b|"
     r"([\d,.]+)\s+square\s+met(?:re|er)s?\b", re.I,
 )
-_BEDROOM = re.compile(r"\b([1-5])\s*(?:bedroom|bedrooms|bed)\b", re.I)
+_BEDROOM = re.compile(r"\b([1-5])[\s-]*(?:bedroom|bedrooms|bed)\b", re.I)
 _BEDROOM_WORD = re.compile(
     r"\b(one|two|three|four|five)[ -]bed(?:room)?s?\b", re.I,
 )
