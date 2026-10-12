@@ -102,6 +102,38 @@ def add_live_chart_dashboard(sheet):
     print("Google Sheets chart dashboard updated with three live area-comparison charts.")
 
 
+def _verify_sheet_readback(name, expected_values, written_values):
+    """Compare a worksheet write while accounting for Sheets omitting trailing empty cells.
+
+    The Google Sheets values API may omit empty cells at the end of each row and
+    entirely empty trailing rows. Normalize both grids to the workbook's expected
+    rectangle, but still fail on any missing or changed non-empty value.
+    """
+    row_count = len(expected_values)
+    width = max((len(row) for row in expected_values), default=0)
+
+    def rectangular_grid(grid):
+        normalized = []
+        for row_index in range(row_count):
+            row = grid[row_index] if row_index < len(grid) else []
+            normalized.append([
+                str(row[col_index] if col_index < len(row) and row[col_index] is not None else "")
+                for col_index in range(width)
+            ])
+        return normalized
+
+    expected = rectangular_grid(expected_values)
+    actual = rectangular_grid(written_values)
+    for row_index, (expected_row, actual_row) in enumerate(zip(expected, actual), start=1):
+        for col_index, (expected_cell, actual_cell) in enumerate(zip(expected_row, actual_row), start=1):
+            if expected_cell != actual_cell:
+                cell = gspread.utils.rowcol_to_a1(row_index, col_index)
+                raise RuntimeError(
+                    f"Google Sheet readback mismatch in worksheet '{name}' at {cell}; "
+                    "cell values differ (values omitted from log)."
+                )
+
+
 def run():
     if len(sys.argv)<2: raise SystemExit("Usage: python sheets_writer.py <listings.csv> [changes.csv] [research.csv] [xlsx_path]")
     xlsx_path=sys.argv[4] if len(sys.argv)>4 else ""
@@ -125,10 +157,7 @@ def run():
         # row/column drift, and stale-tab updates before the run is reported
         # as successful.
         written = ws.get(f"A1:{gspread.utils.rowcol_to_a1(len(values), max(len(r) for r in values))}")
-        expected = [[str(value if value is not None else "") for value in row] for row in values]
-        actual = [[str(v or "") for v in row] for row in written]
-        if actual != expected:
-            raise RuntimeError(f"Google Sheet readback mismatch in worksheet '{name}'")
+        _verify_sheet_readback(name, values, written)
         style(ws,name,rows,cols)
         if name in {"Current Listings","Weekly Changes","Estate Intel Public"}: ws.freeze(rows=1)
         if name=="Current Listings":
