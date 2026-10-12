@@ -539,18 +539,47 @@ def _source_breakdown_rows(listings, node, txn_type, beds=None):
             else "Land"
         )
 
+        count = len(prices)
+        if count == 1:
+            reported_price = f"{fmt_naira(prices[0])} (single observed asking price)"
+        elif count == 2:
+            reported_price = f"{fmt_naira(statistics.median(prices))} (midpoint of 2 listings; not a stable median)"
+        else:
+            reported_price = f"{fmt_naira(statistics.median(prices))} (median)"
+
+        plot_sizes = [
+            fnum(r.get("size_sqm") or r.get("land_area_sqm"))
+            for r in source_rows
+        ]
+        plot_sizes = [size for size in plot_sizes if size is not None and size > 0]
+        price_per_sqm = [
+            price / size
+            for price, row in zip(
+                [fnum(r.get("asking_price_ngn")) for r in source_rows],
+                source_rows,
+            )
+            for size in [fnum(row.get("size_sqm") or row.get("land_area_sqm"))]
+            if price is not None and price > 0 and size is not None and size > 0
+        ]
+
         out.append(
             {
                 "label": label,
-                "value": (
-                    f"{fmt_naira(statistics.median(prices))} "
-                    "(median)"
-                ),
+                "value": reported_price,
                 "range": (
                     f"{fmt_naira(min(prices))} – "
                     f"{fmt_naira(max(prices))}"
                 ),
-                "sample": str(len(prices)),
+                "plot_size": (
+                    f"{min(plot_sizes):,.0f}–{max(plot_sizes):,.0f} sqm"
+                    if len(plot_sizes) > 1 and min(plot_sizes) != max(plot_sizes)
+                    else f"{plot_sizes[0]:,.0f} sqm" if plot_sizes else "Not stated by source"
+                ) if beds is None else "—",
+                "price_per_sqm": (
+                    f"{fmt_naira(statistics.median(price_per_sqm))}/sqm"
+                    if price_per_sqm else "Not calculable: plot size missing"
+                ) if beds is None else "—",
+                "sample": str(count),
                 "source": source,
                 "as_of": source_as_of(latest),
                 "link": latest.get("source_url", ""),
@@ -1100,7 +1129,7 @@ def build_docx(
 
         t = doc.add_table(
             rows=1,
-            cols=6,
+            cols=8,
         )
         t.style = "Table Grid"
         t.autofit = True
@@ -1109,6 +1138,8 @@ def build_docx(
             "Segment",
             "Reported price",
             "Range",
+            "Plot size",
+            "Asking price/sqm",
             "Listings (n)",
             "Source",
             "As of",
@@ -1133,7 +1164,11 @@ def build_docx(
                 item.get("label", ""),
                 item.get("value", ""),
                 item.get("range", "—"),
+                item.get("plot_size", "—"),
+                item.get("price_per_sqm", "—"),
                 item.get("sample", ""),
+                item.get("source", ""),
+                item.get("as_of", ""),
             ]
 
             for i, value in enumerate(values):
