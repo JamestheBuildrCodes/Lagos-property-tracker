@@ -738,9 +738,9 @@ def _narrative_lines(listings, summary, research=None):
     if dq:
         lines.append((
             "bullet",
-            f"AI evidence-consistency check: {dq.get('ai_verified_rows', 0)} listing rows passed; "
+            f"Deterministic source-evidence check: {dq.get('evidence_verified_rows', 0)} listing rows passed; "
             f"{dq.get('quarantined_for_review', 0)} were quarantined for review. "
-            "This compares extracted fields with captured public listing-card text; it is not proof of ownership or a closed transaction.",
+            "This compares extracted fields with captured public listing-card text and detail URLs; it is not proof of ownership or a closed transaction.",
         ))
 
     rental_groups = []
@@ -2611,7 +2611,7 @@ def main():
         quality = json.loads(Path("market_output_quality.json").read_text(encoding="utf-8"))
         summary["data_quality"] = {
             "input_rows": quality.get("input_rows"),
-            "ai_verified_rows": quality.get("ai_verified_rows", quality.get("output_rows")),
+            "evidence_verified_rows": quality.get("evidence_verified_rows", quality.get("output_rows")),
             "quarantined_for_review": quality.get("quarantined_for_review", 0),
         }
     except (OSError, json.JSONDecodeError):
