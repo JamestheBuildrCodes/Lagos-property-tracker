@@ -1,0 +1,10 @@
+{
+  "verified_at_utc": "2026-10-12T21:19:13.901063+00:00",
+  "publication_status": "fallback_to_existing_layer3_google_doc",
+  "client_preferred_doc_created": false,
+  "client_preferred_doc_content_verified": false,
+  "fallback_document_url": "https://docs.google.com/document/d/1x2FsxsnqpLQ5j3Efu5d8G7Xmdo190F7UV7vTht6aHJ8/edit",
+  "fallback_source": "docs_writer.py (service-account publication)",
+  "oauth_error": "invalid_grant: OAuth refresh token expired or revoked",
+  "action_required": "Re-authorize Google OAuth and replace the GOOGLE_OAUTH_TOKEN_JSON GitHub Actions secret to restore the client-preferred weekly document."
+}

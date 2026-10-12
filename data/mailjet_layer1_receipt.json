@@ -1,0 +1,26 @@
+{
+  "accepted_at_utc": "2026-10-12T21:19:14.793760+00:00",
+  "http_status": 200,
+  "custom_id": "lagos-property-layer1-38307483104-20261012T211914Z",
+  "subject": "Lagos & Abuja Property Market — Weekly Intelligence Brief",
+  "layer": "layer1",
+  "message_results": [
+    {
+      "status": "success",
+      "recipients": [
+        {
+          "field": "To",
+          "email": "H***@yahoo.co.uk",
+          "message_id": 1152921545512116292,
+          "message_uuid": "00a272e5-d5b4-4cbf-8c02-84b882e1aef6"
+        },
+        {
+          "field": "Cc",
+          "email": "t***@gmail.com",
+          "message_id": 1152921545512116293,
+          "message_uuid": "18eda09b-1382-4d69-8819-b1ca5ebf58b0"
+        }
+      ]
+    }
+  ]
+}

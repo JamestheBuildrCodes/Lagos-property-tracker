@@ -1,10 +1,11 @@
 {
-  "date": "2026-10-01",
+  "date": "2026-10-12",
   "manifest_entries": 207,
   "category_requests": 54,
-  "listing_rows": 90,
+  "listing_rows": 166,
   "estate_intel_rows": 9,
   "failures": [],
-  "quality_rejections": 905,
+  "quality_rejections": 1392,
+  "stale_rejections": 509,
   "listing_quality_policy": "Only detail URLs whose canonical node slug matches the assigned node are admitted; explicit conflicting node evidence is rejected."
 }
