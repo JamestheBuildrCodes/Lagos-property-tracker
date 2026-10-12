@@ -241,29 +241,109 @@ def _openai_verify_rows(rows: list[dict], chunk_size: int = 20) -> dict[str, dic
     return results
 
 
+
+def _groq_verify_rows(rows: list[dict], chunk_size: int = 20) -> dict[str, dict]:
+    """Optional Groq OpenAI-compatible JSON pass; callers must tolerate quota failures."""
+    api_key = os.environ.get("GROQ_API_KEY", "").strip()
+    if not api_key:
+        raise RuntimeError("GROQ_API_KEY is missing")
+    model = os.environ.get("GROQ_MODEL", "openai/gpt-oss-20b").strip() or "openai/gpt-oss-20b"
+    results: dict[str, dict] = {}
+    eligible_rows = [row for row in rows if str(row.get("source_excerpt") or "").strip()]
+    for start in range(0, len(eligible_rows), chunk_size):
+        chunk = eligible_rows[start:start + chunk_size]
+        payload_rows = [{
+            "record_id": str(row.get("record_id") or ""),
+            "source_card_text": _safe_excerpt(str(row.get("source_excerpt") or "")),
+            "extracted": {key: row.get(key) for key in (
+                "market_node", "transaction", "property_type", "bedrooms",
+                "asking_price_ngn", "size_sqm", "price_per_sqm_ngn", "listing_date",
+            )},
+        } for row in chunk]
+        instructions = (
+            "Cross-check extracted property-listing fields only against the supplied public listing-card text. "
+            "Do not invent values. Mark pass only if asking price, transaction, bedroom count, property type, "
+            "and any stated plot size agree. Ambiguous or contradictory evidence must be review. "
+            "Return a valid JSON object with a results array containing every record_id exactly once."
+        )
+        body = {
+            "model": model,
+            "messages": [
+                {"role": "system", "content": instructions},
+                {"role": "user", "content": "Validate the following JSON listing data and return a JSON object of results:\n" + json.dumps(payload_rows, ensure_ascii=False)},
+            ],
+            "temperature": 0,
+            "response_format": {"type": "json_object"},
+        }
+        response = requests.post(
+            "https://api.groq.com/openai/v1/chat/completions",
+            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+            json=body,
+            timeout=(10, 60),
+        )
+        if response.status_code >= 300:
+            raise RuntimeError(f"Groq API HTTP {response.status_code}: {response.text[:400]}")
+        choices = response.json().get("choices") or []
+        if not choices or not isinstance(choices[0].get("message", {}).get("content"), str):
+            raise ValueError("Groq response contains no assistant JSON content")
+        parsed = json.loads(choices[0]["message"]["content"])
+        returned = parsed.get("results")
+        if not isinstance(returned, list):
+            raise ValueError("Groq verification response lacks results array")
+        expected_ids = {str(row.get("record_id") or "") for row in chunk}
+        seen = set()
+        for item in returned:
+            if not isinstance(item, dict):
+                continue
+            rid = str(item.get("record_id") or "")
+            if rid not in expected_ids or rid in seen:
+                continue
+            seen.add(rid)
+            issues = item.get("issues") if isinstance(item.get("issues"), list) else []
+            status = str(item.get("status") or "").lower()
+            if status != "pass" or issues:
+                status = "review"
+            results[rid] = {"status": status, "issues": [str(issue)[:300] for issue in issues[:6]], "method": "groq"}
+        for rid in expected_ids - seen:
+            results[rid] = {"status": "review", "issues": ["Groq response omitted this record; unable to verify"], "method": "groq"}
+    return results
+
+
 def verify_rows(rows: list[dict], chunk_size: int = 20) -> dict[str, dict]:
     """Return results from deterministic evidence checks; AI is opt-in and non-blocking."""
     results = {str(row.get("record_id") or ""): deterministic_verify_row(row) for row in rows}
     mode = os.environ.get("EVIDENCE_VERIFICATION_MODE", "deterministic").strip().lower()
-    if mode != "openai":
+    if mode not in {"openai", "groq"}:
+        return results
+    # Only send deterministic passes to the optional model for a second opinion.
+    # Missing/conflicting source evidence is already quarantined without API use.
+    eligible = [
+        row for row in rows
+        if results.get(str(row.get("record_id") or ""), {}).get("status") == "pass"
+    ]
+    if not eligible:
         return results
     try:
-        ai_results = _openai_verify_rows(rows, chunk_size=chunk_size)
+        ai_results = (
+            _openai_verify_rows(eligible, chunk_size=chunk_size)
+            if mode == "openai"
+            else _groq_verify_rows(eligible, chunk_size=chunk_size)
+        )
     except Exception as exc:
-        print(f"[Evidence verifier] Optional OpenAI pass unavailable; keeping deterministic decisions: {type(exc).__name__}: {exc}")
+        print(f"[Evidence verifier] Optional {mode} pass unavailable; keeping deterministic decisions: {type(exc).__name__}: {exc}")
         return results
-    for row in rows:
+    for row in eligible:
         rid = str(row.get("record_id") or "")
         deterministic = results.get(rid, {"status": "review", "issues": ["Missing deterministic result"]})
         ai = ai_results.get(rid)
         # Optional AI may send an evidence-passing row to review, but may never
         # override a deterministic failure into a pass.
-        if deterministic["status"] == "pass" and ai and ai.get("status") != "pass":
+        if ai and ai.get("status") != "pass":
             results[rid] = {
                 "status": "review",
                 "issues": list(deterministic.get("issues", [])) + list(ai.get("issues", ["Optional AI requested review"]))[:6],
-                "method": "deterministic+openai",
+                "method": f"deterministic+{mode}",
             }
         else:
-            deterministic["method"] = "deterministic+openai" if ai else "deterministic"
+            deterministic["method"] = f"deterministic+{mode}" if ai else "deterministic"
     return results
