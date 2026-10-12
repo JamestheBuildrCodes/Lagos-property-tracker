@@ -114,7 +114,7 @@ class ClientDocReportTests(unittest.TestCase):
         )
         self.assertEqual(len(rows), 1)
         self.assertEqual(rows[0]["label"], "3-bedroom")
-        self.assertEqual(rows[0]["value"], "₦700,000,000 (median)")
+        self.assertEqual(rows[0]["value"], "₦700,000,000 (single observed asking price)")
         self.assertEqual(rows[0]["range"], "₦700,000,000 – ₦700,000,000")
         self.assertEqual(rows[0]["sample"], "1")
         self.assertEqual(rows[0]["source"], "PropertyPro.ng")
