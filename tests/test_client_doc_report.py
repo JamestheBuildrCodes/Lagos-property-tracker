@@ -91,6 +91,7 @@ class ClientDocReportTests(unittest.TestCase):
             additional = wb["Additional Sources"]
             self.assertIn("Knight Frank Nigeria", [additional.cell(i, 1).value for i in range(2, additional.max_row + 1)])
             self.assertIn("Cushman & Wakefield (C&W)", [additional.cell(i, 1).value for i in range(2, additional.max_row + 1)])
+            self.assertIn("Estate Intel commercial arrangement status", [additional.cell(i, 1).value for i in range(2, additional.max_row + 1)])
             health = wb["Source Health"]
             row = next(i for i in range(2, health.max_row + 1) if health.cell(i, 1).value == "Estate Intel")
             self.assertEqual(health.cell(row, 2).value, 1)
@@ -161,6 +162,8 @@ class ClientDocReportTests(unittest.TestCase):
         rendered = "\n".join(value for kind, value in narrative if kind != "table")
         self.assertIn("Port Harcourt is not currently tracked", rendered)
         self.assertIn("Estate Intel", rendered)
+        self.assertIn("commercial arrangement", rendered.lower())
+        self.assertIn("08:00 Lagos time", rendered)
         self.assertIn("1. What This Report Is", rendered)
         self.assertIn("7. What Happens Next", rendered)
         self.assertIn("8. Sources & Definitions", rendered)

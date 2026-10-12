@@ -45,9 +45,10 @@ def add_live_chart_dashboard(sheet):
         ["These graphs compare the validated listing sample; they are not closed transaction prices or a full-market census."],
         ["Read with Area Scorecard sample counts. Segments with fewer than five comparables are thin and should be treated as directional."],
         ["Source assessment: Knight Frank Nigeria research is contextual only; C&W Nigeria/Lagos comparable coverage remains unverified."],
+        ["Distribution: weekly Monday 08:00 Lagos time; the send receipt verifies provider acceptance, not final inbox placement. Estate Intel commercial status requires direct confirmation."],
     ], "A1")
     dashboard.format("A1:P1", {"backgroundColor": NAVY, "textFormat": {"foregroundColor": WHITE, "bold": True, "fontSize": 13}})
-    dashboard.format("A2:P4", {"wrapStrategy": "WRAP", "verticalAlignment": "TOP", "textFormat": {"foregroundColor": TEXT}})
+    dashboard.format("A2:P5", {"wrapStrategy": "WRAP", "verticalAlignment": "TOP", "textFormat": {"foregroundColor": TEXT}})
     try:
         dashboard.columns_auto_resize(0, 8)
     except Exception as exc:

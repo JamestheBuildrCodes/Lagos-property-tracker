@@ -29,6 +29,14 @@ SUPPLEMENTAL_SOURCE_ASSESSMENTS = [
         "Use in report": "Potential future commercial-market context after local coverage is confirmed; not a current comparable listing source.",
         "Next step / limitation": "Confirm local/regional Nigeria coverage, data definitions and reuse/access permissions before adding any figures to market analysis.",
     },
+    {
+        "Source": "Estate Intel commercial arrangement status",
+        "Official page": "https://estateintel.com/about",
+        "Source type": "Subscription / commercial access status",
+        "Assessment": "Current client agreement, paid subscription, or pending negotiation is not verifiable from the repository or public pages reviewed.",
+        "Use in report": "The tracker currently uses public research pages only; premium/login-gated content is not collected.",
+        "Next step / limitation": "Confirm status with the account owner and Estate Intel directly before claiming a commercial arrangement is active or pending.",
+    },
 ]
 
 def esc(v):
@@ -159,7 +167,9 @@ def build_executive_html_from_summary(s,date=None,doc_url="",sheet_url=""):
     ]
     for label,value,context in metrics:
         html_parts.append(f"<tr><td style=\"padding:9px;border-bottom:1px solid #d9e1ea\">{esc(label)}</td><td style=\"padding:9px;border-bottom:1px solid #d9e1ea\"><b>{esc(value)}</b></td><td style=\"padding:9px;border-bottom:1px solid #d9e1ea\">{esc(context)}</td></tr>")
-    html_parts.append("</table><h2 style=\"font-size:19px\">What changed this week?</h2>")
+    html_parts.append("</table>")
+    html_parts.append("<p><b>Reporting and distribution:</b> The automated scan is scheduled weekly for Mondays at 08:00 Lagos time (07:00 UTC). Client email is dispatched only after quality checks and report publication succeed. The workflow checks the email provider receipt; that confirms provider acceptance, not guaranteed inbox placement.</p>")
+    html_parts.append("<h2 style=\"font-size:19px\">What changed this week?</h2>")
     if ai_commentary.get("key_findings"):
         html_parts.append("<ul>")
         html_parts.extend(f"<li style=\"margin:6px 0\">{esc(x)}</li>" for x in ai_commentary["key_findings"])
@@ -366,7 +376,7 @@ def build_xlsx_from_data(listings,changes,research,s,output=None):
 
     ws=wb.create_sheet("Methodology")
     for row in [["Purpose","Decision-ready property market intelligence"],["Comparable listing sources","Nigeria Property Centre; PropertyPro Nigeria"],["Research sources","Estate Intel public pages; Knight Frank Nigeria H1 2026 research reviewed as context; C&W Nigeria/Lagos-specific feed not yet verified"],
-                ["Freshness","Current listing data targeted to 31 days; weekly refresh"],["Coverage","9 nodes: Banana Island, Old Ikoyi, Lekki Phase 1, Victoria Island, Eko Atlantic, Ikeja GRA, Asokoro, Maitama, Wuse"],
+                ["Freshness","Current listing data targeted to 7 days; weekly refresh"],["Reporting & distribution","Scheduled Mondays at 08:00 Lagos time (07:00 UTC); email is attempted only after quality gates and publication, with provider receipt checked but inbox placement not guaranteed"],["Estate Intel commercial access","Not verifiable from this repository; confirm current agreement/subscription directly with account owner/vendor. Public pages only are used by this pipeline."],["Coverage","9 nodes: Banana Island, Old Ikoyi, Lekki Phase 1, Victoria Island, Eko Atlantic, Ikeja GRA, Asokoro, Maitama, Wuse"],
                 ["Assets","Apartment sales/rentals 1–5BR; residential land; Estate Intel public research"],["Pricing","Asking prices; not confirmed closed transactions"],
                 ["Estate Intel","Public research only; premium/login-gated values excluded"],["Transport","NPC direct; PropertyPro and Estate Intel via Zyte browser HTML"],
                 ["History","Available-period directional comparison; labelled six-month only after at least 180 days of coverage"],["Decision use","Executive Summary for decisions; Area Scorecard for comparison; Current Listings for audit"]]: ws.append(row)

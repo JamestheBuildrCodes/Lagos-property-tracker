@@ -700,6 +700,14 @@ def _narrative_lines(listings, summary, research=None):
         ),
         (
             "bullet",
+            "Estate Intel commercial arrangements: the current agreement or subscription status is not evidenced in the repository or automation settings and must be confirmed directly with the account owner/vendor. This pipeline currently uses public research pages only; it does not access premium/login-gated data.",
+        ),
+        (
+            "bullet",
+            "Reporting cadence and distribution: scheduled weekly on Mondays at 08:00 Lagos time (07:00 UTC). The automated email step runs only after quality validation and report publication; the provider send receipt confirms acceptance by the email service, not guaranteed inbox placement.",
+        ),
+        (
+            "bullet",
             "Method: source-by-source medians from listing-level "
             "asking prices, with observed min–max ranges only where at least "
             "two listings exist; a one-listing segment is explicitly not given a range. "
