@@ -82,9 +82,10 @@ jobs:
 
       - name: Apply market data quality gate
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL || 'gpt-4.1-mini' }}
-          EVIDENCE_VERIFICATION_MODE: "deterministic"
+          # Optional free Groq pass when GROQ_API_KEY is configured; otherwise
+          # deterministic evidence checks run with no model credits or API calls.
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          EVIDENCE_VERIFICATION_MODE: ${{ secrets.GROQ_API_KEY != '' && 'groq' || 'deterministic' }}
         run: |
           CURR=$(ls -t property_listings_*.csv | head -n 1)
           test -s "$CURR"
