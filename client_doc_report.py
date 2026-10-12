@@ -714,6 +714,15 @@ def _narrative_lines(listings, summary, research=None):
         ),
     ]
 
+    dq = summary.get("data_quality", {}) or {}
+    if dq:
+        lines.append((
+            "bullet",
+            f"AI evidence-consistency check: {dq.get('ai_verified_rows', 0)} listing rows passed; "
+            f"{dq.get('quarantined_for_review', 0)} were quarantined for review. "
+            "This compares extracted fields with captured public listing-card text; it is not proof of ownership or a closed transaction.",
+        ))
+
     rental_groups = []
     for city, nodes in (
         ("Lagos", LAGOS_NODES),
@@ -2553,6 +2562,15 @@ def main():
         changes,
         sys.argv[1],
     )
+    try:
+        quality = json.loads(Path("market_output_quality.json").read_text(encoding="utf-8"))
+        summary["data_quality"] = {
+            "input_rows": quality.get("input_rows"),
+            "ai_verified_rows": quality.get("ai_verified_rows", quality.get("output_rows")),
+            "quarantined_for_review": quality.get("quarantined_for_review", 0),
+        }
+    except (OSError, json.JSONDecodeError):
+        summary["data_quality"] = {}
     # Reuse the model interpretation from the bundle to avoid a second paid API call.
     try:
         saved_analysis_path = Path("market_intelligence.json")
