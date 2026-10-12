@@ -5,13 +5,24 @@ import os
 import sys
 from pathlib import Path
 
-from mailjet_sender import recipients_from_values, send_message
+from mailjet_sender import recipients_from_values, send_message, valid_email
 from report_builder import build_executive_html
 
 
 def send_report(client_email: str, cc_email: str, html_body: str, doc_url: str = "", sheet_url: str = "") -> None:
+    # The client is the primary recipient; the internal mailbox is a CC.
+    # Fail closed rather than silently sending without either intended party.
+    if not valid_email(client_email):
+        raise ValueError("REPORT_CLIENT_EMAIL must be a valid client email address")
+    if not valid_email(cc_email):
+        raise ValueError("REPORT_TO_EMAIL must be a valid internal-copy email address")
+    if client_email.strip().lower() == cc_email.strip().lower():
+        raise ValueError("Client recipient and internal-copy recipient must be different")
+
     to = recipients_from_values(client_email)
     cc = recipients_from_values(cc_email)
+    if len(to) != 1 or len(cc) != 1:
+        raise ValueError("Email routing must resolve to exactly one client To and one internal CC")
 
     if doc_url or sheet_url:
         html_body += '<div style="margin:24px 0;padding:16px;background:#f6f8fb;border-top:3px solid #0d2340"><h2>Full report and evidence</h2><p>Open the analyst report for context and the Google Sheet for property-level evidence.</p>'
