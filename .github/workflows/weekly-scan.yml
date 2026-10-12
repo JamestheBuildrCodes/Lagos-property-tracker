@@ -118,7 +118,8 @@ jobs:
       - name: Build all three intelligence layers from one analysis
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL || 'gpt-4.1-mini' }}
+          OPENAI_REQUIRED: "true"
         run: |
           CURR=$(ls -t property_listings_*.csv | head -n 1)
           CHANGES=$(ls -t changes_*.csv 2>/dev/null | head -n 1)
