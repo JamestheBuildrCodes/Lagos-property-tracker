@@ -4,6 +4,7 @@ import unittest
 from unittest.mock import Mock, patch
 
 import ai_listing_verifier
+import ai_market_interpreter
 
 
 class AIListingVerifierTests(unittest.TestCase):
@@ -58,11 +59,37 @@ class AIListingVerifierTests(unittest.TestCase):
 
         self.assertEqual(result["abc123"]["status"], "pass")
         body = mocked.call_args.kwargs["json"]
-        self.assertIn("json", body["instructions"])
+        self.assertIn("json", body["instructions"].lower())
+        self.assertIn("json", body["input"].lower())
         self.assertEqual(body["text"]["format"]["type"], "json_object")
         sent = body["input"]
         self.assertNotIn("source_url", sent)
         self.assertIn("source_card_text", sent)
+
+    def test_market_interpreter_input_explicitly_identifies_json(self):
+        response = Mock(status_code=200)
+        response.json.return_value = {
+            "output": [{
+                "type": "message",
+                "content": [{
+                    "type": "output_text",
+                    "text": json.dumps({
+                        "executive_takeaway": "Cautious finding.",
+                        "key_findings": [],
+                        "business_implications": [],
+                        "recommended_actions": [],
+                        "limitations": [],
+                    }),
+                }],
+            }]
+        }
+        with patch.object(ai_market_interpreter.requests, 'post', return_value=response) as mocked:
+            result = ai_market_interpreter.interpret_summary({
+                "listings_tracked": 1,
+                "scorecard": [],
+            })
+        self.assertIsNotNone(result)
+        self.assertIn("json", mocked.call_args.kwargs["json"]["input"].lower())
 
     def test_missing_source_excerpt_is_never_marked_verified(self):
         row = {"record_id": "no-evidence", "source_excerpt": ""}
