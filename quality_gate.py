@@ -57,21 +57,21 @@ def process(path):
     verification = verify_rows(kept)
     verified_rows=[];review_rows=[]
     for row in pre_review:
-        row["ai_verification_status"]="review"
-        row["ai_verification_issues"]=row.pop("_pre_review_reason", "Bulk multi-unit listing needs manual review")
+        row["evidence_verification_status"]="review"
+        row["evidence_verification_issues"]=row.pop("_pre_review_reason", "Bulk multi-unit listing needs manual review")
         review_rows.append(row)
     for row in kept:
         rid=str(row.get("record_id") or "")
         result=verification.get(rid, {"status":"review","issues":["No verifier result returned"]})
-        row["ai_verification_status"]=result.get("status","review")
-        row["ai_verification_issues"]="; ".join(result.get("issues",[]))
-        if row["ai_verification_status"] == "pass":
+        row["evidence_verification_status"]=result.get("status","review")
+        row["evidence_verification_issues"]="; ".join(result.get("issues",[]))
+        if row["evidence_verification_status"] == "pass":
             verified_rows.append(row)
         else:
             review_rows.append(row)
 
     fields=list(rows[0].keys()) if rows else []
-    for extra in ("ai_verification_status","ai_verification_issues"):
+    for extra in ("evidence_verification_status","evidence_verification_issues"):
         if extra not in fields:
             fields.append(extra)
     with open(path,"w",newline="",encoding="utf-8") as f:
@@ -80,8 +80,8 @@ def process(path):
     with open("market_output_review.csv","w",newline="",encoding="utf-8") as f:
         w=csv.DictWriter(f,fieldnames=review_fields,extrasaction="ignore");w.writeheader()
         for row in review_rows:
-            w.writerow({**row,"review_reason":row.get("ai_verification_issues","AI review required")})
-    report={"input_rows":len(rows),"output_rows":len(verified_rows),"ai_verified_rows":len(verified_rows),"quarantined_for_review":len(review_rows),"removed_rows":len(removed),"fixed_rows":len(fixed),"duplicates_removed":duplicates,"removals":removed[:200],"fixes":fixed[:200],"ai_review_sample":[{"record_id":r.get("record_id"),"source":r.get("source"),"source_url":r.get("source_url"),"issues":r.get("ai_verification_issues")} for r in review_rows[:100]]}
+            w.writerow({**row,"review_reason":row.get("evidence_verification_issues","Evidence review required")})
+    report={"input_rows":len(rows),"output_rows":len(verified_rows),"evidence_verified_rows":len(verified_rows),"verification_method":"deterministic_source_evidence","quarantined_for_review":len(review_rows),"removed_rows":len(removed),"fixed_rows":len(fixed),"duplicates_removed":duplicates,"removals":removed[:200],"fixes":fixed[:200],"review_sample":[{"record_id":r.get("record_id"),"source":r.get("source"),"source_url":r.get("source_url"),"issues":r.get("evidence_verification_issues")} for r in review_rows[:100]]}
     Path("market_output_quality.json").write_text(json.dumps(report,indent=2,ensure_ascii=False),encoding="utf-8");print(json.dumps(report,indent=2))
 
 if __name__=="__main__":
