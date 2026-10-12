@@ -98,6 +98,28 @@ class AIListingVerifierTests(unittest.TestCase):
         self.assertIsNotNone(result)
         self.assertIn("json", mocked.call_args.kwargs["json"]["input"].lower())
 
+    def test_ai_commentary_quota_failure_uses_deterministic_fallback(self):
+        old_key = os.environ.get("OPENAI_API_KEY")
+        old_enabled = os.environ.get("OPENAI_AI_COMMENTARY_ENABLED")
+        old_required = os.environ.get("OPENAI_AI_COMMENTARY_REQUIRED")
+        os.environ["OPENAI_API_KEY"] = "test-only-placeholder"
+        os.environ["OPENAI_AI_COMMENTARY_ENABLED"] = "true"
+        os.environ["OPENAI_AI_COMMENTARY_REQUIRED"] = "false"
+        response = Mock(status_code=429, text='{"error":{"message":"credit_balance_exhausted"}}')
+        try:
+            with patch.object(ai_market_interpreter.requests, "post", return_value=response):
+                self.assertIsNone(ai_market_interpreter.interpret_summary({"listings_tracked": 1}))
+        finally:
+            for key, value in (
+                ("OPENAI_API_KEY", old_key),
+                ("OPENAI_AI_COMMENTARY_ENABLED", old_enabled),
+                ("OPENAI_AI_COMMENTARY_REQUIRED", old_required),
+            ):
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
+
     def test_missing_source_excerpt_is_never_marked_verified(self):
         row = {"record_id": "no-evidence", "source_excerpt": ""}
         with patch.object(ai_listing_verifier.requests, "post") as mocked:
