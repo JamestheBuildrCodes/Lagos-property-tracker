@@ -122,10 +122,10 @@ jobs:
 
       - name: Build all three intelligence layers from one analysis
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL || 'gpt-4.1-mini' }}
-          OPENAI_AI_COMMENTARY_ENABLED: "false"
-          OPENAI_AI_COMMENTARY_REQUIRED: "false"
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GROQ_MODEL: ${{ secrets.GROQ_MODEL || 'llama-3.3-70b-versatile' }}
+          GROQ_AI_COMMENTARY_ENABLED: "true"
+          GROQ_AI_COMMENTARY_REQUIRED: "false"
         run: |
           CURR=$(ls -t property_listings_*.csv | head -n 1)
           CHANGES=$(ls -t changes_*.csv 2>/dev/null | head -n 1)
@@ -154,6 +154,8 @@ jobs:
         env:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           GOOGLE_DOC_ID: ${{ secrets.GOOGLE_DOC_ID }}
+          GOOGLE_CREATE_WEEKLY_DOC: "true"
+          GOOGLE_WEEKLY_REPORT_FOLDER_ID: "1pwAwektfnA52XkHzTIDkLGLHG0q_R1t3"
           REPORT_TO_EMAIL: ${{ secrets.REPORT_TO_EMAIL }}
           REPORT_CLIENT_EMAIL: ${{ secrets.REPORT_CLIENT_EMAIL }}
         run: |
@@ -266,7 +268,7 @@ jobs:
         run: |
           git config user.name "property-market-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/ tests/ discover_sources.py scraper.py market_analysis.py report_builder.py sheets_writer.py email_report.py docs_writer.py client_doc_report.py mailjet_sender.py validate_market_output.py requirements.txt .github/workflows/weekly-scan.yml .github/workflows/email-delivery-diagnostic.yml mailjet_delivery_diagnostic.py
+          git add data/ tests/ discover_sources.py scraper.py market_analysis.py report_builder.py sheets_writer.py email_report.py docs_writer.py client_doc_report.py mailjet_sender.py validate_market_output.py quality_gate.py ai_listing_verifier.py ai_market_interpreter.py workflow_failure_alert.py requirements.txt DEPLOYMENT_GUIDE.md README_APPLY_FIX.md .github/workflows/weekly-scan.yml .github/workflows/email-delivery-diagnostic.yml mailjet_delivery_diagnostic.py
           git commit -m "Property market snapshot $(date -u +%Y-%m-%d)" || echo "Nothing to commit"
 
       - name: Rebase and push results safely
