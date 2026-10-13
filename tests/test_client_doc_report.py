@@ -202,6 +202,11 @@ class ClientDocReportTests(unittest.TestCase):
                 os.chdir(td)
                 fallback_url = "https://docs.google.com/document/d/layer3-report-id/edit"
                 Path("google_doc_url.txt").write_text(fallback_url + chr(10), encoding="utf-8")
+                Path("google_doc_publication.json").write_text(json.dumps({
+                    "publication_status": "new_weekly_document_created",
+                    "created_new_document": True,
+                    "url": fallback_url,
+                }), encoding="utf-8")
 
                 result = client_doc_report._fallback_to_fresh_service_account_doc(error)
 
