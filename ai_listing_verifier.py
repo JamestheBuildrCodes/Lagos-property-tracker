@@ -1,9 +1,8 @@
 """Source-evidence validation for scraped property listings.
 
-Default mode is deterministic and free: it checks normalized values against the
-exact public listing-card excerpt and detail URL captured by the scraper. An
-optional OpenAI second pass can be enabled explicitly, but it is never required
-for publication. This is a consistency check, not proof of ownership or a deal.
+Default mode is deterministic and free. An optional Groq second pass can only
+send deterministic passes to review; it can never override a failed deterministic
+check. This is a consistency check, not proof of ownership or a deal.
 """
 from __future__ import annotations
 
@@ -15,8 +14,6 @@ from typing import Any
 
 import requests
 
-RESPONSES_URL = "https://api.openai.com/v1/responses"
-DEFAULT_MODEL = "gpt-4.1-mini"
 
 _CURRENCY_AMOUNT = re.compile(r"(?:₦|NGN\b|(?<!\w)N)\s*([\d][\d,]*(?:\.\d+)?)", re.I)
 _UNIT_PRICE = re.compile(
@@ -32,19 +29,6 @@ _BEDROOM_WORD = re.compile(
     r"\b(one|two|three|four|five)[ -]bed(?:room)?s?\b", re.I,
 )
 _WORD_NUMBERS = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5}
-
-
-def _text(payload: dict[str, Any]) -> str:
-    parts = []
-    for item in payload.get("output", []) or []:
-        if item.get("type") != "message":
-            continue
-        for part in item.get("content", []) or []:
-            if part.get("type") == "output_text" and part.get("text"):
-                parts.append(part["text"])
-    if not parts:
-        raise ValueError("OpenAI returned no output_text")
-    return "\n".join(parts)
 
 
 def _number(value: Any) -> float | None:
@@ -179,75 +163,12 @@ def _safe_excerpt(value: str) -> str:
     return value[:1200]
 
 
-def _openai_verify_rows(rows: list[dict], chunk_size: int = 20) -> dict[str, dict]:
-    api_key = os.environ.get("OPENAI_API_KEY", "").strip()
-    if not api_key:
-        raise RuntimeError("OPENAI_API_KEY is missing")
-    model = os.environ.get("OPENAI_MODEL", DEFAULT_MODEL).strip() or DEFAULT_MODEL
-    results: dict[str, dict] = {}
-    eligible_rows = [row for row in rows if str(row.get("source_excerpt") or "").strip()]
-    for start in range(0, len(eligible_rows), chunk_size):
-        chunk = eligible_rows[start:start + chunk_size]
-        payload_rows = [{
-            "record_id": str(row.get("record_id") or ""),
-            "source_card_text": _safe_excerpt(str(row.get("source_excerpt") or "")),
-            "extracted": {key: row.get(key) for key in (
-                "market_node", "transaction", "property_type", "bedrooms",
-                "asking_price_ngn", "size_sqm", "price_per_sqm_ngn", "listing_date",
-            )},
-        } for row in chunk]
-        instructions = (
-            "Cross-check extracted property-listing fields only against the supplied public listing-card text. "
-            "Do not invent values. Mark pass only if asking price, transaction, bedroom count, property type, "
-            "and any stated plot size agree. Ambiguous or contradictory evidence must be review. "
-            "Return a valid JSON object with a results array containing every record_id exactly once."
-        )
-        body = {
-            "model": model,
-            "instructions": instructions,
-            "input": "Validate the following JSON listing data and return a JSON object of results:\n" + json.dumps(payload_rows, ensure_ascii=False),
-            "max_output_tokens": max(1200, len(chunk) * 110),
-            "store": False,
-            "text": {"format": {"type": "json_object"}},
-        }
-        response = requests.post(
-            RESPONSES_URL,
-            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
-            json=body,
-            timeout=(10, 60),
-        )
-        if response.status_code >= 300:
-            raise RuntimeError(f"Responses API HTTP {response.status_code}: {response.text[:400]}")
-        parsed = json.loads(_text(response.json()))
-        returned = parsed.get("results")
-        if not isinstance(returned, list):
-            raise ValueError("AI verification response lacks results array")
-        expected_ids = {str(row.get("record_id") or "") for row in chunk}
-        seen = set()
-        for item in returned:
-            if not isinstance(item, dict):
-                continue
-            rid = str(item.get("record_id") or "")
-            if rid not in expected_ids or rid in seen:
-                continue
-            seen.add(rid)
-            issues = item.get("issues") if isinstance(item.get("issues"), list) else []
-            status = str(item.get("status") or "").lower()
-            if status != "pass" or issues:
-                status = "review"
-            results[rid] = {"status": status, "issues": [str(issue)[:300] for issue in issues[:6]], "method": "openai"}
-        for rid in expected_ids - seen:
-            results[rid] = {"status": "review", "issues": ["AI response omitted this record; unable to verify"], "method": "openai"}
-    return results
-
-
-
 def _groq_verify_rows(rows: list[dict], chunk_size: int = 20) -> dict[str, dict]:
     """Optional Groq OpenAI-compatible JSON pass; callers must tolerate quota failures."""
     api_key = os.environ.get("GROQ_API_KEY", "").strip()
     if not api_key:
         raise RuntimeError("GROQ_API_KEY is missing")
-    model = os.environ.get("GROQ_MODEL", "openai/gpt-oss-20b").strip() or "openai/gpt-oss-20b"
+    model = os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile").strip() or "llama-3.3-70b-versatile"
     results: dict[str, dict] = {}
     eligible_rows = [row for row in rows if str(row.get("source_excerpt") or "").strip()]
     for start in range(0, len(eligible_rows), chunk_size):
@@ -313,7 +234,7 @@ def verify_rows(rows: list[dict], chunk_size: int = 20) -> dict[str, dict]:
     """Return results from deterministic evidence checks; AI is opt-in and non-blocking."""
     results = {str(row.get("record_id") or ""): deterministic_verify_row(row) for row in rows}
     mode = os.environ.get("EVIDENCE_VERIFICATION_MODE", "deterministic").strip().lower()
-    if mode not in {"openai", "groq"}:
+    if mode != "groq":
         return results
     # Only send deterministic passes to the optional model for a second opinion.
     # Missing/conflicting source evidence is already quarantined without API use.
@@ -324,11 +245,7 @@ def verify_rows(rows: list[dict], chunk_size: int = 20) -> dict[str, dict]:
     if not eligible:
         return results
     try:
-        ai_results = (
-            _openai_verify_rows(eligible, chunk_size=chunk_size)
-            if mode == "openai"
-            else _groq_verify_rows(eligible, chunk_size=chunk_size)
-        )
+        ai_results = _groq_verify_rows(eligible, chunk_size=chunk_size)
     except Exception as exc:
         print(f"[Evidence verifier] Optional {mode} pass unavailable; keeping deterministic decisions: {type(exc).__name__}: {exc}")
         return results
