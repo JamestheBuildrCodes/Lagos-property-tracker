@@ -61,6 +61,14 @@ class PipelineTests(unittest.TestCase):
         self.assertIn("after 3 attempts", scraper)
         self.assertIn("if not successes", preflight)
         self.assertIn("Source-specific warnings", preflight)
+
+    def test_zyte_account_outage_does_not_block_direct_first_sources(self):
+        preflight = Path("zyte_preflight.py").read_text(encoding="utf-8")
+        workflow = Path(".github/workflows/weekly-scan.yml").read_text(encoding="utf-8")
+        self.assertIn("Zyte account/auth failure", preflight)
+        self.assertIn("direct-first sources will still be attempted", preflight)
+        self.assertIn("downstream quality gate will prevent publication", preflight)
+        self.assertIn("python scraper.py", workflow)
     def test_workflow_uses_expected_output_name(self):
         text = (ROOT / ".github/workflows/weekly-scan.yml").read_text()
         self.assertIn("property_listings_", text)
