@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import os
 import sys
+from html import escape as html_escape
 from pathlib import Path
 
 from mailjet_sender import recipients_from_values, send_message, valid_email
@@ -24,6 +25,17 @@ def send_report(client_email: str, cc_email: str, html_body: str, doc_url: str =
     if len(to) != 1 or len(cc) != 1:
         raise ValueError("Email routing must resolve to exactly one client To and one internal CC")
 
+    data_note = os.environ.get("REPORT_EMAIL_NOTE", "").strip()
+    if data_note:
+        html_body = (
+            '<div style="margin:0 0 18px;padding:14px;background:#fff4d6;'
+            'border-left:4px solid #9a6700;color:#3f2f00">'
+            '<strong>Data availability note:</strong> '
+            + html_escape(data_note)
+            + '</div>'
+            + html_body
+        )
+
     if doc_url or sheet_url:
         html_body += '<div style="margin:24px 0;padding:16px;background:#f6f8fb;border-top:3px solid #0d2340"><h2>Full report and evidence</h2><p>Open the analyst report for context and the Google Sheet for property-level evidence.</p>'
         if doc_url:
@@ -33,6 +45,8 @@ def send_report(client_email: str, cc_email: str, html_body: str, doc_url: str =
         html_body += '</div>'
 
     text_body = (
+        ("DATA AVAILABILITY NOTE: " + data_note + "\n\n") if data_note else ""
+    ) + (
         "Lagos & Abuja Property Market — Weekly Intelligence Brief\n\n"
         "This week's property market intelligence brief is ready. "
         "The HTML version contains the executive summary and recommended actions. "
