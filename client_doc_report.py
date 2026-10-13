@@ -1757,8 +1757,20 @@ def publish_google_doc(
         info = json.loads(raw)
     except json.JSONDecodeError as exc:
         raise RuntimeError(
-            "GOOGLE_OAUTH_TOKEN_JSON is not valid JSON"
+            "GOOGLE_OAUTH_TOKEN_JSON is not valid JSON. Store the complete "
+            "authorized-user token JSON, not a pasted client-secret fragment."
         ) from exc
+
+    if not isinstance(info, dict):
+        raise RuntimeError(
+            "GOOGLE_OAUTH_TOKEN_JSON must contain a JSON object."
+        )
+
+    # Google OAuth client downloads put client credentials under installed/web.
+    # Accept that shape when an authorized refresh_token is also present.
+    client_config = info.get("installed") or info.get("web") or {}
+    if isinstance(client_config, dict):
+        info = {**client_config, **info}
 
     required = (
         "refresh_token",
@@ -1775,8 +1787,11 @@ def publish_google_doc(
 
     if missing:
         raise RuntimeError(
-            "GOOGLE_OAUTH_TOKEN_JSON is missing: "
+            "GOOGLE_OAUTH_TOKEN_JSON is incomplete; missing: "
             + ", ".join(missing)
+            + ". The secret must be the token JSON produced by a completed "
+            "OAuth authorization flow. The downloaded OAuth client-credentials "
+            "JSON alone does not contain a refresh_token."
         )
 
     creds = Credentials.from_authorized_user_info(
@@ -2556,17 +2571,19 @@ def send_notification_email(doc_url, attachment_path=None):
         raise RuntimeError("Google Docs publication failed and no report attachment is available.")
 
     text_body = (
-        "Google Docs publication was unavailable because the saved Google OAuth refresh token "
-        "has been revoked or expired. The generated Word report is attached to this email. "
-        "Re-authorize GOOGLE_OAUTH_TOKEN_JSON to restore Google Docs links."
+        "Google Docs publication was unavailable because the OAuth credentials were invalid, "
+        "incomplete, expired, or lacked permission. The generated Word report is attached. "
+        "Update GOOGLE_OAUTH_TOKEN_JSON with a complete authorized-user token JSON to restore "
+        "Google Docs links."
         if attachment_fallback else
         "This week's market snapshot document is ready.\n\n"
         f"Open the report: {doc_url}"
     )
     html_body = (
-        "<p>Google Docs publication was unavailable because the saved Google OAuth refresh "
-        "token has been revoked or expired.</p><p>The generated Word report is attached to "
-        "this email. Re-authorize <code>GOOGLE_OAUTH_TOKEN_JSON</code> to restore Google Docs links.</p>"
+        "<p>Google Docs publication was unavailable because the OAuth credentials were invalid, "
+        "incomplete, expired, or lacked permission.</p><p>The generated Word report is attached. "
+        "Update <code>GOOGLE_OAUTH_TOKEN_JSON</code> with a complete authorized-user token JSON "
+        "to restore Google Docs links.</p>"
         if attachment_fallback else
         "<p>This week's market snapshot document is ready.</p>"
         f"<p><a href='{doc_url}'>Open the report</a></p>"
@@ -2687,9 +2704,7 @@ def _fallback_to_fresh_service_account_doc(oauth_error):
 
 
 def _write_docx_attachment_fallback(oauth_error, docx_path):
-    """Record a truthful DOCX-only fallback when Google OAuth is revoked and no fresh Doc exists."""
-    if not _is_revoked_oauth_refresh_error(oauth_error):
-        raise oauth_error
+    """Record a truthful DOCX-only fallback when Google Docs publication fails."""
     path = Path(docx_path)
     if not path.is_file() or path.stat().st_size == 0:
         raise RuntimeError("Google OAuth is revoked and the generated DOCX fallback is missing.") from oauth_error
@@ -2702,11 +2717,11 @@ def _write_docx_attachment_fallback(oauth_error, docx_path):
         "client_preferred_doc_created": False,
         "client_preferred_doc_content_verified": False,
         "docx_attachment": path.name,
-        "oauth_error": "invalid_grant: OAuth refresh token expired or revoked",
+        "oauth_error_type": type(oauth_error).__name__,
         "action_required": (
-            "Replace the revoked GOOGLE_OAUTH_TOKEN_JSON GitHub Actions secret with a newly "
-            "authorized OAuth token. This run can deliver the generated DOCX by email, but "
-            "cannot publish or verify a Google Doc."
+            "Correct GOOGLE_OAUTH_TOKEN_JSON using a complete authorized-user token JSON "
+            "containing refresh_token, client_id, client_secret, and token_uri. This run can "
+            "deliver the generated DOCX by email, but cannot publish or verify a Google Doc."
         ),
     }
     Path("google_doc_verification.json").write_text(
@@ -2714,8 +2729,8 @@ def _write_docx_attachment_fallback(oauth_error, docx_path):
         encoding="utf-8",
     )
     print(
-        "WARNING: Google OAuth refresh token is revoked/expired and no fresh Google Doc "
-        "is available. The report will be emailed as a DOCX attachment; no Google Doc URL exists."
+        "WARNING: Google Docs publication failed and no fresh Google Doc is available. "
+        "The report will be emailed as a DOCX attachment; no Google Doc URL exists."
     )
     return "ATTACHED_DOCX_FALLBACK"
 
@@ -2838,11 +2853,15 @@ def main():
             except Exception as oauth_error:
                 try:
                     url = _fallback_to_fresh_service_account_doc(oauth_error)
-                except RuntimeError:
-                    if _is_revoked_oauth_refresh_error(oauth_error):
-                        url = _write_docx_attachment_fallback(oauth_error, docx_path)
-                    else:
-                        raise
+                except RuntimeError as fallback_error:
+                    # This workflow may not have run docs_writer.py, so a fresh
+                    # service-account document is not guaranteed to exist.
+                    # Deliver the generated DOCX rather than fail the whole run.
+                    print(
+                        "WARNING: Could not use a fresh service-account Google Doc: "
+                        f"{fallback_error}"
+                    )
+                    url = _write_docx_attachment_fallback(oauth_error, docx_path)
         else:
             raise RuntimeError(
                 "No fresh service-account weekly Google Doc is available and GOOGLE_OAUTH_TOKEN_JSON is not configured."
