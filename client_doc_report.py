@@ -2654,8 +2654,9 @@ def _fallback_to_fresh_service_account_doc(oauth_error):
     publication_path = Path("google_doc_publication.json")
     if not source.exists() or not publication_path.exists():
         raise RuntimeError(
-            "The OAuth refresh token is revoked/expired and this run has no verified service-account weekly document. "
-            "Check the Google Docs publication step and re-authorize GOOGLE_OAUTH_TOKEN_JSON."
+            "Google Docs OAuth publication failed and this run has no verified service-account weekly document. "
+            "Check the preceding OAuth error and ensure GOOGLE_OAUTH_TOKEN_JSON contains a complete, "
+            "authorized token with refresh_token, client_id, client_secret, and token_uri."
         ) from oauth_error
 
     try:
