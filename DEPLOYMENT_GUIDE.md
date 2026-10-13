@@ -56,7 +56,7 @@ final executive email is sent only after the new Doc and verified Sheet are read
 so the client receives one message with the interpretation plus the report and
 Sheet links. It covers only the nine tracked Lagos/Abuja nodes; it does not invent
 Port Harcourt data. Optional AI commentary interprets whitelisted aggregate metrics;
-the deterministic narrative remains if the AI key is absent or the API fails.
+the deterministic narrative remains if the Groq key is absent or the API fails.
 
 ## Coverage
 
@@ -100,8 +100,8 @@ Set these GitHub Actions repository secrets:
 | `GOOGLE_SERVICE_ACCOUNT_JSON` | Google Sheets service-account credentials (Editor access to the existing Sheet required) |
 | `GOOGLE_SHEET_ID` | Existing client data Sheet ID |
 | `GOOGLE_OAUTH_TOKEN_JSON` | Required OAuth token for creating the new client-preferred Google Doc each week |
-| `OPENAI_API_KEY` | Optional key for AI interpretation of aggregate metrics only; omit it to use free deterministic analysis |
-| `OPENAI_MODEL` | Explicit compatible model name required only when enabling the optional paid API |
+| `GROQ_API_KEY` | Optional key for AI interpretation of aggregate metrics only; omit it to use free deterministic analysis |
+| `GROQ_MODEL` | Explicit compatible model name required only when enabling the optional paid API |
 
 For the Google Sheet, share the existing spreadsheet with the service account's
 `client_email` as **Editor**. Do not create a replacement spreadsheet.
@@ -124,7 +124,7 @@ Termux. It then:
 2. runs Zyte authentication/connectivity preflight;
 3. collects current data, then applies quality gates and location validation;
 4. compares against the previous archived snapshot, labelling absent URLs as "not observed" rather than confirming a sale or withdrawal;
-5. builds the executive email, workbook and analyst report from the same aggregate analysis; optional AI commentary is produced only when `OPENAI_API_KEY` is configured;
+5. builds the executive email, workbook and analyst report from the same aggregate analysis; optional Groq commentary is produced only when `GROQ_API_KEY` is configured;
 6. mirrors the workbook into the existing Google Sheet and verifies its cells by readback;
 7. publishes the analyst Google Doc and archives its DOCX;
 8. creates a new client snapshot Google Doc and verifies its URL;
@@ -152,8 +152,8 @@ Set these GitHub Actions secrets:
 - `MAILJET_FROM_NAME` — sender display name; defaults to `Master Builder Inc.`.
 - `REPORT_CLIENT_EMAIL` — client To recipient.
 - `REPORT_TO_EMAIL` — internal owner copy (Cc), not the sender.
-- `OPENAI_API_KEY` — optional; without it, reports use deterministic analysis.
-- `OPENAI_MODEL` — optional model override; the code default is `gpt-6-luna`.
+- `GROQ_API_KEY` — optional; without it, reports use deterministic analysis.
+- `GROQ_MODEL` — optional model override; the code default is `llama-3.3-70b-versatile`.
 - `REPORT_CLIENT_EMAIL` — client recipient (To).
 - `REPORT_TO_EMAIL` — internal verification recipient (Cc).
 
