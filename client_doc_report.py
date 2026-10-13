@@ -2601,7 +2601,7 @@ def _fallback_to_fresh_service_account_doc(oauth_error):
     )
     print(
         "WARNING: Google OAuth refresh token was revoked/expired. "
-        "Using the fresh service-account Google Doc created in this run: {url}"
+        f"Using the fresh service-account Google Doc created in this run: {url}"
     )
     return url
 
