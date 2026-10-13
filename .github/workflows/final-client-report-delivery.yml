@@ -2,6 +2,9 @@ name: Final Client Report Delivery
 
 on:
   workflow_dispatch: {}
+  push:
+    paths:
+      - ".github/workflows/final-client-report-delivery.yml"
 
 permissions:
   contents: read
@@ -45,14 +48,32 @@ jobs:
 
           CURRENT="$CURR" python - <<'PY'
           import csv, os
-          from datetime import date
+          from datetime import date, timedelta
+
           current = os.environ["CURRENT"]
-          today = date.today().isoformat()
+          today = date.today()
           with open(current, newline="", encoding="utf-8-sig") as f:
               rows = list(csv.DictReader(f))
           if not rows:
               raise SystemExit("Committed snapshot is empty.")
-          bad_date = [r.get("date_scraped") for r in rows if r.get("date_scraped") != today]
+
+          scraped_dates = sorted({(r.get("date_scraped") or "").strip() for r in rows})
+          if len(scraped_dates) != 1 or not scraped_dates[0]:
+              raise SystemExit(f"Snapshot must have exactly one non-empty date_scraped value; found {scraped_dates}")
+
+          try:
+              snapshot_date = date.fromisoformat(scraped_dates[0])
+          except ValueError:
+              raise SystemExit(f"Invalid date_scraped in {current}: {scraped_dates[0]!r}")
+
+          age_days = (today - snapshot_date).days
+          if age_days < 0 or age_days > 1:
+              raise SystemExit(
+                  f"Snapshot is {age_days} days old (date_scraped={snapshot_date}); "
+                  "final client delivery permits only today's or yesterday's snapshot. "
+                  "Run the live scan to refresh older data."
+              )
+
           bad_age = []
           for r in rows:
               try:
@@ -61,14 +82,15 @@ jobs:
                   raise SystemExit(f"Invalid listing_age_days in {current}: {r.get('listing_age_days')!r}")
               if age < 0 or age > 7:
                   bad_age.append(age)
-          if bad_date:
-              raise SystemExit(f"Committed snapshot is not same-day: found date_scraped values {sorted(set(bad_date))}")
           if bad_age:
-              raise SystemExit(f"Committed snapshot contains listing_age_days outside 0-7: {sorted(set(bad_age))[:10]}")
-          print(f"Using same-day committed snapshot: {current} ({len(rows)} rows; max age 7 days)")
+              raise SystemExit(f"Snapshot contains listing_age_days outside 0-7: {sorted(set(bad_age))[:10]}")
+
+          if age_days == 1:
+              print(f"WARNING: live scan snapshot is from {snapshot_date}, one day old. Report must retain the source/as-of date and must not imply today's listings were freshly scraped.")
+          print(f"Validated snapshot: {current} ({len(rows)} rows; source date {snapshot_date}; listing age max 7 days)")
           PY
 
-          python client_doc_report.py             "$CURR"             "${RESEARCH:-none}"             "${CHANGES:-none}"
+          python client_doc_report.py "$CURR" "${RESEARCH:-none}" "${CHANGES:-none}"
 
           test -s Lagos_Property_Market_Snapshot_*.docx
           test -s client_doc_url.txt
@@ -76,7 +98,7 @@ jobs:
           test -s google_doc_verification.json
 
           python - <<'PY'
-          import json, glob
+          import json
           receipt = json.load(open("mailjet_client-doc_receipt.json", encoding="utf-8"))
           statuses = [x.get("status") for x in receipt.get("message_results", [])]
           assert statuses and all(s == "success" for s in statuses), receipt
