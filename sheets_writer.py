@@ -47,8 +47,11 @@ def share_viewer(sheet_id,email):
     if not email or "@" not in email:
         raise RuntimeError("REPORT_CLIENT_EMAIL is missing or invalid; cannot verify client Sheet access.")
     from googleapiclient.discovery import build
-    client,_=get_client()
-    drive=build("drive","v3",credentials=client.auth,cache_discovery=False)
+    raw=os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON","").strip()
+    if not raw:
+        raise RuntimeError("GOOGLE_SERVICE_ACCOUNT_JSON is missing")
+    credentials=Credentials.from_service_account_info(json.loads(raw),scopes=SCOPES)
+    drive=build("drive","v3",credentials=credentials,cache_discovery=False)
     def find_permission():
         permissions=drive.permissions().list(
             fileId=sheet_id,
