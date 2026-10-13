@@ -110,7 +110,7 @@ jobs:
           status = verification.get("publication_status", "")
           if status == "docx_attachment_fallback_no_google_doc":
               print("Google Doc: NOT PUBLISHED; the generated DOCX was emailed as an attachment.")
-              print("ACTION REQUIRED: replace the revoked GOOGLE_OAUTH_TOKEN_JSON GitHub secret.")
+              print("ACTION REQUIRED: update GOOGLE_OAUTH_TOKEN_JSON with a complete authorized-user token JSON containing refresh_token, client_id, client_secret, and token_uri.")
           else:
               print("Google Doc:", open("client_doc_url.txt", encoding="utf-8").read().strip())
           PY
