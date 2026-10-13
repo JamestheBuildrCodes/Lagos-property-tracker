@@ -13,7 +13,7 @@ from typing import Any
 import requests
 
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
-DEFAULT_MODEL = "llama-3.3-70b-versatile"
+DEFAULT_MODEL = "openai/gpt-oss-20b"
 
 
 def _safe_payload(summary: dict[str, Any]) -> dict[str, Any]:
