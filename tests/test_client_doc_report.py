@@ -234,7 +234,7 @@ class ClientDocReportTests(unittest.TestCase):
         try:
             with tempfile.TemporaryDirectory() as td:
                 os.chdir(td)
-                with self.assertRaisesRegex(RuntimeError, "no fresh Layer 3 Google Doc"):
+                with self.assertRaisesRegex(RuntimeError, "no verified service-account weekly document"):
                     client_doc_report._fallback_to_fresh_service_account_doc(error)
         finally:
             os.chdir(current_dir)
