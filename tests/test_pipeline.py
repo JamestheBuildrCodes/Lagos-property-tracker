@@ -66,7 +66,8 @@ class PipelineTests(unittest.TestCase):
         preflight = Path("zyte_preflight.py").read_text(encoding="utf-8")
         workflow = Path(".github/workflows/weekly-scan.yml").read_text(encoding="utf-8")
         self.assertIn("Zyte account/auth failure", preflight)
-        self.assertIn("direct-first sources will still be attempted", preflight)
+        self.assertIn("CONTINUING in degraded mode", preflight)
+        self.assertIn("direct-first sources will still be", preflight)
         self.assertIn("downstream quality gate will prevent publication", preflight)
         self.assertIn("python scraper.py", workflow)
     def test_workflow_uses_expected_output_name(self):
