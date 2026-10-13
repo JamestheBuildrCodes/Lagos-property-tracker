@@ -168,7 +168,7 @@ def _groq_verify_rows(rows: list[dict], chunk_size: int = 20) -> dict[str, dict]
     api_key = os.environ.get("GROQ_API_KEY", "").strip()
     if not api_key:
         raise RuntimeError("GROQ_API_KEY is missing")
-    model = os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile").strip() or "llama-3.3-70b-versatile"
+    model = os.environ.get("GROQ_MODEL", "openai/gpt-oss-20b").strip() or "openai/gpt-oss-20b"
     results: dict[str, dict] = {}
     eligible_rows = [row for row in rows if str(row.get("source_excerpt") or "").strip()]
     for start in range(0, len(eligible_rows), chunk_size):
