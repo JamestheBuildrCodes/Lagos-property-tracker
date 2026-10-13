@@ -181,6 +181,30 @@ class ClientDocReportTests(unittest.TestCase):
         self.assertTrue(all("email you when a new listing matches" not in text.lower() for _, text in cards))
 
 
+    def test_fresh_service_account_doc_is_reused_without_oauth_duplicate(self):
+        import json
+        import os
+
+        current_dir = Path.cwd()
+        try:
+            with tempfile.TemporaryDirectory() as td:
+                os.chdir(td)
+                url = "https://docs.google.com/document/d/fresh-weekly-doc/edit"
+                Path("google_doc_url.txt").write_text(url + chr(10), encoding="utf-8")
+                Path("google_doc_publication.json").write_text(json.dumps({
+                    "publication_status": "new_weekly_document_created",
+                    "created_new_document": True,
+                    "url": url,
+                }), encoding="utf-8")
+                result = client_doc_report._use_fresh_service_account_doc()
+                self.assertEqual(result, url)
+                self.assertEqual(Path("client_doc_url.txt").read_text(encoding="utf-8").strip(), url)
+                verification = json.loads(Path("google_doc_verification.json").read_text(encoding="utf-8"))
+                self.assertEqual(verification["publication_status"], "fresh_service_account_weekly_doc_used")
+                self.assertTrue(verification["document_is_current_run"])
+        finally:
+            os.chdir(current_dir)
+
     def test_revoked_oauth_token_falls_back_to_fresh_service_account_doc(self):
         import json
         import os
