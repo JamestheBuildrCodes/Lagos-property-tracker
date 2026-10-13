@@ -326,57 +326,19 @@ class OptionalAIInterpreterTests(unittest.TestCase):
         self.assertNotIn("owner@example.com", rendered)
         self.assertNotIn("raw_rows", rendered)
 
-    def test_ai_interpreter_falls_back_without_api_key(self):
+    def test_ai_interpreter_falls_back_without_groq_key(self):
         import os
         import ai_market_interpreter
-        old = os.environ.pop("OPENAI_API_KEY", None)
+        old_key = os.environ.pop("GROQ_API_KEY", None)
+        old_enabled = os.environ.get("GROQ_AI_COMMENTARY_ENABLED")
+        os.environ["GROQ_AI_COMMENTARY_ENABLED"] = "true"
         try:
             self.assertIsNone(ai_market_interpreter.interpret_summary({"listings_tracked": 1}))
         finally:
-            if old is not None:
-                os.environ["OPENAI_API_KEY"] = old
-
-    def test_ai_interpreter_uses_configured_cost_effective_default_model(self):
-        import json
-        import os
-        from unittest.mock import patch, Mock
-        import ai_market_interpreter
-        old_key = os.environ.get("OPENAI_API_KEY")
-        old_enabled = os.environ.get("OPENAI_AI_COMMENTARY_ENABLED")
-        old_model = os.environ.pop("OPENAI_MODEL", None)
-        os.environ["OPENAI_API_KEY"] = "test-only-placeholder"
-        os.environ["OPENAI_AI_COMMENTARY_ENABLED"] = "true"
-        payload = {
-            "output": [{
-                "type": "message",
-                "content": [{
-                    "type": "output_text",
-                    "text": json.dumps({
-                        "executive_takeaway": "Limited sample.",
-                        "key_findings": [],
-                        "business_implications": [],
-                        "recommended_actions": [],
-                        "limitations": [],
-                    }),
-                }],
-            }]
-        }
-        response = Mock(status_code=200)
-        response.json.return_value = payload
-        try:
-            with patch.object(ai_market_interpreter.requests, "post", return_value=response) as mocked_post:
-                result = ai_market_interpreter.interpret_summary({"listings_tracked": 1})
-            self.assertEqual(result["model"], "gpt-4.1-mini")
-            self.assertEqual(mocked_post.call_args.kwargs["json"]["model"], "gpt-4.1-mini")
-        finally:
-            if old_key is None:
-                os.environ.pop("OPENAI_API_KEY", None)
-            else:
-                os.environ["OPENAI_API_KEY"] = old_key
-            if old_model is not None:
-                os.environ["OPENAI_MODEL"] = old_model
+            if old_key is not None:
+                os.environ["GROQ_API_KEY"] = old_key
             if old_enabled is None:
-                os.environ.pop("OPENAI_AI_COMMENTARY_ENABLED", None)
+                os.environ.pop("GROQ_AI_COMMENTARY_ENABLED", None)
             else:
-                os.environ["OPENAI_AI_COMMENTARY_ENABLED"] = old_enabled
+                os.environ["GROQ_AI_COMMENTARY_ENABLED"] = old_enabled
 
