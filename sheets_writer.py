@@ -44,10 +44,33 @@ def get_client():
     print(f"Google service account: {email} | project: {project}")
     return gspread.authorize(Credentials.from_service_account_info(data,scopes=SCOPES)),email
 def share_viewer(sheet_id,email):
-    if not email or "@" not in email:return
+    if not email or "@" not in email:
+        raise RuntimeError("REPORT_CLIENT_EMAIL is missing or invalid; cannot verify client Sheet access.")
     from googleapiclient.discovery import build
-    client,_=get_client(); drive=build("drive","v3",credentials=client.auth,cache_discovery=False)
-    drive.permissions().create(fileId=sheet_id,body={"type":"user","role":"reader","emailAddress":email},sendNotificationEmail=False).execute(); print(f"Google Sheet viewer access granted: {email}")
+    client,_=get_client()
+    drive=build("drive","v3",credentials=client.auth,cache_discovery=False)
+    def find_permission():
+        permissions=drive.permissions().list(
+            fileId=sheet_id,
+            fields="permissions(id,type,role,emailAddress,deleted)",
+            supportsAllDrives=True,
+        ).execute().get("permissions",[])
+        return next((p for p in permissions if p.get("type")=="user"
+            and str(p.get("emailAddress","")).lower()==email.lower()
+            and not p.get("deleted",False)),None)
+    permission=find_permission()
+    if permission is None:
+        drive.permissions().create(
+            fileId=sheet_id,
+            body={"type":"user","role":"reader","emailAddress":email},
+            sendNotificationEmail=True,
+            supportsAllDrives=True,
+            fields="id,type,role,emailAddress",
+        ).execute()
+        permission=find_permission()
+    if permission is None or permission.get("role") not in {"owner","organizer","fileOrganizer","writer","commenter","reader"}:
+        raise RuntimeError(f"Google Drive did not confirm client viewer access for {email}.")
+    print(f"Google Sheet viewer access verified: {email}; role={permission.get('role')}")
 def style(ws,name,rows,cols):
     _retry_sheets_write(f"{name}: clear filter", ws.clear_basic_filter)
     _retry_sheets_write(
@@ -262,7 +285,9 @@ def run():
     add_live_chart_dashboard(sheet)
     client_email=os.environ.get("REPORT_CLIENT_EMAIL","").strip()
     if client_email:
-        try: share_viewer(sheet_id,client_email)
-        except Exception as exc: print(f"Client Sheet sharing skipped: {exc}")
+        try:
+            share_viewer(sheet_id,client_email)
+        except Exception as exc:
+            raise RuntimeError(f"Could not verify client access to the Google Sheet; refusing to email an inaccessible link: {exc}") from exc
     print(f"Google Sheets updated and styled: {sheet.title}")
 if __name__=="__main__": run()
