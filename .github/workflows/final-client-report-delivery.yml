@@ -5,6 +5,9 @@ on:
   push:
     paths:
       - ".github/workflows/final-client-report-delivery.yml"
+      - "client_doc_report.py"
+      - "mailjet_sender.py"
+      - "tests/test_client_doc_report.py"
 
 permissions:
   contents: read
@@ -103,7 +106,13 @@ jobs:
           statuses = [x.get("status") for x in receipt.get("message_results", [])]
           assert statuses and all(s == "success" for s in statuses), receipt
           print("Client email accepted by Mailjet with message-level success.")
-          print("Google Doc:", open("client_doc_url.txt", encoding="utf-8").read().strip())
+          verification = json.load(open("google_doc_verification.json", encoding="utf-8"))
+          status = verification.get("publication_status", "")
+          if status == "docx_attachment_fallback_no_google_doc":
+              print("Google Doc: NOT PUBLISHED; the generated DOCX was emailed as an attachment.")
+              print("ACTION REQUIRED: replace the revoked GOOGLE_OAUTH_TOKEN_JSON GitHub secret.")
+          else:
+              print("Google Doc:", open("client_doc_url.txt", encoding="utf-8").read().strip())
           PY
 
       - name: Upload final client deliverables
