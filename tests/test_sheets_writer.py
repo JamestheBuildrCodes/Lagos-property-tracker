@@ -1,6 +1,10 @@
 """Regression tests for Google Sheets publication helpers."""
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
+import json
+import os
+
+from sheets_writer import share_viewer
 
 import gspread
 from sheets_writer import _retry_sheets_write, _verify_sheet_readback
@@ -19,6 +23,32 @@ class FakeSheetsAPIError(gspread.exceptions.APIError):
     def __init__(self, status_code, message):
         super().__init__(FakeSheetsResponse(status_code, message))
 
+
+
+class SheetSharingTests(unittest.TestCase):
+    def test_share_viewer_uses_service_account_credentials_not_gspread_client_auth(self):
+        drive = Mock()
+        drive.permissions.return_value.list.return_value.execute.return_value = {
+            "permissions": [{
+                "id": "perm-1", "type": "user",
+                "emailAddress": "client@example.com", "role": "reader",
+            }]
+        }
+        service_credentials = object()
+        with patch.dict(os.environ, {
+            "GOOGLE_SERVICE_ACCOUNT_JSON": json.dumps({"client_email": "svc@example.com"})
+        }), patch(
+            "sheets_writer.Credentials.from_service_account_info",
+            return_value=service_credentials,
+        ) as make_credentials, patch(
+            "googleapiclient.discovery.build", return_value=drive
+        ) as build:
+            share_viewer("sheet-123", "client@example.com")
+        make_credentials.assert_called_once()
+        build.assert_called_once_with(
+            "drive", "v3", credentials=service_credentials, cache_discovery=False
+        )
+        drive.permissions.return_value.list.assert_called_once()
 
 class SheetReadbackTests(unittest.TestCase):
     def test_accepts_google_sheets_omitting_trailing_blanks(self):
