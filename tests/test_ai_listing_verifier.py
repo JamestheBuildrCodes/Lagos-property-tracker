@@ -69,7 +69,7 @@ class AIListingVerifierTests(unittest.TestCase):
         self.assertEqual(result["groq-1"]["status"], "pass")
         self.assertEqual(result["groq-1"]["method"], "deterministic+groq")
         self.assertIn("api.groq.com/openai/v1/chat/completions", mocked.call_args.args[0])
-        self.assertEqual(mocked.call_args.kwargs["json"]["model"], "llama-3.3-70b-versatile")
+        self.assertEqual(mocked.call_args.kwargs["json"]["model"], "openai/gpt-oss-20b")
         self.assertEqual(mocked.call_args.kwargs["json"]["response_format"]["type"], "json_object")
 
     def test_groq_failure_falls_back_to_deterministic_evidence(self):
@@ -94,7 +94,7 @@ class AIListingVerifierTests(unittest.TestCase):
         with patch.object(ai_market_interpreter.requests, "post", return_value=response) as mocked:
             result = ai_market_interpreter.interpret_summary({"listings_tracked": 1, "scorecard": []})
         self.assertIsNotNone(result)
-        self.assertEqual(result["model"], "llama-3.3-70b-versatile")
+        self.assertEqual(result["model"], "openai/gpt-oss-20b")
         self.assertEqual(mocked.call_args.kwargs["json"]["response_format"]["type"], "json_object")
         self.assertNotIn("source_url", mocked.call_args.kwargs["json"]["messages"][1]["content"])
 
