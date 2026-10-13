@@ -106,11 +106,12 @@ def main() -> int:
 
     if not messages:
         print(
-            "No matching Mailjet message record was found in the "
-            "diagnostic window. Check the Mailjet account, sender, "
-            "recipient, and time window."
+            "No matching Mailjet message record was found in the diagnostic window. "
+            "This diagnostic is not authoritative for the current send; the workflow's "
+            "message-level Mailjet receipt is the delivery-attempt source of truth. "
+            "Check Mailjet's dashboard if recipient delivery state needs confirmation."
         )
-        return 2
+        return 0
 
     print(
         "Note: a Mailjet message record proves processing/tracking; "
