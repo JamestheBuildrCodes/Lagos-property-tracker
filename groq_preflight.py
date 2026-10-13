@@ -26,7 +26,7 @@ def main() -> int:
             "model": model,
             "messages": [
                 {"role": "system", "content": "Return a JSON object only."},
-                {"role": "user", "content": "Return exactly this JSON object: {\\"ok\\":true}"},
+                {"role": "user", "content": 'Return exactly this JSON object: {"ok":true}'},
             ],
             "temperature": 0,
             "max_tokens": 30,
