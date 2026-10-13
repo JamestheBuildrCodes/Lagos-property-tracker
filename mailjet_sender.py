@@ -237,13 +237,26 @@ def send_message(
             + "; ".join(failures)
         )
 
+    # The repository is public. Keep message IDs and statuses for auditing,
+    # but never commit recipient email addresses into the receipt/archive.
+    safe_details = []
+    for result in details:
+        safe_result = dict(result)
+        safe_recipients = []
+        for recipient in result.get("recipients", []):
+            safe_recipient = dict(recipient)
+            safe_recipient["email"] = _mask_email(str(recipient.get("email") or ""))
+            safe_recipients.append(safe_recipient)
+        safe_result["recipients"] = safe_recipients
+        safe_details.append(safe_result)
+
     receipt = {
         "accepted_at_utc": datetime.now(timezone.utc).isoformat(),
         "http_status": response.status_code,
         "custom_id": custom_id,
         "subject": subject,
         "layer": layer,
-        "message_results": details,
+        "message_results": safe_details,
     }
 
     receipt_path = Path(f"mailjet_{layer}_receipt.json")
