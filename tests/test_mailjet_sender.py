@@ -84,6 +84,10 @@ class MailjetSenderTests(unittest.TestCase):
             self.assertTrue(receipt_path.exists())
             saved = json.loads(receipt_path.read_text(encoding="utf-8"))
             self.assertEqual(saved["message_results"][0]["recipients"][1]["message_uuid"], "uuid-124")
+            serialized = json.dumps(saved)
+            self.assertNotIn("client@example.com", serialized)
+            self.assertNotIn("copy@example.com", serialized)
+            self.assertIn("c***@example.com", serialized)
 
     def test_http_success_but_message_error_is_not_treated_as_sent(self):
         response_payload = {
