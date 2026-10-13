@@ -264,5 +264,37 @@ class ClientDocReportTests(unittest.TestCase):
             os.chdir(current_dir)
 
 
+    def test_revoked_oauth_without_fresh_doc_records_docx_attachment_fallback(self):
+        import json
+        import os
+        from google.auth.exceptions import RefreshError
+
+        current_dir = Path.cwd()
+        error = RefreshError("invalid_grant: Token has been expired or revoked.")
+        try:
+            with tempfile.TemporaryDirectory() as td:
+                os.chdir(td)
+                docx = Path("Lagos_Property_Market_Snapshot_2026-10-13.docx")
+                docx.write_bytes(b"test docx payload")
+                marker = client_doc_report._write_docx_attachment_fallback(error, docx)
+                self.assertEqual(marker, "ATTACHED_DOCX_FALLBACK")
+                self.assertEqual(
+                    Path("client_doc_url.txt").read_text(encoding="utf-8").strip(),
+                    "ATTACHED_DOCX_FALLBACK",
+                )
+                verification = json.loads(
+                    Path("google_doc_verification.json").read_text(encoding="utf-8")
+                )
+                self.assertEqual(
+                    verification["publication_status"],
+                    "docx_attachment_fallback_no_google_doc",
+                )
+                self.assertFalse(verification["google_doc_created"])
+                self.assertEqual(verification["docx_attachment"], docx.name)
+        finally:
+            os.chdir(current_dir)
+
+
+
 if __name__ == "__main__":
     unittest.main()
