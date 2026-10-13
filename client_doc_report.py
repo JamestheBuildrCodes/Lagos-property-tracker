@@ -2565,13 +2565,23 @@ def _fallback_to_fresh_service_account_doc(oauth_error):
     preferred document was created or verified.
     """
     source = Path("google_doc_url.txt")
-    if not source.exists():
+    publication_path = Path("google_doc_publication.json")
+    if not source.exists() or not publication_path.exists():
         raise RuntimeError(
-            "The OAuth refresh token is revoked/expired and no fresh Layer 3 Google Doc was published in this run. "
-            "Re-authorize GOOGLE_OAUTH_TOKEN_JSON and retry."
+            "The OAuth refresh token is revoked/expired and this run has no verified service-account weekly document. "
+            "Check the Google Docs publication step and re-authorize GOOGLE_OAUTH_TOKEN_JSON."
         ) from oauth_error
 
+    try:
+        publication = json.loads(publication_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise RuntimeError("The service-account weekly document publication record is invalid.") from exc
+    if publication.get("publication_status") != "new_weekly_document_created" or not publication.get("created_new_document"):
+        raise RuntimeError("Refusing to send a stale Google Doc: this run did not create a new weekly document.") from oauth_error
+
     url = source.read_text(encoding="utf-8").strip()
+    if url != str(publication.get("url") or "").strip():
+        raise RuntimeError("The weekly Google Doc URL does not match this run's publication record.") from oauth_error
     if not url.startswith("https://docs.google.com/document/d/") or "/edit" not in url:
         raise RuntimeError(
             "This run's service-account publication did not produce a valid Google Docs URL."
@@ -2585,6 +2595,7 @@ def _fallback_to_fresh_service_account_doc(oauth_error):
         "verified_at_utc": datetime.now(timezone.utc).isoformat(),
         "publication_status": "fallback_to_fresh_service_account_weekly_doc",
         "fallback_document_is_current_run": True,
+        "publication_record": "google_doc_publication.json",
         "client_preferred_doc_created": False,
         "client_preferred_doc_content_verified": False,
         "fallback_document_url": url,
