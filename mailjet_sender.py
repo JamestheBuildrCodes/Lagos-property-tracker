@@ -7,6 +7,7 @@ the downstream delivery state can be audited later.
 """
 from __future__ import annotations
 
+import base64
 import json
 import os
 from datetime import datetime, timezone
@@ -164,6 +165,7 @@ def send_message(
     text_body: str,
     layer: str,
     cc: Iterable[str] = (),
+    attachments: Iterable[dict] = (),
 ) -> dict:
     api_key = os.environ.get("MAILJET_API_KEY", "").strip()
     secret_key = os.environ.get("MAILJET_SECRET_KEY", "").strip()
@@ -208,6 +210,11 @@ def send_message(
 
     if cc_list:
         message["Cc"] = [{"Email": address} for address in cc_list]
+
+    attachment_items = list(attachments)
+    if attachment_items:
+        # Mailjet expects each attachment's content to be base64-encoded.
+        message["Attachments"] = attachment_items
 
     response = requests.post(
         MAILJET_SEND_URL,
