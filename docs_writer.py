@@ -260,6 +260,9 @@ def publish(summary, output_docx=None):
 
     force_new = os.environ.get("GOOGLE_CREATE_WEEKLY_DOC", "false").strip().lower() == "true"
     doc_id = "" if force_new else os.environ.get("GOOGLE_DOC_ID", "").strip()
+    created_new = not bool(doc_id)
+    created_in_folder = False
+    folder_id = os.environ.get("GOOGLE_WEEKLY_REPORT_FOLDER_ID", "").strip()
     title = f"Lagos Property Market — Weekly Intelligence Report — {datetime.now(timezone.utc):%Y-%m-%d}"
     text = report_text(summary)
 
@@ -274,7 +277,6 @@ def publish(summary, output_docx=None):
         requests += _format_requests(text)
         docs.documents().batchUpdate(documentId=doc_id, body={"requests": requests}).execute()
     else:
-        folder_id = os.environ.get("GOOGLE_WEEKLY_REPORT_FOLDER_ID", "").strip()
         doc_id = ""
         if folder_id:
             try:
@@ -287,6 +289,7 @@ def publish(summary, output_docx=None):
                     fields="id",
                 ).execute()
                 doc_id = created["id"]
+                created_in_folder = True
                 print(f"Created fresh weekly Google Doc in configured folder: {folder_id}")
             except HttpError as exc:
                 print(f"Could not create the weekly Google Doc in the configured folder; creating a fresh document in Drive root instead: {exc}")
@@ -319,6 +322,20 @@ def publish(summary, output_docx=None):
 
     url = f"https://docs.google.com/document/d/{doc_id}/edit"
     Path("google_doc_url.txt").write_text(url + "\n", encoding="utf-8")
+    publication = {
+        "publication_status": "new_weekly_document_created" if created_new else "existing_document_updated",
+        "created_new_document": created_new,
+        "document_id": doc_id,
+        "url": url,
+        "created_at_utc": datetime.now(timezone.utc).isoformat(),
+        "target_folder_id": folder_id or None,
+        "created_in_target_folder": created_in_folder,
+        "title": title,
+    }
+    Path("google_doc_publication.json").write_text(
+        json.dumps(publication, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
     print(f"Google Doc published: {url}")
     if output_docx:
         Path(output_docx).write_text(url, encoding="utf-8")
