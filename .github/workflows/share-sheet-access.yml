@@ -1,0 +1,30 @@
+name: Repair Client Google Sheet Access
+
+on:
+  workflow_dispatch: {}
+  push:
+    paths:
+      - ".ops/share-sheet-access-trigger"
+
+permissions:
+  contents: read
+
+jobs:
+  share:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install Google API dependencies
+        run: python -m pip install "google-auth>=2.35,<3" "google-api-python-client>=2.150,<3"
+      - name: Grant and verify client Sheet access
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+          REPORT_CLIENT_EMAIL: ${{ secrets.REPORT_CLIENT_EMAIL }}
+        run: python share_sheet_access.py
