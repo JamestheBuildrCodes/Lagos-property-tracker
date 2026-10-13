@@ -46,10 +46,18 @@ for source, url in URLS:
         if r.status_code >= 400:
             detail = r.text[:500]
             if r.status_code in (401, 402, 403):
-                raise SystemExit(
-                    f"Zyte preflight authentication/account failure HTTP "
-                    f"{r.status_code}: {detail}"
+                # Zyte is an optional transport for protected sources. An
+                # account/key failure must disable that transport, not prevent
+                # the collector from trying direct-first sources such as NPC.
+                last_detail = (
+                    f"Zyte account/auth failure HTTP {r.status_code}: {detail}"
                 )
+                failures.append((source, last_detail))
+                print(
+                    f"  WARNING: {source} cannot be checked through Zyte "
+                    f"(HTTP {r.status_code}); continuing with other sources."
+                )
+                break
             if r.status_code == 520 and (
                 "Website Ban" in detail or "temporary-error" in detail
             ):
@@ -93,9 +101,19 @@ for source, url in URLS:
         break
 
 if not successes:
-    print("Zyte preflight failed: no approved source returned usable HTML.")
+    print("Zyte preflight found no protected source returning usable HTML.")
     for source, reason in failures:
         print(f"  {source}: {reason}")
+    # Continue into scraper.py: it tries Nigeria Property Centre directly
+    # before using Zyte. The downstream listing and quality gates still fail
+    # closed if the direct sources cannot produce enough reliable data.
+    print(
+        "CONTINUING in degraded mode: direct-first sources will still be "
+        "attempted; Zyte-dependent sources may be unavailable. The downstream "
+        "quality gate will prevent publication of empty or invalid data."
+    )
+    if any("Zyte account/auth failure" in reason for _, reason in failures):
+        raise SystemExit(0)
     raise SystemExit(1)
 
 print("Zyte preflight passed for: " + ", ".join(successes))
