@@ -2528,24 +2528,57 @@ def publish_google_doc(
 
 
 
-def send_notification_email(doc_url):
+def send_notification_email(doc_url, attachment_path=None):
+    import base64
+    import mimetypes
+
     recipients = recipients_from_values(
         os.environ.get("REPORT_CLIENT_EMAIL", ""),
         os.environ.get("REPORT_TO_EMAIL", ""),
+    )
+    attachment_fallback = doc_url == "ATTACHED_DOCX_FALLBACK"
+    attachments = []
+    if attachment_path and attachment_fallback:
+        path = Path(attachment_path)
+        if not path.is_file() or path.stat().st_size == 0:
+            raise RuntimeError("Cannot send DOCX fallback: report attachment is missing or empty.")
+        content_type = (
+            mimetypes.guess_type(path.name)[0]
+            or "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        )
+        attachments.append({
+            "ContentType": content_type,
+            "Filename": path.name,
+            "Base64Content": base64.b64encode(path.read_bytes()).decode("ascii"),
+        })
+
+    if attachment_fallback and not attachments:
+        raise RuntimeError("Google Docs publication failed and no report attachment is available.")
+
+    text_body = (
+        "Google Docs publication was unavailable because the saved Google OAuth refresh token "
+        "has been revoked or expired. The generated Word report is attached to this email. "
+        "Re-authorize GOOGLE_OAUTH_TOKEN_JSON to restore Google Docs links."
+        if attachment_fallback else
+        "This week's market snapshot document is ready.\n\n"
+        f"Open the report: {doc_url}"
+    )
+    html_body = (
+        "<p>Google Docs publication was unavailable because the saved Google OAuth refresh "
+        "token has been revoked or expired.</p><p>The generated Word report is attached to "
+        "this email. Re-authorize <code>GOOGLE_OAUTH_TOKEN_JSON</code> to restore Google Docs links.</p>"
+        if attachment_fallback else
+        "<p>This week's market snapshot document is ready.</p>"
+        f"<p><a href='{doc_url}'>Open the report</a></p>"
     )
 
     send_message(
         to=recipients,
         subject="Your Weekly Lagos & Abuja Property Market Snapshot",
-        text_body=(
-            "This week's market snapshot document is ready.\n\n"
-            f"Open the report: {doc_url}"
-        ),
-        html_body=(
-            "<p>This week's market snapshot document is ready.</p>"
-            f"<p><a href='{doc_url}'>Open the report</a></p>"
-        ),
+        text_body=text_body,
+        html_body=html_body,
         layer="client-doc",
+        attachments=attachments,
     )
 def _is_revoked_oauth_refresh_error(exc):
     """Return True only for Google's invalid_grant refresh-token failure."""
@@ -2651,6 +2684,40 @@ def _fallback_to_fresh_service_account_doc(oauth_error):
         f"Using the fresh service-account Google Doc created in this run: {url}"
     )
     return url
+
+
+def _write_docx_attachment_fallback(oauth_error, docx_path):
+    """Record a truthful DOCX-only fallback when Google OAuth is revoked and no fresh Doc exists."""
+    if not _is_revoked_oauth_refresh_error(oauth_error):
+        raise oauth_error
+    path = Path(docx_path)
+    if not path.is_file() or path.stat().st_size == 0:
+        raise RuntimeError("Google OAuth is revoked and the generated DOCX fallback is missing.") from oauth_error
+
+    Path("client_doc_url.txt").write_text("ATTACHED_DOCX_FALLBACK\n", encoding="utf-8")
+    verification = {
+        "verified_at_utc": datetime.now(timezone.utc).isoformat(),
+        "publication_status": "docx_attachment_fallback_no_google_doc",
+        "google_doc_created": False,
+        "client_preferred_doc_created": False,
+        "client_preferred_doc_content_verified": False,
+        "docx_attachment": path.name,
+        "oauth_error": "invalid_grant: OAuth refresh token expired or revoked",
+        "action_required": (
+            "Replace the revoked GOOGLE_OAUTH_TOKEN_JSON GitHub Actions secret with a newly "
+            "authorized OAuth token. This run can deliver the generated DOCX by email, but "
+            "cannot publish or verify a Google Doc."
+        ),
+    }
+    Path("google_doc_verification.json").write_text(
+        json.dumps(verification, indent=2) + chr(10),
+        encoding="utf-8",
+    )
+    print(
+        "WARNING: Google OAuth refresh token is revoked/expired and no fresh Google Doc "
+        "is available. The report will be emailed as a DOCX attachment; no Google Doc URL exists."
+    )
+    return "ATTACHED_DOCX_FALLBACK"
 
 
 def main():
@@ -2769,14 +2836,26 @@ def main():
                     research=research,
                 )
             except Exception as oauth_error:
-                url = _fallback_to_fresh_service_account_doc(oauth_error)
+                try:
+                    url = _fallback_to_fresh_service_account_doc(oauth_error)
+                except RuntimeError:
+                    if _is_revoked_oauth_refresh_error(oauth_error):
+                        url = _write_docx_attachment_fallback(oauth_error, docx_path)
+                    else:
+                        raise
         else:
             raise RuntimeError(
                 "No fresh service-account weekly Google Doc is available and GOOGLE_OAUTH_TOKEN_JSON is not configured."
             ) from service_doc_error
 
-    if os.environ.get("SUPPRESS_REPORT_NOTIFICATION_EMAIL", "").strip() != "1":
-        send_notification_email(url)
+    suppress_notification = os.environ.get("SUPPRESS_REPORT_NOTIFICATION_EMAIL", "").strip() == "1"
+    if not suppress_notification or url == "ATTACHED_DOCX_FALLBACK":
+        if suppress_notification and url == "ATTACHED_DOCX_FALLBACK":
+            print("Sending DOCX attachment fallback despite notification suppression because no Google Doc URL exists.")
+        send_notification_email(
+            url,
+            attachment_path=docx_path if url == "ATTACHED_DOCX_FALLBACK" else None,
+        )
     else:
         print("Separate document notification suppressed; executive email will include the report link.")
 
