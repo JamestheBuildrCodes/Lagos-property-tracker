@@ -2556,6 +2556,42 @@ def _is_revoked_oauth_refresh_error(exc):
     return isinstance(exc, RefreshError) and "invalid_grant" in str(exc).lower()
 
 
+def _use_fresh_service_account_doc():
+    """Use the new report Google Doc already created by docs_writer.py this run."""
+    publication_path = Path("google_doc_publication.json")
+    source = Path("google_doc_url.txt")
+    if not publication_path.exists() or not source.exists():
+        raise RuntimeError("No current-run service-account Google Doc publication is available.")
+    publication = json.loads(publication_path.read_text(encoding="utf-8"))
+    url = source.read_text(encoding="utf-8").strip()
+    if publication.get("publication_status") != "new_weekly_document_created" or not publication.get("created_new_document"):
+        raise RuntimeError("Refusing to use a stale Google Doc; this run did not create a new weekly document.")
+    if url != str(publication.get("url") or "").strip() or not url.startswith("https://docs.google.com/document/d/"):
+        raise RuntimeError("The service-account Google Doc URL does not match its publication record.")
+    Path("client_doc_url.txt").write_text(url + chr(10), encoding="utf-8")
+    verification = {
+        "verified_at_utc": datetime.now(timezone.utc).isoformat(),
+        "publication_status": "fresh_service_account_weekly_doc_used",
+        "document_is_current_run": True,
+        "client_preferred_doc_created": False,
+        "client_preferred_doc_content_verified": False,
+        "fallback_document_url": url,
+        "fallback_source": "docs_writer.py (fresh weekly document created in this run)",
+        "publication_record": "google_doc_publication.json",
+        "action_required": (
+            "The fresh weekly report is available. GOOGLE_OAUTH_TOKEN_JSON is not "
+            "needed for delivery; refresh it only if the separate client-preferred "
+            "OAuth formatting flow is restored."
+        ),
+    }
+    Path("google_doc_verification.json").write_text(
+        json.dumps(verification, indent=2) + chr(10),
+        encoding="utf-8",
+    )
+    print(f"Using fresh service-account weekly Google Doc: {url}")
+    return url
+
+
 def _fallback_to_fresh_service_account_doc(oauth_error):
     """Keep report delivery alive using the fresh Layer 3 Doc published earlier in this same workflow run.
 
@@ -2719,30 +2755,30 @@ def main():
         f"DOCX created: {docx_path}"
     )
 
-    if os.environ.get(
-        "GOOGLE_OAUTH_TOKEN_JSON"
-    ):
-        try:
-            _, url = publish_google_doc(
-                listings,
-                summary,
-                research=research,
-            )
-        except Exception as exc:
-            if not _is_revoked_oauth_refresh_error(exc):
-                raise
-            url = _fallback_to_fresh_service_account_doc(exc)
-
-        if os.environ.get("SUPPRESS_REPORT_NOTIFICATION_EMAIL", "").strip() != "1":
-            send_notification_email(url)
+    try:
+        # docs_writer.py has already created a fresh weekly Google Doc with the
+        # service account. Prefer that same document to avoid duplicate weekly
+        # documents and avoid making delivery depend on a revoked OAuth token.
+        url = _use_fresh_service_account_doc()
+    except Exception as service_doc_error:
+        if os.environ.get("GOOGLE_OAUTH_TOKEN_JSON", "").strip():
+            try:
+                _, url = publish_google_doc(
+                    listings,
+                    summary,
+                    research=research,
+                )
+            except Exception as oauth_error:
+                url = _fallback_to_fresh_service_account_doc(oauth_error)
         else:
-            print("Separate document notification suppressed; executive email will include the report link.")
+            raise RuntimeError(
+                "No fresh service-account weekly Google Doc is available and GOOGLE_OAUTH_TOKEN_JSON is not configured."
+            ) from service_doc_error
 
+    if os.environ.get("SUPPRESS_REPORT_NOTIFICATION_EMAIL", "").strip() != "1":
+        send_notification_email(url)
     else:
-        print(
-            "GOOGLE_OAUTH_TOKEN_JSON not set — "
-            "skipping Google Doc publish, DOCX only."
-        )
+        print("Separate document notification suppressed; executive email will include the report link.")
 
 
 if __name__ == "__main__":
