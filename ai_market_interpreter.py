@@ -1,8 +1,8 @@
-"""Optional evidence-constrained AI interpretation of aggregate property metrics.
+"""Optional Groq interpretation of aggregate property-market metrics.
 
-Only aggregate statistics are sent to the model. Individual listing URLs,
-agent contacts, recipient addresses and raw scraped rows are not submitted.
-If the API key is absent or the API fails, the deterministic report continues.
+Only whitelisted aggregate statistics are sent to Groq. Raw listings, URLs,
+agent contacts and recipient addresses are never sent. If Groq is unavailable
+or unconfigured, deterministic report commentary remains available.
 """
 from __future__ import annotations
 
@@ -12,21 +12,8 @@ from typing import Any
 
 import requests
 
-RESPONSES_URL = "https://api.openai.com/v1/responses"
-DEFAULT_MODEL = "gpt-4.1-mini"
-
-
-def _response_text(payload: dict[str, Any]) -> str:
-    chunks = []
-    for item in payload.get("output", []) or []:
-        if item.get("type") != "message":
-            continue
-        for part in item.get("content", []) or []:
-            if part.get("type") == "output_text" and part.get("text"):
-                chunks.append(part["text"])
-    if not chunks:
-        raise ValueError("No output_text was returned by the Responses API")
-    return "\n".join(chunks)
+GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
+DEFAULT_MODEL = "llama-3.3-70b-versatile"
 
 
 def _safe_payload(summary: dict[str, Any]) -> dict[str, Any]:
@@ -79,55 +66,53 @@ def _safe_payload(summary: dict[str, Any]) -> dict[str, Any]:
 
 
 def interpret_summary(summary: dict[str, Any]) -> dict[str, Any] | None:
-    # Paid API commentary is opt-in. The report builder already creates a
-    # deterministic evidence-based narrative when this function returns None.
-    enabled = os.environ.get("OPENAI_AI_COMMENTARY_ENABLED", "false").strip().lower() == "true"
+    enabled = os.environ.get("GROQ_AI_COMMENTARY_ENABLED", "false").strip().lower() == "true"
     if not enabled:
         return None
-    api_key = os.environ.get("OPENAI_API_KEY", "").strip()
-    required = os.environ.get("OPENAI_AI_COMMENTARY_REQUIRED", "false").strip().lower() == "true"
+    api_key = os.environ.get("GROQ_API_KEY", "").strip()
+    required = os.environ.get("GROQ_AI_COMMENTARY_REQUIRED", "false").strip().lower() == "true"
     if not api_key:
-        print("[AI commentary] No OpenAI API key; using deterministic report narrative.")
+        print("[Groq commentary] No GROQ_API_KEY; using deterministic report narrative.")
         return None
 
-    model = os.environ.get("OPENAI_MODEL", DEFAULT_MODEL).strip() or DEFAULT_MODEL
+    model = os.environ.get("GROQ_MODEL", DEFAULT_MODEL).strip() or DEFAULT_MODEL
     instructions = (
         "Act as a cautious Nigerian property-market research analyst. Interpret only "
-        "the aggregate JSON provided; do not invent events, causes, prices, comps, or "
-        "external facts. Monetary values are Nigerian naira. These are asking prices, "
+        "the aggregate JSON provided; do not invent events, causes, prices, comparables, "
+        "or external facts. Monetary values are Nigerian naira. These are asking prices, "
         "not confirmed transactions or a complete census of Lagos/Abuja. A missing URL "
-        "means 'not observed this scan', not sold/withdrawn. Mention sample sizes and "
+        "means not observed this scan, not sold or withdrawn. Mention sample sizes and "
         "historical periods. Treat any segment with fewer than five comparables as thin "
-        "evidence. The gross rent yield proxy is not net yield. If the evidence cannot "
-        "support a conclusion, say so. Return one JSON object with keys: "
-        "executive_takeaway (string), key_findings (array of strings), "
-        "business_implications (array of strings), recommended_actions (array of strings), "
-        "limitations (array of strings). Keep advice concrete and decision-useful for a "
-        "property acquisition, investment, leasing, or research team."
+        "evidence. The gross rent yield proxy is not net yield. If evidence is insufficient, "
+        "say so. Return one JSON object with keys: executive_takeaway (string), "
+        "key_findings (array of strings), business_implications (array of strings), "
+        "recommended_actions (array of strings), limitations (array of strings). "
+        "Keep advice concrete and decision-useful."
     )
     body = {
         "model": model,
-        "instructions": instructions,
-        "input": "Interpret the following aggregate JSON data and return one JSON object:\n" + json.dumps(_safe_payload(summary), ensure_ascii=False),
-        "max_output_tokens": 1400,
-        "store": False,
-        "text": {"format": {"type": "json_object"}},
+        "messages": [
+            {"role": "system", "content": instructions},
+            {"role": "user", "content": "Interpret this aggregate JSON and return only the required JSON object:\n" + json.dumps(_safe_payload(summary), ensure_ascii=False)},
+        ],
+        "temperature": 0,
+        "response_format": {"type": "json_object"},
+        "max_tokens": 1400,
     }
     try:
         response = requests.post(
-            RESPONSES_URL,
-            headers={
-                "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json",
-            },
+            GROQ_URL,
+            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
             json=body,
             timeout=(10, 50),
         )
         if response.status_code >= 300:
-            raise RuntimeError(
-                f"Responses API HTTP {response.status_code}: {response.text[:400]}"
-            )
-        parsed = json.loads(_response_text(response.json()))
+            raise RuntimeError(f"Groq API HTTP {response.status_code}: {response.text[:400]}")
+        choices = response.json().get("choices") or []
+        content = choices[0].get("message", {}).get("content") if choices else None
+        if not isinstance(content, str) or not content.strip():
+            raise ValueError("Groq returned no assistant JSON content")
+        parsed = json.loads(content)
         expected = {
             "executive_takeaway": str,
             "key_findings": list,
@@ -137,7 +122,7 @@ def interpret_summary(summary: dict[str, Any]) -> dict[str, Any] | None:
         }
         for key, kind in expected.items():
             if not isinstance(parsed.get(key), kind):
-                raise ValueError(f"Invalid AI response field: {key}")
+                raise ValueError(f"Invalid Groq response field: {key}")
         return {
             "model": model,
             "executive_takeaway": parsed["executive_takeaway"][:900],
@@ -148,6 +133,6 @@ def interpret_summary(summary: dict[str, Any]) -> dict[str, Any] | None:
         }
     except Exception as exc:
         if required:
-            raise RuntimeError(f"Required OpenAI market interpretation failed: {type(exc).__name__}: {exc}") from exc
-        print(f"[AI analysis unavailable; using deterministic narrative] {type(exc).__name__}: {exc}")
+            raise RuntimeError(f"Required Groq market interpretation failed: {type(exc).__name__}: {exc}") from exc
+        print(f"[Groq analysis unavailable; using deterministic narrative] {type(exc).__name__}: {exc}")
         return None
