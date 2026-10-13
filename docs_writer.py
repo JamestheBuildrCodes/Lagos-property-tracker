@@ -1,6 +1,6 @@
 """Publish the analyst report as a real Google Doc using the service account.
 
-If GOOGLE_DOC_ID is set, that document is replaced in-place. Otherwise a new
+By default, GOOGLE_DOC_ID is updated in-place. When GOOGLE_CREATE_WEEKLY_DOC=true, a new
 weekly document is created. Optional REPORT_CLIENT_EMAIL / REPORT_TO_EMAIL
 recipients receive viewer access to the created/updated document.
 
@@ -258,7 +258,8 @@ def publish(summary, output_docx=None):
     docs = build("docs", "v1", credentials=credentials, cache_discovery=False)
     drive = build("drive", "v3", credentials=credentials, cache_discovery=False)
 
-    doc_id = os.environ.get("GOOGLE_DOC_ID", "").strip()
+    force_new = os.environ.get("GOOGLE_CREATE_WEEKLY_DOC", "false").strip().lower() == "true"
+    doc_id = "" if force_new else os.environ.get("GOOGLE_DOC_ID", "").strip()
     title = f"Lagos Property Market — Weekly Intelligence Report — {datetime.now(timezone.utc):%Y-%m-%d}"
     text = report_text(summary)
 
@@ -273,8 +274,26 @@ def publish(summary, output_docx=None):
         requests += _format_requests(text)
         docs.documents().batchUpdate(documentId=doc_id, body={"requests": requests}).execute()
     else:
-        doc = docs.documents().create(body={"title": title}).execute()
-        doc_id = doc["documentId"]
+        folder_id = os.environ.get("GOOGLE_WEEKLY_REPORT_FOLDER_ID", "").strip()
+        doc_id = ""
+        if folder_id:
+            try:
+                created = drive.files().create(
+                    body={
+                        "name": title,
+                        "mimeType": "application/vnd.google-apps.document",
+                        "parents": [folder_id],
+                    },
+                    fields="id",
+                ).execute()
+                doc_id = created["id"]
+                print(f"Created fresh weekly Google Doc in configured folder: {folder_id}")
+            except HttpError as exc:
+                print(f"Could not create the weekly Google Doc in the configured folder; creating a fresh document in Drive root instead: {exc}")
+        if not doc_id:
+            doc = docs.documents().create(body={"title": title}).execute()
+            doc_id = doc["documentId"]
+            print("Created fresh weekly Google Doc in Drive root.")
         requests = [{"insertText": {"location": {"index": 1}, "text": text}}]
         requests += _format_requests(text)
         docs.documents().batchUpdate(documentId=doc_id, body={"requests": requests}).execute()
@@ -292,8 +311,10 @@ def publish(summary, output_docx=None):
         recipients += [x.strip() for x in os.environ.get(key, "").split(",") if "@" in x]
     for email in dict.fromkeys(recipients):
         try:
-            drive.permissions().create(fileId=doc_id, body={"type": "user", "role": "reader", "emailAddress": email}, sendNotificationEmail=False).execute()
+            drive.permissions().create(fileId=doc_id, body={"type": "user", "role": "reader", "emailAddress": email}, sendNotificationEmail=True).execute()
         except HttpError as exc:
+            if email.lower() == os.environ.get("REPORT_CLIENT_EMAIL", "").strip().lower():
+                raise RuntimeError(f"Could not grant the client access to the fresh weekly Google Doc: {exc}") from exc
             print(f"Google Doc sharing skipped for {email}: {exc}")
 
     url = f"https://docs.google.com/document/d/{doc_id}/edit"
