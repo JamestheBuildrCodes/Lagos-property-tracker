@@ -2556,8 +2556,8 @@ def _is_revoked_oauth_refresh_error(exc):
     return isinstance(exc, RefreshError) and "invalid_grant" in str(exc).lower()
 
 
-def _fallback_to_existing_google_doc(oauth_error):
-    """Keep report delivery alive using the Layer 3 Doc already published.
+def _fallback_to_fresh_service_account_doc(oauth_error):
+    """Keep report delivery alive using the fresh Layer 3 Doc published earlier in this same workflow run.
 
     docs_writer.py runs earlier in the same workflow with the service account,
     writes google_doc_url.txt, and grants the client viewer access. This is an
@@ -2567,17 +2567,14 @@ def _fallback_to_existing_google_doc(oauth_error):
     source = Path("google_doc_url.txt")
     if not source.exists():
         raise RuntimeError(
-            "The OAuth refresh token is revoked/expired and no previously "
-            "published Layer 3 Google Doc is available for fallback. "
+            "The OAuth refresh token is revoked/expired and no fresh Layer 3 Google Doc was published in this run. "
             "Re-authorize GOOGLE_OAUTH_TOKEN_JSON and retry."
         ) from oauth_error
 
     url = source.read_text(encoding="utf-8").strip()
     if not url.startswith("https://docs.google.com/document/d/") or "/edit" not in url:
         raise RuntimeError(
-            "The OAuth refresh token is revoked/expired and google_doc_url.txt "
-            "does not contain a valid Google Docs URL. Re-authorize "
-            "GOOGLE_OAUTH_TOKEN_JSON and retry."
+            "This run's service-account publication did not produce a valid Google Docs URL."
         ) from oauth_error
 
     Path("client_doc_url.txt").write_text(url + chr(10), encoding="utf-8")
@@ -2586,15 +2583,16 @@ def _fallback_to_existing_google_doc(oauth_error):
     # the richer human-owned document that OAuth would have created.
     verification = {
         "verified_at_utc": datetime.now(timezone.utc).isoformat(),
-        "publication_status": "fallback_to_existing_layer3_google_doc",
+        "publication_status": "fallback_to_fresh_service_account_weekly_doc",
+        "fallback_document_is_current_run": True,
         "client_preferred_doc_created": False,
         "client_preferred_doc_content_verified": False,
         "fallback_document_url": url,
-        "fallback_source": "docs_writer.py (service-account publication)",
+        "fallback_source": "docs_writer.py (fresh service-account document created in this workflow run)",
         "oauth_error": "invalid_grant: OAuth refresh token expired or revoked",
         "action_required": (
-            "Re-authorize Google OAuth and replace the GOOGLE_OAUTH_TOKEN_JSON "
-            "GitHub Actions secret to restore the client-preferred weekly document."
+            "Refresh GOOGLE_OAUTH_TOKEN_JSON to restore client-preferred formatting; "
+            "the current report is still a newly generated service-account Google Doc."
         ),
     }
     Path("google_doc_verification.json").write_text(
@@ -2603,8 +2601,7 @@ def _fallback_to_existing_google_doc(oauth_error):
     )
     print(
         "WARNING: Google OAuth refresh token was revoked/expired. "
-        "The client-preferred Google Doc was not created. Falling back to the "
-        f"existing, service-account-published Layer 3 Google Doc: {url}"
+        "Using the fresh service-account Google Doc created in this run: {url}"
     )
     return url
 
@@ -2723,7 +2720,7 @@ def main():
         except Exception as exc:
             if not _is_revoked_oauth_refresh_error(exc):
                 raise
-            url = _fallback_to_existing_google_doc(exc)
+            url = _fallback_to_fresh_service_account_doc(exc)
 
         if os.environ.get("SUPPRESS_REPORT_NOTIFICATION_EMAIL", "").strip() != "1":
             send_notification_email(url)
