@@ -5,6 +5,17 @@ import email_report
 
 
 class EmailReportRoutingTests(unittest.TestCase):
+    def test_email_report_supports_data_availability_note(self):
+        from email_report import send_report
+        from unittest.mock import patch
+        with patch.dict("os.environ", {"REPORT_EMAIL_NOTE": "Snapshot from 12 October; no fresh scrape."}), patch(
+            "email_report.send_message"
+        ) as send:
+            send_report("client@example.com", "internal@example.com", "<html><body>Brief</body></html>")
+        kwargs = send.call_args.kwargs
+        self.assertIn("Snapshot from 12 October", kwargs["html_body"])
+        self.assertIn("Snapshot from 12 October", kwargs["text_body"])
+
     def test_client_is_to_and_internal_recipient_is_cc(self):
         with patch.object(email_report, "send_message") as mocked_send:
             email_report.send_report(
