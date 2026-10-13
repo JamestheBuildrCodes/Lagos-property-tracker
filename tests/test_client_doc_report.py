@@ -181,7 +181,7 @@ class ClientDocReportTests(unittest.TestCase):
         self.assertTrue(all("email you when a new listing matches" not in text.lower() for _, text in cards))
 
 
-    def test_revoked_oauth_token_falls_back_to_existing_layer3_doc(self):
+    def test_revoked_oauth_token_falls_back_to_fresh_service_account_doc(self):
         import json
         import os
         from google.auth.exceptions import RefreshError
@@ -203,7 +203,7 @@ class ClientDocReportTests(unittest.TestCase):
                 fallback_url = "https://docs.google.com/document/d/layer3-report-id/edit"
                 Path("google_doc_url.txt").write_text(fallback_url + chr(10), encoding="utf-8")
 
-                result = client_doc_report._fallback_to_existing_google_doc(error)
+                result = client_doc_report._fallback_to_fresh_service_account_doc(error)
 
                 self.assertEqual(result, fallback_url)
                 self.assertEqual(Path("client_doc_url.txt").read_text(encoding="utf-8").strip(), fallback_url)
@@ -212,7 +212,7 @@ class ClientDocReportTests(unittest.TestCase):
                 )
                 self.assertEqual(
                     verification["publication_status"],
-                    "fallback_to_existing_layer3_google_doc",
+                    "fallback_to_fresh_service_account_weekly_doc",
                 )
                 self.assertFalse(verification["client_preferred_doc_created"])
                 self.assertFalse(verification["client_preferred_doc_content_verified"])
@@ -229,8 +229,8 @@ class ClientDocReportTests(unittest.TestCase):
         try:
             with tempfile.TemporaryDirectory() as td:
                 os.chdir(td)
-                with self.assertRaisesRegex(RuntimeError, "Re-authorize GOOGLE_OAUTH_TOKEN_JSON"):
-                    client_doc_report._fallback_to_existing_google_doc(error)
+                with self.assertRaisesRegex(RuntimeError, "no fresh Layer 3 Google Doc"):
+                    client_doc_report._fallback_to_fresh_service_account_doc(error)
         finally:
             os.chdir(current_dir)
 
