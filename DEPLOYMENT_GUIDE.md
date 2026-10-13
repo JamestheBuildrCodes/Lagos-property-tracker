@@ -99,7 +99,7 @@ Set these GitHub Actions repository secrets:
 | `GOOGLE_DOC_ID` | Optional existing analyst Google Doc to update in place |
 | `GOOGLE_SERVICE_ACCOUNT_JSON` | Google Sheets service-account credentials (Editor access to the existing Sheet required) |
 | `GOOGLE_SHEET_ID` | Existing client data Sheet ID |
-| `GOOGLE_OAUTH_TOKEN_JSON` | Required OAuth token for creating the new client-preferred Google Doc each week |
+| `GOOGLE_OAUTH_TOKEN_JSON` | Optional legacy OAuth path; the current workflow creates and shares a fresh weekly Google Doc using the service account, so report delivery does not depend on this token |
 | `GROQ_API_KEY` | Optional key for AI interpretation of aggregate metrics only; omit it to use free deterministic analysis |
 | `GROQ_MODEL` | Explicit compatible model name required only when enabling the optional paid API |
 
@@ -127,7 +127,7 @@ Termux. It then:
 5. builds the executive email, workbook and analyst report from the same aggregate analysis; optional Groq commentary is produced only when `GROQ_API_KEY` is configured;
 6. mirrors the workbook into the existing Google Sheet and verifies its cells by readback;
 7. publishes the analyst Google Doc and archives its DOCX;
-8. creates a new client snapshot Google Doc and verifies its URL;
+8. creates a new weekly Google Doc through the service account and verifies that the document was created in this run;
 9. sends one final executive email to `REPORT_CLIENT_EMAIL`, copying `REPORT_TO_EMAIL`, with report and Sheet links;
 10. verifies Mailjet's message-level acceptance receipt, archives outputs and commits the result.
 
