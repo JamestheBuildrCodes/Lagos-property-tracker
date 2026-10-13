@@ -294,6 +294,33 @@ class ClientDocReportTests(unittest.TestCase):
         finally:
             os.chdir(current_dir)
 
+    def test_incomplete_oauth_configuration_also_records_docx_fallback(self):
+        import json
+        import os
+
+        current_dir = Path.cwd()
+        try:
+            with tempfile.TemporaryDirectory() as td:
+                os.chdir(td)
+                docx = Path("Lagos_Property_Market_Snapshot_2026-10-14.docx")
+                docx.write_bytes(b"test docx payload")
+                error = RuntimeError(
+                    "GOOGLE_OAUTH_TOKEN_JSON is incomplete; missing: refresh_token, client_id"
+                )
+                marker = client_doc_report._write_docx_attachment_fallback(error, docx)
+                self.assertEqual(marker, "ATTACHED_DOCX_FALLBACK")
+                verification = json.loads(
+                    Path("google_doc_verification.json").read_text(encoding="utf-8")
+                )
+                self.assertEqual(
+                    verification["publication_status"],
+                    "docx_attachment_fallback_no_google_doc",
+                )
+                self.assertEqual(verification["oauth_error_type"], "RuntimeError")
+                self.assertEqual(verification["docx_attachment"], docx.name)
+        finally:
+            os.chdir(current_dir)
+
 
 
 if __name__ == "__main__":
