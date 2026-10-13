@@ -164,7 +164,7 @@ def _safe_excerpt(value: str) -> str:
 
 
 def _groq_verify_rows(rows: list[dict], chunk_size: int = 20) -> dict[str, dict]:
-    """Optional Groq OpenAI-compatible JSON pass; callers must tolerate quota failures."""
+    """Optional Groq JSON chat-completions pass; callers must tolerate provider failures."""
     api_key = os.environ.get("GROQ_API_KEY", "").strip()
     if not api_key:
         raise RuntimeError("GROQ_API_KEY is missing")
