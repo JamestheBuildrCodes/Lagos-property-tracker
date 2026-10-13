@@ -1,0 +1,96 @@
+name: Resend Latest Archived Property Report
+
+on:
+  push:
+    paths:
+      - ".ops/resend-latest-report"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: resend-latest-property-report
+  cancel-in-progress: false
+
+jobs:
+  resend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install reporting dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Select latest archived report
+        id: snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE=$(find data -maxdepth 1 -type f -name 'property_listings_*.csv' -printf '%f\n' | sort | tail -n 1)
+          test -n "$FILE" || { echo "No archived property snapshot exists."; exit 1; }
+          DATE="${FILE#property_listings_}"
+          DATE="${DATE%.csv}"
+          CURR="data/$FILE"
+          XLSX="data/market_intelligence_${DATE}.xlsx"
+          HTML="data/executive_brief_${DATE}.html"
+          CHANGES="data/changes_${DATE}.csv"
+          RESEARCH="data/estateintel_public_research_${DATE}.csv"
+          for REQUIRED in "$CURR" "$XLSX" "$HTML" data/client_doc_url.txt; do
+            test -s "$REQUIRED" || { echo "Required archived report file missing: $REQUIRED"; exit 1; }
+          done
+          echo "date=$DATE" >> "$GITHUB_OUTPUT"
+          echo "curr=$CURR" >> "$GITHUB_OUTPUT"
+          echo "xlsx=$XLSX" >> "$GITHUB_OUTPUT"
+          echo "html=$HTML" >> "$GITHUB_OUTPUT"
+          if [ -s "$CHANGES" ]; then echo "changes=$CHANGES" >> "$GITHUB_OUTPUT"; else echo "changes=none" >> "$GITHUB_OUTPUT"; fi
+          if [ -s "$RESEARCH" ]; then echo "research=$RESEARCH" >> "$GITHUB_OUTPUT"; else echo "research=none" >> "$GITHUB_OUTPUT"; fi
+          echo "Selected most recent successful snapshot: $DATE"
+          echo "NOTE: this workflow resends the latest archived snapshot; it does not scrape new listings."
+
+      - name: Refresh Google Sheet and verify client access
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+          REPORT_CLIENT_EMAIL: ${{ secrets.REPORT_CLIENT_EMAIL }}
+        run: |
+          set -euo pipefail
+          test -n "$GOOGLE_SERVICE_ACCOUNT_JSON" || { echo "GOOGLE_SERVICE_ACCOUNT_JSON is required."; exit 1; }
+          test -n "$GOOGLE_SHEET_ID" || { echo "GOOGLE_SHEET_ID is required."; exit 1; }
+          python sheets_writer.py "${{ steps.snapshot.outputs.curr }}" "${{ steps.snapshot.outputs.changes }}" "${{ steps.snapshot.outputs.research }}" "${{ steps.snapshot.outputs.xlsx }}"
+
+      - name: Send latest archived report with data availability note
+        env:
+          MAILJET_API_KEY: ${{ secrets.MAILJET_API_KEY }}
+          MAILJET_SECRET_KEY: ${{ secrets.MAILJET_SECRET_KEY }}
+          MAILJET_FROM_EMAIL: ${{ secrets.MAILJET_FROM_EMAIL }}
+          MAILJET_FROM_NAME: "Master Builder Inc."
+          REPORT_TO_EMAIL: ${{ secrets.REPORT_TO_EMAIL }}
+          REPORT_CLIENT_EMAIL: ${{ secrets.REPORT_CLIENT_EMAIL }}
+          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+          REPORT_EMAIL_NOTE: "This resend uses the latest successfully collected property snapshot dated ${{ steps.snapshot.outputs.date }}. A new scrape could not run on 13 October 2026 because Zyte returned HTTP 403 (account suspended); the figures are not represented as a fresh 13 October scrape."
+        run: |
+          set -euo pipefail
+          for KEY in MAILJET_API_KEY MAILJET_SECRET_KEY MAILJET_FROM_EMAIL REPORT_TO_EMAIL REPORT_CLIENT_EMAIL GOOGLE_SHEET_ID; do
+            test -n "${!KEY}" || { echo "$KEY is required."; exit 1; }
+          done
+          DOC_URL=$(cat data/client_doc_url.txt)
+          SHEET_URL="https://docs.google.com/spreadsheets/d/$GOOGLE_SHEET_ID/edit"
+          python email_report.py "${{ steps.snapshot.outputs.curr }}" "${{ steps.snapshot.outputs.changes }}" "$REPORT_CLIENT_EMAIL" "${{ steps.snapshot.outputs.html }}" "$DOC_URL" "$SHEET_URL"
+          test -s mailjet_layer1_receipt.json
+          python - <<'PY'
+          import json
+          data = json.load(open("mailjet_layer1_receipt.json", encoding="utf-8"))
+          statuses = [item.get("status") for item in data.get("message_results", [])]
+          assert statuses and all(status == "success" for status in statuses), (
+              f"Mailjet did not accept every message successfully: {statuses}"
+          )
+          print("Mailjet accepted the archived-report resend; provider acceptance is not proof of inbox delivery.")
+          PY
