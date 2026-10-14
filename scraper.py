@@ -345,17 +345,74 @@ def _fetch_zyte(url: str, source: str) -> requests.Response:
     raise RuntimeError(str(last_exc))
 
 
-def fetch_page(url: str, source: str) -> requests.Response:
-    """Fetch a manifest URL using the cheapest valid transport.
+def _fetch_alternate_providers(url: str, source: str) -> requests.Response:
+    """Try configured fallback transports in order: ZenRows, then ScraperAPI.
 
-    NPC is attempted directly first. If the public site returns 403, the
-    request falls back to Zyte rather than treating the source as permanently
-    unavailable. PropertyPro and Estate Intel use Zyte browser HTML.
+    These providers are optional. Missing keys are skipped, account/billing
+    failures disable that provider for the rest of this run, and the caller
+    raises only after all configured transports fail.
+    """
+    providers = [
+        ("ZenRows", os.environ.get("ZENROWS_API_KEY", "").strip()),
+        ("ScraperAPI", os.environ.get("SCRAPERAPI_API_KEY", "").strip()),
+    ]
+    errors = []
+    for provider, key in providers:
+        if not key:
+            print(f"[{provider}] API key not configured; skipping fallback.")
+            continue
+        try:
+            print(f"[{provider}] fallback for {source}: {url}")
+            if provider == "ZenRows":
+                response = requests.get(
+                    "https://api.zenrows.com/v1/",
+                    params={"apikey": key, "url": url, "js_render": "true"},
+                    headers={"Accept": "text/html"},
+                    timeout=ZYTE_TIMEOUT,
+                )
+            else:
+                response = requests.get(
+                    "https://api.scraperapi.com/",
+                    params={"api_key": key, "url": url, "render": "true"},
+                    headers={"Accept": "text/html"},
+                    timeout=ZYTE_TIMEOUT,
+                )
+            if response.status_code >= 400:
+                detail = f"HTTP {response.status_code}: {response.text[:240]}"
+                errors.append(f"{provider}: {detail}")
+                print(f"[{provider}] fallback failed for {source}: {detail}")
+                # Do not repeatedly spend calls against invalid/suspended accounts.
+                if response.status_code in (401, 402, 403):
+                    print(f"[{provider}] authentication/billing failure; moving to next provider.")
+                continue
+            html = response.text or ""
+            if not html.strip() or "<html" not in html[:5000].lower():
+                errors.append(f"{provider}: response did not look like HTML")
+                print(f"[{provider}] returned an empty or non-HTML response.")
+                continue
+            print(f"[{provider}] OK for {source}: {len(html)} HTML characters")
+            response.url = url
+            return response
+        except requests.RequestException as exc:
+            errors.append(f"{provider}: {exc}")
+            print(f"[{provider}] request failed for {source}: {exc}")
+    raise RuntimeError(
+        f"All configured scraper transports failed for {source}. "
+        + ("; ".join(errors) if errors else "No fallback API keys are configured.")
+    )
+
+
+def fetch_page(url: str, source: str) -> requests.Response:
+    """Fetch using direct access where supported, then Zyte, ZenRows, ScraperAPI.
+
+    Paid transports are failover options, not a guarantee: each needs an active
+    subscription/valid key and the target site must return parseable HTML.
     """
     host = urlparse(url).netloc.lower()
     if host not in ALLOWED_HOSTS[source]:
         raise ValueError(f"Manifest URL host is not allowed for {source}: {url}")
 
+    # Try the public site directly first for NPC to avoid unnecessary API spend.
     if source == "Nigeria Property Centre":
         try:
             response = requests.get(
@@ -369,19 +426,30 @@ def fetch_page(url: str, source: str) -> requests.Response:
             )
             if response.status_code < 400:
                 return response
-            if response.status_code == 403:
-                print(
-                    f"[NPC] Direct request returned HTTP 403 for {url}; "
-                    "falling back to Zyte."
-                )
-                return _fetch_zyte(url, source)
-            response.raise_for_status()
+            print(
+                f"[NPC] Direct request returned HTTP {response.status_code}; "
+                "trying configured API transports."
+            )
         except requests.RequestException as exc:
-            raise RuntimeError(
-                f"Nigeria Property Centre direct request failed: {exc}"
-            ) from exc
+            print(f"[NPC] Direct request failed ({exc}); trying configured API transports.")
 
-    return _fetch_zyte(url, source)
+    # Zyte is tried first when configured. A suspended account must not block
+    # the independent fallback providers.
+    zyte_error = None
+    if ZYTE_API_KEY and not PAID_SOURCE_FAILURE.is_set():
+        try:
+            return _fetch_zyte(url, source)
+        except (RuntimeError, requests.RequestException, ValueError) as exc:
+            zyte_error = str(exc)
+            print(f"[Zyte] unavailable for {source}: {zyte_error}; trying fallbacks.")
+    else:
+        print("[Zyte] disabled (missing key or prior account failure); trying fallbacks.")
+
+    try:
+        return _fetch_alternate_providers(url, source)
+    except RuntimeError as fallback_error:
+        details = f"Zyte failure: {zyte_error}. " if zyte_error else ""
+        raise RuntimeError(details + str(fallback_error)) from fallback_error
 
 def add_page_param(url: str, page: int) -> str:
     if page == 1:
