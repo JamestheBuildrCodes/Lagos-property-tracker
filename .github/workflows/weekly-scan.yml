@@ -51,6 +51,8 @@ jobs:
       - name: Collect current market data
         env:
           ZYTE_API_KEY: ${{ secrets.ZYTE_API_KEY }}
+          ZENROWS_API_KEY: ${{ secrets.ZENROWS_API_KEY }}
+          SCRAPERAPI_API_KEY: ${{ secrets.SCRAPERAPI_API_KEY }}
           ZYTE_BROWSER_HTML: "true"
           MAX_LISTING_AGE_DAYS: "7"
           PREFERRED_FRESHNESS_DAYS: "7"
