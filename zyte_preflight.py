@@ -17,7 +17,8 @@ URLS = [
 
 key = os.environ.get("ZYTE_API_KEY", "").strip()
 if not key:
-    raise SystemExit("ZYTE_API_KEY is missing")
+    print("ZYTE_API_KEY is not configured; skipping Zyte preflight and allowing scraper.py to try configured fallback transports.")
+    raise SystemExit(0)
 
 successes = []
 failures = []
