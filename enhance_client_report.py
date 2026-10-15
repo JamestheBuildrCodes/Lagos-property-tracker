@@ -76,6 +76,19 @@ def data_quality_audit(rows):
             continue
         if txn != "land" and not is_apartment(row):
             continue
+        if txn == "rent" and str(row.get("price_period") or "unspecified").lower() not in {"annual", "monthly"}:
+            findings.append({
+                "priority": "high",
+                "type": "rent_period_unspecified",
+                "market_node": node,
+                "transaction": txn,
+                "bedrooms": beds,
+                "asking_price_ngn": num(row, "source_asking_price_ngn", "asking_price_ngn"),
+                "source": row.get("source", "Unknown"),
+                "source_url": row.get("source_url", ""),
+                "reason": "Source does not explicitly identify monthly or annual rent. Excluded from annual rent medians/charts rather than guessing the period.",
+            })
+            continue
         price = num(row, "asking_price_ngn")
         if price is None or price <= 0:
             continue
