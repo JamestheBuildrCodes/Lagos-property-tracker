@@ -1,20 +1,24 @@
 {
-  "input_rows": 405,
-  "output_rows": 364,
-  "evidence_verified_rows": 364,
+  "input_rows": 366,
+  "output_rows": 336,
+  "evidence_verified_rows": 336,
   "verification_method": "deterministic_source_evidence",
-  "quarantined_for_review": 41,
+  "quarantined_for_review": 30,
   "removed_rows": 0,
-  "fixed_rows": 27,
+  "fixed_rows": 28,
   "duplicates_removed": 0,
   "removals": [],
   "fixes": [
     {
-      "row": 40,
+      "row": 20,
       "fix": "converted parsed land unit price into total asking price"
     },
     {
-      "row": 41,
+      "row": 21,
+      "fix": "converted parsed land unit price into total asking price"
+    },
+    {
+      "row": 26,
       "fix": "converted parsed land unit price into total asking price"
     },
     {
@@ -22,99 +26,99 @@
       "fix": "converted parsed land unit price into total asking price"
     },
     {
-      "row": 70,
+      "row": 49,
       "fix": "converted parsed land unit price into total asking price"
     },
     {
-      "row": 73,
+      "row": 50,
       "fix": "converted parsed land unit price into total asking price"
     },
     {
-      "row": 74,
+      "row": 51,
       "fix": "converted parsed land unit price into total asking price"
     },
     {
-      "row": 75,
+      "row": 52,
       "fix": "converted parsed land unit price into total asking price"
     },
     {
-      "row": 76,
+      "row": 55,
       "fix": "converted parsed land unit price into total asking price"
     },
     {
-      "row": 79,
-      "fix": "converted parsed land unit price into total asking price"
-    },
-    {
-      "row": 144,
-      "fix": "converted parsed land unit price into total asking price"
-    },
-    {
-      "row": 145,
+      "row": 99,
       "fix": "removed bedroom value from land record"
     },
     {
-      "row": 146,
+      "row": 102,
       "fix": "converted parsed land unit price into total asking price"
     },
     {
-      "row": 147,
-      "fix": "converted parsed land unit price into total asking price"
-    },
-    {
-      "row": 150,
-      "fix": "converted parsed land unit price into total asking price"
-    },
-    {
-      "row": 179,
-      "fix": "converted parsed land unit price into total asking price"
-    },
-    {
-      "row": 181,
+      "row": 103,
       "fix": "removed bedroom value from land record"
     },
     {
-      "row": 273,
+      "row": 104,
       "fix": "converted parsed land unit price into total asking price"
     },
     {
-      "row": 276,
+      "row": 105,
       "fix": "converted parsed land unit price into total asking price"
     },
     {
-      "row": 297,
+      "row": 108,
       "fix": "converted parsed land unit price into total asking price"
     },
     {
-      "row": 298,
+      "row": 137,
       "fix": "converted parsed land unit price into total asking price"
     },
     {
-      "row": 300,
-      "fix": "converted parsed land unit price into total asking price"
-    },
-    {
-      "row": 301,
-      "fix": "converted parsed land unit price into total asking price"
-    },
-    {
-      "row": 339,
-      "fix": "converted parsed land unit price into total asking price"
-    },
-    {
-      "row": 382,
+      "row": 139,
       "fix": "removed bedroom value from land record"
     },
     {
-      "row": 383,
+      "row": 240,
       "fix": "converted parsed land unit price into total asking price"
     },
     {
-      "row": 384,
+      "row": 243,
       "fix": "converted parsed land unit price into total asking price"
     },
     {
-      "row": 387,
+      "row": 264,
+      "fix": "converted parsed land unit price into total asking price"
+    },
+    {
+      "row": 265,
+      "fix": "converted parsed land unit price into total asking price"
+    },
+    {
+      "row": 266,
+      "fix": "converted parsed land unit price into total asking price"
+    },
+    {
+      "row": 267,
+      "fix": "converted parsed land unit price into total asking price"
+    },
+    {
+      "row": 321,
+      "fix": "converted parsed land unit price into total asking price"
+    },
+    {
+      "row": 343,
+      "fix": "removed bedroom value from land record"
+    },
+    {
+      "row": 344,
+      "fix": "converted parsed land unit price into total asking price"
+    },
+    {
+      "row": 345,
+      "fix": "converted parsed land unit price into total asking price"
+    },
+    {
+      "row": 348,
       "fix": "converted parsed land unit price into total asking price"
     }
   ],
@@ -123,24 +127,6 @@
       "record_id": "c97386e4bff1eddc",
       "source": "PropertyPro.ng",
       "source_url": "https://propertypro.ng/property/3-bedroom-flat-apartment-for-sale-banana-island-ikoyi-lagos-4QBUY",
-      "issues": "Bulk multi-unit block listing is not comparable to a single-apartment bedroom segment; manual classification required."
-    },
-    {
-      "record_id": "ffec9d76aea839d1",
-      "source": "PropertyPro.ng",
-      "source_url": "https://propertypro.ng/property/4-bedroom-flat-apartment-for-rent-banana-island-ikoyi-lagos-8PYGP",
-      "issues": "Bulk multi-unit block listing is not comparable to a single-apartment bedroom segment; manual classification required."
-    },
-    {
-      "record_id": "8c9d6791b3159b2a",
-      "source": "PropertyPro.ng",
-      "source_url": "https://propertypro.ng/property/flat-apartment-for-sale-old-ikoyi-ikoyi-lagos-4QAPF",
-      "issues": "Bulk multi-unit block listing is not comparable to a single-apartment bedroom segment; manual classification required."
-    },
-    {
-      "record_id": "425f37c0a6376008",
-      "source": "PropertyPro.ng",
-      "source_url": "https://propertypro.ng/property/3-bedroom-flat-apartment-for-rent-old-ikoyi-ikoyi-lagos-6PEFZ",
       "issues": "Bulk multi-unit block listing is not comparable to a single-apartment bedroom segment; manual classification required."
     },
     {
@@ -246,64 +232,16 @@
       "issues": "No valid extracted asking price"
     },
     {
-      "record_id": "dbfd32dce20cb29f",
+      "record_id": "56dc55f5451fb059",
       "source": "PropertyPro.ng",
-      "source_url": "https://propertypro.ng/property/flat-apartment-for-sale-old-ikoyi-ikoyi-lagos-0QEBJ",
+      "source_url": "https://propertypro.ng/property/5-bedroom-flat-apartment-for-sale-old-ikoyi-ikoyi-lagos-5QGMA",
       "issues": "No valid extracted asking price"
     },
     {
-      "record_id": "518d7af4c0165401",
+      "record_id": "d6cb9930cc754e0d",
       "source": "PropertyPro.ng",
-      "source_url": "https://propertypro.ng/property/3-bedroom-flat-apartment-for-sale-old-ikoyi-ikoyi-lagos-0PNPW",
-      "issues": "No valid extracted asking price"
-    },
-    {
-      "record_id": "1453152beba482b0",
-      "source": "PropertyPro.ng",
-      "source_url": "https://propertypro.ng/property/flat-apartment-for-sale-bankole-oki-street-ikoyi-old-ikoyi-ikoyi-lagos-4PXZA",
-      "issues": "No valid extracted asking price"
-    },
-    {
-      "record_id": "cbfe703d55d506ee",
-      "source": "PropertyPro.ng",
-      "source_url": "https://propertypro.ng/property/5-bedroom-flat-apartment-for-sale-old-ikoyi-ikoyi-lagos-0QERR",
-      "issues": "No valid extracted asking price"
-    },
-    {
-      "record_id": "5a745f5baf3be67f",
-      "source": "PropertyPro.ng",
-      "source_url": "https://propertypro.ng/property/3-bedroom-flat-apartment-for-sale-old-ikoyi-ikoyi-lagos-4QEMU",
-      "issues": "No valid extracted asking price"
-    },
-    {
-      "record_id": "15c04ff3baafe8d7",
-      "source": "PropertyPro.ng",
-      "source_url": "https://propertypro.ng/property/3-bedroom-flat-apartment-for-sale-5a-onilegbale-street-old-ikoyi-ikoyi-lagos-old-ikoyi-ikoyi-lagos-2QDFD",
-      "issues": "No valid extracted asking price"
-    },
-    {
-      "record_id": "14afcd8b4616b46c",
-      "source": "PropertyPro.ng",
-      "source_url": "https://propertypro.ng/property/2-bedroom-flat-apartment-for-sale-old-ikoyi-ikoyi-lagos-7QGCE",
-      "issues": "No valid extracted asking price"
-    },
-    {
-      "record_id": "38e34dabbc313a5c",
-      "source": "PropertyPro.ng",
-      "source_url": "https://propertypro.ng/property/5-bedroom-flat-apartment-for-rent-old-ikoyi-ikoyi-lagos-1QAMN",
-      "issues": "No valid extracted asking price"
-    },
-    {
-      "record_id": "cc5e0f53c26a8c05",
-      "source": "PropertyPro.ng",
-      "source_url": "https://propertypro.ng/property/4-bedroom-flat-apartment-for-rent-old-ikoyi-ikoyi-lagos-9QBTR",
-      "issues": "No valid extracted asking price"
-    },
-    {
-      "record_id": "2def7a94cb900c8b",
-      "source": "PropertyPro.ng",
-      "source_url": "https://propertypro.ng/property/4-bedroom-flat-apartment-for-rent-lugard-avenue-old-ikoyi-ikoyi-lagos-1PWTK",
-      "issues": "No valid extracted asking price"
+      "source_url": "https://propertypro.ng/property/3-bedroom-flat-apartment-for-sale-lekki-phase-1-lekki-lagos-8QATY",
+      "issues": "Land record contains apartment/bedroom evidence"
     },
     {
       "record_id": "461777823bd4fb32",

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-15T16:13:07.135745+00:00",
+  "generated_at": "2026-10-15T16:36:28.874334+00:00",
   "max_listing_age_days": 7,
   "nodes": [
     "Banana Island",
@@ -27,7 +27,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130757+00:00",
+      "last_checked": "2026-10-15T16:36:28.869292+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -44,7 +44,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130774+00:00",
+      "last_checked": "2026-10-15T16:36:28.869312+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -61,7 +61,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130782+00:00",
+      "last_checked": "2026-10-15T16:36:28.869320+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -78,7 +78,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130788+00:00",
+      "last_checked": "2026-10-15T16:36:28.869327+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -95,7 +95,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130793+00:00",
+      "last_checked": "2026-10-15T16:36:28.869332+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -112,7 +112,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130807+00:00",
+      "last_checked": "2026-10-15T16:36:28.869346+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -129,7 +129,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130814+00:00",
+      "last_checked": "2026-10-15T16:36:28.869353+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -146,7 +146,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130823+00:00",
+      "last_checked": "2026-10-15T16:36:28.869366+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -163,7 +163,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130829+00:00",
+      "last_checked": "2026-10-15T16:36:28.869373+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -180,7 +180,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130834+00:00",
+      "last_checked": "2026-10-15T16:36:28.869378+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -197,7 +197,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130846+00:00",
+      "last_checked": "2026-10-15T16:36:28.869390+00:00",
       "notes": "Residential-land category; size and asking price are extracted from listing cards."
     },
     {
@@ -214,7 +214,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130857+00:00",
+      "last_checked": "2026-10-15T16:36:28.869405+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -231,7 +231,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130866+00:00",
+      "last_checked": "2026-10-15T16:36:28.869410+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -248,7 +248,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130870+00:00",
+      "last_checked": "2026-10-15T16:36:28.869414+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -265,7 +265,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130874+00:00",
+      "last_checked": "2026-10-15T16:36:28.869418+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -282,7 +282,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130878+00:00",
+      "last_checked": "2026-10-15T16:36:28.869422+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -299,7 +299,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130887+00:00",
+      "last_checked": "2026-10-15T16:36:28.869434+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -316,7 +316,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130891+00:00",
+      "last_checked": "2026-10-15T16:36:28.869438+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -333,7 +333,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130895+00:00",
+      "last_checked": "2026-10-15T16:36:28.869443+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -350,7 +350,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130899+00:00",
+      "last_checked": "2026-10-15T16:36:28.869447+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -367,7 +367,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130903+00:00",
+      "last_checked": "2026-10-15T16:36:28.869450+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -384,7 +384,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130914+00:00",
+      "last_checked": "2026-10-15T16:36:28.869459+00:00",
       "notes": "Residential-land category; size and asking price are extracted from listing cards."
     },
     {
@@ -401,7 +401,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130923+00:00",
+      "last_checked": "2026-10-15T16:36:28.869468+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -418,7 +418,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130927+00:00",
+      "last_checked": "2026-10-15T16:36:28.869472+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -435,7 +435,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130930+00:00",
+      "last_checked": "2026-10-15T16:36:28.869476+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -452,7 +452,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130934+00:00",
+      "last_checked": "2026-10-15T16:36:28.869480+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -469,7 +469,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130938+00:00",
+      "last_checked": "2026-10-15T16:36:28.869484+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -486,7 +486,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130947+00:00",
+      "last_checked": "2026-10-15T16:36:28.869493+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -503,7 +503,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130951+00:00",
+      "last_checked": "2026-10-15T16:36:28.869497+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -520,7 +520,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130955+00:00",
+      "last_checked": "2026-10-15T16:36:28.869501+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -537,7 +537,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130958+00:00",
+      "last_checked": "2026-10-15T16:36:28.869504+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -554,7 +554,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130962+00:00",
+      "last_checked": "2026-10-15T16:36:28.869508+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -571,7 +571,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130970+00:00",
+      "last_checked": "2026-10-15T16:36:28.869516+00:00",
       "notes": "Residential-land category; size and asking price are extracted from listing cards."
     },
     {
@@ -588,7 +588,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130978+00:00",
+      "last_checked": "2026-10-15T16:36:28.869524+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -605,7 +605,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130982+00:00",
+      "last_checked": "2026-10-15T16:36:28.869529+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -622,7 +622,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130986+00:00",
+      "last_checked": "2026-10-15T16:36:28.869533+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -639,7 +639,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130990+00:00",
+      "last_checked": "2026-10-15T16:36:28.869536+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -656,7 +656,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.130994+00:00",
+      "last_checked": "2026-10-15T16:36:28.869540+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -673,7 +673,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131002+00:00",
+      "last_checked": "2026-10-15T16:36:28.869553+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -690,7 +690,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131006+00:00",
+      "last_checked": "2026-10-15T16:36:28.869558+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -707,7 +707,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131009+00:00",
+      "last_checked": "2026-10-15T16:36:28.869562+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -724,7 +724,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131013+00:00",
+      "last_checked": "2026-10-15T16:36:28.869566+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -741,7 +741,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131017+00:00",
+      "last_checked": "2026-10-15T16:36:28.869571+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -758,7 +758,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131027+00:00",
+      "last_checked": "2026-10-15T16:36:28.869579+00:00",
       "notes": "Residential-land category; size and asking price are extracted from listing cards."
     },
     {
@@ -775,7 +775,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131037+00:00",
+      "last_checked": "2026-10-15T16:36:28.869587+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -792,7 +792,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131041+00:00",
+      "last_checked": "2026-10-15T16:36:28.869591+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -809,7 +809,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131044+00:00",
+      "last_checked": "2026-10-15T16:36:28.869595+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -826,7 +826,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131048+00:00",
+      "last_checked": "2026-10-15T16:36:28.869599+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -843,7 +843,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131052+00:00",
+      "last_checked": "2026-10-15T16:36:28.869603+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -860,7 +860,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131062+00:00",
+      "last_checked": "2026-10-15T16:36:28.869612+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -877,7 +877,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131066+00:00",
+      "last_checked": "2026-10-15T16:36:28.869617+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -894,7 +894,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131070+00:00",
+      "last_checked": "2026-10-15T16:36:28.869620+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -911,7 +911,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131073+00:00",
+      "last_checked": "2026-10-15T16:36:28.869624+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -928,7 +928,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131077+00:00",
+      "last_checked": "2026-10-15T16:36:28.869628+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -945,7 +945,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131085+00:00",
+      "last_checked": "2026-10-15T16:36:28.869636+00:00",
       "notes": "Residential-land category; size and asking price are extracted from listing cards."
     },
     {
@@ -962,7 +962,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131093+00:00",
+      "last_checked": "2026-10-15T16:36:28.869644+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -979,7 +979,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131097+00:00",
+      "last_checked": "2026-10-15T16:36:28.869648+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -996,7 +996,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131101+00:00",
+      "last_checked": "2026-10-15T16:36:28.869652+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1013,7 +1013,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131105+00:00",
+      "last_checked": "2026-10-15T16:36:28.869655+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1030,7 +1030,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131109+00:00",
+      "last_checked": "2026-10-15T16:36:28.869659+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1047,7 +1047,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131116+00:00",
+      "last_checked": "2026-10-15T16:36:28.869666+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1064,7 +1064,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131121+00:00",
+      "last_checked": "2026-10-15T16:36:28.869672+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1081,7 +1081,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131124+00:00",
+      "last_checked": "2026-10-15T16:36:28.869676+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1098,7 +1098,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131128+00:00",
+      "last_checked": "2026-10-15T16:36:28.869680+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1115,7 +1115,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131132+00:00",
+      "last_checked": "2026-10-15T16:36:28.869684+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1132,7 +1132,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131141+00:00",
+      "last_checked": "2026-10-15T16:36:28.869692+00:00",
       "notes": "Residential-land category; size and asking price are extracted from listing cards."
     },
     {
@@ -1149,7 +1149,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131151+00:00",
+      "last_checked": "2026-10-15T16:36:28.869700+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1166,7 +1166,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131155+00:00",
+      "last_checked": "2026-10-15T16:36:28.869704+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1183,7 +1183,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131159+00:00",
+      "last_checked": "2026-10-15T16:36:28.869708+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1200,7 +1200,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131163+00:00",
+      "last_checked": "2026-10-15T16:36:28.869713+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1217,7 +1217,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131169+00:00",
+      "last_checked": "2026-10-15T16:36:28.869717+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1234,7 +1234,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131176+00:00",
+      "last_checked": "2026-10-15T16:36:28.869724+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1251,7 +1251,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131180+00:00",
+      "last_checked": "2026-10-15T16:36:28.869728+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1268,7 +1268,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131184+00:00",
+      "last_checked": "2026-10-15T16:36:28.869732+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1285,7 +1285,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131187+00:00",
+      "last_checked": "2026-10-15T16:36:28.869736+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1302,7 +1302,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131191+00:00",
+      "last_checked": "2026-10-15T16:36:28.869739+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1319,7 +1319,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131199+00:00",
+      "last_checked": "2026-10-15T16:36:28.869747+00:00",
       "notes": "Residential-land category; size and asking price are extracted from listing cards."
     },
     {
@@ -1336,7 +1336,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131210+00:00",
+      "last_checked": "2026-10-15T16:36:28.869757+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1353,7 +1353,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131214+00:00",
+      "last_checked": "2026-10-15T16:36:28.869762+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1370,7 +1370,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131218+00:00",
+      "last_checked": "2026-10-15T16:36:28.869766+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1387,7 +1387,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131221+00:00",
+      "last_checked": "2026-10-15T16:36:28.869769+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1404,7 +1404,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131225+00:00",
+      "last_checked": "2026-10-15T16:36:28.869773+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1421,7 +1421,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131233+00:00",
+      "last_checked": "2026-10-15T16:36:28.869781+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1438,7 +1438,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131237+00:00",
+      "last_checked": "2026-10-15T16:36:28.869784+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1455,7 +1455,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131241+00:00",
+      "last_checked": "2026-10-15T16:36:28.869788+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1472,7 +1472,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131244+00:00",
+      "last_checked": "2026-10-15T16:36:28.869794+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1489,7 +1489,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131248+00:00",
+      "last_checked": "2026-10-15T16:36:28.869798+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1506,7 +1506,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131256+00:00",
+      "last_checked": "2026-10-15T16:36:28.869805+00:00",
       "notes": "Residential-land category; size and asking price are extracted from listing cards."
     },
     {
@@ -1523,7 +1523,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131263+00:00",
+      "last_checked": "2026-10-15T16:36:28.869812+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1540,7 +1540,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131267+00:00",
+      "last_checked": "2026-10-15T16:36:28.869816+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1557,7 +1557,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131271+00:00",
+      "last_checked": "2026-10-15T16:36:28.869820+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1574,7 +1574,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131275+00:00",
+      "last_checked": "2026-10-15T16:36:28.869824+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1591,7 +1591,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131279+00:00",
+      "last_checked": "2026-10-15T16:36:28.869827+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1608,7 +1608,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131289+00:00",
+      "last_checked": "2026-10-15T16:36:28.869835+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1625,7 +1625,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131293+00:00",
+      "last_checked": "2026-10-15T16:36:28.869839+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1642,7 +1642,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131297+00:00",
+      "last_checked": "2026-10-15T16:36:28.869843+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1659,7 +1659,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131301+00:00",
+      "last_checked": "2026-10-15T16:36:28.869849+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1676,7 +1676,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131306+00:00",
+      "last_checked": "2026-10-15T16:36:28.869853+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1693,7 +1693,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131314+00:00",
+      "last_checked": "2026-10-15T16:36:28.869861+00:00",
       "notes": "Residential-land category; size and asking price are extracted from listing cards."
     },
     {
@@ -1710,7 +1710,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131325+00:00",
+      "last_checked": "2026-10-15T16:36:28.869872+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1727,7 +1727,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131330+00:00",
+      "last_checked": "2026-10-15T16:36:28.869877+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1744,7 +1744,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131334+00:00",
+      "last_checked": "2026-10-15T16:36:28.869881+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1761,7 +1761,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131338+00:00",
+      "last_checked": "2026-10-15T16:36:28.869884+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1778,7 +1778,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131342+00:00",
+      "last_checked": "2026-10-15T16:36:28.869888+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1795,7 +1795,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131351+00:00",
+      "last_checked": "2026-10-15T16:36:28.869897+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1812,7 +1812,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131357+00:00",
+      "last_checked": "2026-10-15T16:36:28.869903+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1829,7 +1829,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131361+00:00",
+      "last_checked": "2026-10-15T16:36:28.869907+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1846,7 +1846,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131365+00:00",
+      "last_checked": "2026-10-15T16:36:28.869913+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1863,7 +1863,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131369+00:00",
+      "last_checked": "2026-10-15T16:36:28.869917+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1880,7 +1880,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131377+00:00",
+      "last_checked": "2026-10-15T16:36:28.869926+00:00",
       "notes": "Residential-land category; size and asking price are extracted from listing cards."
     },
     {
@@ -1897,7 +1897,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131386+00:00",
+      "last_checked": "2026-10-15T16:36:28.869934+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1914,7 +1914,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131390+00:00",
+      "last_checked": "2026-10-15T16:36:28.869938+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1931,7 +1931,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131394+00:00",
+      "last_checked": "2026-10-15T16:36:28.869942+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1948,7 +1948,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131398+00:00",
+      "last_checked": "2026-10-15T16:36:28.869946+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1965,7 +1965,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131402+00:00",
+      "last_checked": "2026-10-15T16:36:28.869949+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1982,7 +1982,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131449+00:00",
+      "last_checked": "2026-10-15T16:36:28.869957+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -1999,7 +1999,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131462+00:00",
+      "last_checked": "2026-10-15T16:36:28.869961+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2016,7 +2016,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131470+00:00",
+      "last_checked": "2026-10-15T16:36:28.869965+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2033,7 +2033,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131474+00:00",
+      "last_checked": "2026-10-15T16:36:28.869969+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2050,7 +2050,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131478+00:00",
+      "last_checked": "2026-10-15T16:36:28.869972+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2067,7 +2067,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131487+00:00",
+      "last_checked": "2026-10-15T16:36:28.869980+00:00",
       "notes": "Residential-land category; size and asking price are extracted from listing cards."
     },
     {
@@ -2084,7 +2084,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131496+00:00",
+      "last_checked": "2026-10-15T16:36:28.869988+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2101,7 +2101,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131501+00:00",
+      "last_checked": "2026-10-15T16:36:28.869994+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2118,7 +2118,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131508+00:00",
+      "last_checked": "2026-10-15T16:36:28.869998+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2135,7 +2135,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131512+00:00",
+      "last_checked": "2026-10-15T16:36:28.870001+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2152,7 +2152,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131516+00:00",
+      "last_checked": "2026-10-15T16:36:28.870005+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2169,7 +2169,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131524+00:00",
+      "last_checked": "2026-10-15T16:36:28.870013+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2186,7 +2186,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131531+00:00",
+      "last_checked": "2026-10-15T16:36:28.870019+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2203,7 +2203,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131535+00:00",
+      "last_checked": "2026-10-15T16:36:28.870023+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2220,7 +2220,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131540+00:00",
+      "last_checked": "2026-10-15T16:36:28.870028+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2237,7 +2237,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131545+00:00",
+      "last_checked": "2026-10-15T16:36:28.870031+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2254,7 +2254,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131554+00:00",
+      "last_checked": "2026-10-15T16:36:28.870076+00:00",
       "notes": "Residential-land category; size and asking price are extracted from listing cards."
     },
     {
@@ -2271,7 +2271,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131564+00:00",
+      "last_checked": "2026-10-15T16:36:28.870096+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2288,7 +2288,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131568+00:00",
+      "last_checked": "2026-10-15T16:36:28.870101+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2305,7 +2305,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131572+00:00",
+      "last_checked": "2026-10-15T16:36:28.870105+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2322,7 +2322,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131575+00:00",
+      "last_checked": "2026-10-15T16:36:28.870108+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2339,7 +2339,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131579+00:00",
+      "last_checked": "2026-10-15T16:36:28.870112+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2356,7 +2356,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131587+00:00",
+      "last_checked": "2026-10-15T16:36:28.870121+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2373,7 +2373,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131591+00:00",
+      "last_checked": "2026-10-15T16:36:28.870125+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2390,7 +2390,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131595+00:00",
+      "last_checked": "2026-10-15T16:36:28.870129+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2407,7 +2407,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131599+00:00",
+      "last_checked": "2026-10-15T16:36:28.870132+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2424,7 +2424,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131602+00:00",
+      "last_checked": "2026-10-15T16:36:28.870136+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2441,7 +2441,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131610+00:00",
+      "last_checked": "2026-10-15T16:36:28.870144+00:00",
       "notes": "Residential-land category; size and asking price are extracted from listing cards."
     },
     {
@@ -2458,7 +2458,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131618+00:00",
+      "last_checked": "2026-10-15T16:36:28.870152+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2475,7 +2475,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131622+00:00",
+      "last_checked": "2026-10-15T16:36:28.870156+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2492,7 +2492,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131625+00:00",
+      "last_checked": "2026-10-15T16:36:28.870160+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2509,7 +2509,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131629+00:00",
+      "last_checked": "2026-10-15T16:36:28.870164+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2526,7 +2526,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131633+00:00",
+      "last_checked": "2026-10-15T16:36:28.870168+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2543,7 +2543,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131643+00:00",
+      "last_checked": "2026-10-15T16:36:28.870177+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2560,7 +2560,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131647+00:00",
+      "last_checked": "2026-10-15T16:36:28.870182+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2577,7 +2577,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131651+00:00",
+      "last_checked": "2026-10-15T16:36:28.870188+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2594,7 +2594,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131656+00:00",
+      "last_checked": "2026-10-15T16:36:28.870191+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2611,7 +2611,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131660+00:00",
+      "last_checked": "2026-10-15T16:36:28.870195+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2628,7 +2628,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131667+00:00",
+      "last_checked": "2026-10-15T16:36:28.870202+00:00",
       "notes": "Residential-land category; size and asking price are extracted from listing cards."
     },
     {
@@ -2645,7 +2645,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131676+00:00",
+      "last_checked": "2026-10-15T16:36:28.870213+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2662,7 +2662,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131680+00:00",
+      "last_checked": "2026-10-15T16:36:28.870217+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2679,7 +2679,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131684+00:00",
+      "last_checked": "2026-10-15T16:36:28.870221+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2696,7 +2696,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131688+00:00",
+      "last_checked": "2026-10-15T16:36:28.870225+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2713,7 +2713,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131692+00:00",
+      "last_checked": "2026-10-15T16:36:28.870228+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2730,7 +2730,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131699+00:00",
+      "last_checked": "2026-10-15T16:36:28.870236+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2747,7 +2747,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131703+00:00",
+      "last_checked": "2026-10-15T16:36:28.870240+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2764,7 +2764,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131707+00:00",
+      "last_checked": "2026-10-15T16:36:28.870244+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2781,7 +2781,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131710+00:00",
+      "last_checked": "2026-10-15T16:36:28.870248+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2798,7 +2798,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131714+00:00",
+      "last_checked": "2026-10-15T16:36:28.870251+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2815,7 +2815,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131721+00:00",
+      "last_checked": "2026-10-15T16:36:28.870259+00:00",
       "notes": "Residential-land category; size and asking price are extracted from listing cards."
     },
     {
@@ -2832,7 +2832,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131731+00:00",
+      "last_checked": "2026-10-15T16:36:28.870268+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2849,7 +2849,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131735+00:00",
+      "last_checked": "2026-10-15T16:36:28.870272+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2866,7 +2866,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131739+00:00",
+      "last_checked": "2026-10-15T16:36:28.870276+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2883,7 +2883,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131748+00:00",
+      "last_checked": "2026-10-15T16:36:28.870281+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2900,7 +2900,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131752+00:00",
+      "last_checked": "2026-10-15T16:36:28.870285+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2917,7 +2917,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131759+00:00",
+      "last_checked": "2026-10-15T16:36:28.870293+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2934,7 +2934,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131763+00:00",
+      "last_checked": "2026-10-15T16:36:28.870298+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2951,7 +2951,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131767+00:00",
+      "last_checked": "2026-10-15T16:36:28.870302+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2968,7 +2968,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131771+00:00",
+      "last_checked": "2026-10-15T16:36:28.870306+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -2985,7 +2985,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131775+00:00",
+      "last_checked": "2026-10-15T16:36:28.870310+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -3002,7 +3002,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131782+00:00",
+      "last_checked": "2026-10-15T16:36:28.870317+00:00",
       "notes": "Residential-land category; size and asking price are extracted from listing cards."
     },
     {
@@ -3019,7 +3019,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131790+00:00",
+      "last_checked": "2026-10-15T16:36:28.870325+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -3036,7 +3036,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131794+00:00",
+      "last_checked": "2026-10-15T16:36:28.870331+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -3053,7 +3053,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131799+00:00",
+      "last_checked": "2026-10-15T16:36:28.870337+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -3070,7 +3070,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131803+00:00",
+      "last_checked": "2026-10-15T16:36:28.870341+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -3087,7 +3087,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131807+00:00",
+      "last_checked": "2026-10-15T16:36:28.870344+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -3104,7 +3104,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131814+00:00",
+      "last_checked": "2026-10-15T16:36:28.870352+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -3121,7 +3121,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131818+00:00",
+      "last_checked": "2026-10-15T16:36:28.870356+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -3138,7 +3138,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131822+00:00",
+      "last_checked": "2026-10-15T16:36:28.870360+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -3155,7 +3155,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131826+00:00",
+      "last_checked": "2026-10-15T16:36:28.870363+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -3172,7 +3172,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131829+00:00",
+      "last_checked": "2026-10-15T16:36:28.870367+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -3189,7 +3189,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131836+00:00",
+      "last_checked": "2026-10-15T16:36:28.870374+00:00",
       "notes": "Residential-land category; size and asking price are extracted from listing cards."
     },
     {
@@ -3206,7 +3206,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131844+00:00",
+      "last_checked": "2026-10-15T16:36:28.870382+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -3223,7 +3223,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131848+00:00",
+      "last_checked": "2026-10-15T16:36:28.870386+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -3240,7 +3240,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131854+00:00",
+      "last_checked": "2026-10-15T16:36:28.870391+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -3257,7 +3257,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131857+00:00",
+      "last_checked": "2026-10-15T16:36:28.870395+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -3274,7 +3274,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131861+00:00",
+      "last_checked": "2026-10-15T16:36:28.870399+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -3291,7 +3291,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131869+00:00",
+      "last_checked": "2026-10-15T16:36:28.870407+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -3308,7 +3308,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131873+00:00",
+      "last_checked": "2026-10-15T16:36:28.870411+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -3325,7 +3325,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131876+00:00",
+      "last_checked": "2026-10-15T16:36:28.870414+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -3342,7 +3342,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131880+00:00",
+      "last_checked": "2026-10-15T16:36:28.870418+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -3359,7 +3359,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131884+00:00",
+      "last_checked": "2026-10-15T16:36:28.870421+00:00",
       "notes": "One real category URL serves 1-5BR; bedroom is classified from listing text."
     },
     {
@@ -3376,7 +3376,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131891+00:00",
+      "last_checked": "2026-10-15T16:36:28.870429+00:00",
       "notes": "Residential-land category; size and asking price are extracted from listing cards."
     },
     {
@@ -3393,7 +3393,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131900+00:00",
+      "last_checked": "2026-10-15T16:36:28.870438+00:00",
       "notes": "Public page only. Premium/login-gated values are never collected or bypassed."
     },
     {
@@ -3410,7 +3410,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131907+00:00",
+      "last_checked": "2026-10-15T16:36:28.870446+00:00",
       "notes": "Public page only. Premium/login-gated values are never collected or bypassed."
     },
     {
@@ -3427,7 +3427,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131917+00:00",
+      "last_checked": "2026-10-15T16:36:28.870455+00:00",
       "notes": "Public page only. Premium/login-gated values are never collected or bypassed."
     },
     {
@@ -3444,7 +3444,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131926+00:00",
+      "last_checked": "2026-10-15T16:36:28.870464+00:00",
       "notes": "Public page only. Premium/login-gated values are never collected or bypassed."
     },
     {
@@ -3461,7 +3461,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131935+00:00",
+      "last_checked": "2026-10-15T16:36:28.870473+00:00",
       "notes": "Public page only. Premium/login-gated values are never collected or bypassed."
     },
     {
@@ -3478,7 +3478,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131942+00:00",
+      "last_checked": "2026-10-15T16:36:28.870481+00:00",
       "notes": "Public page only. Premium/login-gated values are never collected or bypassed."
     },
     {
@@ -3495,7 +3495,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131949+00:00",
+      "last_checked": "2026-10-15T16:36:28.870488+00:00",
       "notes": "Public page only. Premium/login-gated values are never collected or bypassed."
     },
     {
@@ -3512,7 +3512,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131957+00:00",
+      "last_checked": "2026-10-15T16:36:28.870497+00:00",
       "notes": "Public page only. Premium/login-gated values are never collected or bypassed."
     },
     {
@@ -3529,7 +3529,7 @@
       "verified": true,
       "verification": "canonical URL approved; transport is validated by the first production fetch before parsing",
       "discovered_from": "deterministic_source_catalog",
-      "last_checked": "2026-10-15T16:13:07.131965+00:00",
+      "last_checked": "2026-10-15T16:36:28.870504+00:00",
       "notes": "Public page only. Premium/login-gated values are never collected or bypassed."
     }
   ],
