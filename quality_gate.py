@@ -45,9 +45,19 @@ def process(path):
         kept.append(row)
     unique={};duplicates=0
     for row in kept:
-        key=row.get("record_id") or row.get("source_url")
-        if key in unique:duplicates+=1;continue
-        unique[key]=row
+        # Never collapse unrelated records under an empty identifier. Prefer stable IDs,
+        # then canonical source URLs, and finally a conservative composite key.
+        key = (row.get("record_id") or "").strip()
+        if not key:
+            key = (row.get("source_url") or "").strip().split("?")[0].rstrip("/")
+        if not key:
+            key = "|".join(str(row.get(k) or "").strip().lower() for k in
+                           ("source", "title", "market_node", "property_type",
+                            "transaction_type", "asking_price_ngn", "date_scraped"))
+        if key in unique:
+            duplicates += 1
+            continue
+        unique[key] = row
     kept=list(unique.values())
 
     # Free deterministic evidence check against the exact captured listing-card text.
