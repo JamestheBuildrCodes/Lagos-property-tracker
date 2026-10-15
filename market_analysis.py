@@ -136,6 +136,26 @@ def node_evidence_ok(row):
     return True, ""
 
 
+def infer_rent_period(row):
+    """Infer rent frequency only from explicit captured source text."""
+    text = " ".join(str(row.get(key) or "") for key in ("source_excerpt", "title")).lower()
+    annual = bool(re.search(
+        r"\b(?:annual(?:ly)?|per\s+annum|per\s+year|yearly|p\.?a\.?|/\s*(?:annum|year)|a\s+year)\b",
+        text,
+    ))
+    monthly = bool(re.search(
+        r"\b(?:monthly|per\s+month|p\.?m\.?|/\s*month|a\s+month)\b",
+        text,
+    ))
+    if annual and monthly:
+        return "conflicting"
+    if annual:
+        return "annual"
+    if monthly:
+        return "monthly"
+    return "unspecified"
+
+
 def clean_rows(rows):
     valid = []
     for row in rows:
@@ -150,6 +170,9 @@ def clean_rows(rows):
                 if source_price is None:
                     source_price = fnum(r.get("asking_price_ngn"))
                 period = str(r.get("price_period") or "unspecified").strip().lower()
+                if period not in {"annual", "monthly", "conflicting"}:
+                    period = infer_rent_period(r)
+                r["price_period"] = period
                 annualized = fnum(r.get("annualized_asking_price_ngn"))
                 if annualized is None and source_price is not None:
                     if period == "annual":
