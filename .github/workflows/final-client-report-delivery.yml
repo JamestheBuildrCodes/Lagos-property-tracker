@@ -8,6 +8,7 @@ on:
       - "client_doc_report.py"
       - "enhance_client_report.py"
       - "email_client_docx.py"
+      - "report_builder.py"
       - "mailjet_sender.py"
       - "tests/test_client_doc_report.py"
 
@@ -100,6 +101,11 @@ jobs:
           print(f"Validated snapshot: {current} ({len(rows)} rows; source date {snapshot_date}; listing age max 7 days)")
           PY
 
+          # Rebuild the spreadsheet and executive brief with the same deterministic,
+          # annualized-rent and source-quality rules as the final Word report.
+          python report_builder.py "$CURR" "${CHANGES:-none}" "${RESEARCH:-none}"
+          test -s market_intelligence_*.xlsx
+          test -s market_intelligence.json
           python client_doc_report.py "$CURR" "${RESEARCH:-none}" "${CHANGES:-none}"
           DOCX=$(ls -t Lagos_Property_Market_Snapshot_*.docx | head -n 1)
           test -n "$DOCX" && test -s "$DOCX"
@@ -131,6 +137,9 @@ jobs:
           name: final-client-report
           path: |
             Lagos_Property_Market_Snapshot_*.docx
+            market_intelligence_*.xlsx
+            executive_brief_*.html
+            market_intelligence.json
             client_doc_url.txt
             mailjet_client_docx_receipt.json
             client_report_quality_audit.json
