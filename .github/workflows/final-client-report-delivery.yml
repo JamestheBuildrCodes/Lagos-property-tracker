@@ -104,7 +104,8 @@ jobs:
           # Rebuild the spreadsheet and executive brief with the same deterministic,
           # annualized-rent and source-quality rules as the final Word report.
           python report_builder.py "$CURR" "${CHANGES:-none}" "${RESEARCH:-none}"
-          test -s market_intelligence_*.xlsx
+          XLSX=$(ls -t market_intelligence_*.xlsx | head -n 1)
+          test -n "$XLSX" && test -s "$XLSX"
           test -s market_intelligence.json
           python client_doc_report.py "$CURR" "${RESEARCH:-none}" "${CHANGES:-none}"
           DOCX=$(ls -t Lagos_Property_Market_Snapshot_*.docx | head -n 1)
