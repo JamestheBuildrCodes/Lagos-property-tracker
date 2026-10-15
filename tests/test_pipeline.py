@@ -38,12 +38,13 @@ class PipelineTests(unittest.TestCase):
         self.assertTrue(all(e["transaction"] == "research" for e in ei))
         self.assertTrue(all("premium" not in e["url"].lower() for e in ei))
 
-    def test_npc_direct_first_with_zyte_fallback(self):
+    def test_npc_direct_first_with_configured_transport_fallback(self):
         text = Path("scraper.py").read_text(encoding="utf-8")
         self.assertIn('if source == "Nigeria Property Centre":', text)
-        self.assertIn('response.status_code == 403', text)
-        self.assertIn('falling back to Zyte', text)
+        self.assertIn('response.status_code < 400', text)
+        self.assertIn('trying configured API transports', text)
         self.assertIn('return _fetch_zyte(url, source)', text)
+        self.assertIn('_fetch_alternate_providers(url, source)', text)
 
     def test_zyte_billing_failure_is_not_retried(self):
         text = Path("scraper.py").read_text(encoding="utf-8")
@@ -165,10 +166,13 @@ class ReportingTests(unittest.TestCase):
         self.assertTrue(hasattr(report_builder, "build_docx"))
         self.assertTrue(hasattr(report_builder, "build_bundle"))
 
-    def test_scraper_has_no_zenrows_runtime_dependency(self):
+    def test_scraper_supports_optional_zenrows_and_scraperapi_fallbacks(self):
         text = Path("scraper.py").read_text(encoding="utf-8")
-        self.assertNotIn("ZENROWS_API_KEY", text)
-        self.assertNotIn("ZENROWS_ENDPOINT", text)
+        self.assertIn('os.environ.get("ZENROWS_API_KEY"', text)
+        self.assertIn('os.environ.get("SCRAPERAPI_API_KEY"', text)
+        self.assertIn('https://api.zenrows.com/v1/', text)
+        self.assertIn('https://api.scraperapi.com/', text)
+        self.assertIn('_fetch_alternate_providers(url, source)', text)
 
     def test_reporting_dependencies_are_lazy(self):
         import report_builder
