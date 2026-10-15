@@ -158,11 +158,20 @@ def clean_rows(rows):
                         annualized = source_price * 12
                 r["source_asking_price_ngn"] = source_price
                 r["annualized_asking_price_ngn"] = annualized
+                source_ppsqm = fnum(r.get("source_price_per_sqm_ngn"))
+                if source_ppsqm is None:
+                    source_ppsqm = fnum(r.get("price_per_sqm_ngn"))
+                r["source_price_per_sqm_ngn"] = source_ppsqm
                 if annualized is not None and annualized > 0 and period in {"annual", "monthly"}:
                     r["asking_price_ngn"] = annualized
+                    r["price_per_sqm_ngn"] = (
+                        source_ppsqm * 12 if source_ppsqm is not None and period == "monthly"
+                        else source_ppsqm
+                    )
                 else:
                     r["price_period"] = period or "unspecified"
                     r["asking_price_ngn"] = ""
+                    r["price_per_sqm_ngn"] = ""
             valid.append(r)
     return valid
 
