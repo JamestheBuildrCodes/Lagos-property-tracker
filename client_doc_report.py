@@ -2869,7 +2869,10 @@ def main():
             ) from service_doc_error
 
     suppress_notification = os.environ.get("SUPPRESS_REPORT_NOTIFICATION_EMAIL", "").strip() == "1"
-    if not suppress_notification or url == "ATTACHED_DOCX_FALLBACK":
+    defer_docx_email = os.environ.get("DEFER_DOCX_EMAIL", "").strip() == "1"
+    if defer_docx_email:
+        print("DOCX email deferred until final quality enhancement; the enhanced attachment will be sent by the workflow.")
+    elif not suppress_notification or url == "ATTACHED_DOCX_FALLBACK":
         if suppress_notification and url == "ATTACHED_DOCX_FALLBACK":
             print("Sending DOCX attachment fallback despite notification suppression because no Google Doc URL exists.")
         send_notification_email(
