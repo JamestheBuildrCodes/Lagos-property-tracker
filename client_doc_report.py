@@ -2876,9 +2876,14 @@ def main():
                     )
                     url = _write_docx_attachment_fallback(oauth_error, docx_path)
         else:
-            raise RuntimeError(
-                "No fresh service-account weekly Google Doc is available and GOOGLE_OAUTH_TOKEN_JSON is not configured."
-            ) from service_doc_error
+            # Do not make delivery depend on a live OAuth refresh token. If both
+            # Google Docs publication paths are unavailable, the enhanced DOCX
+            # remains the deliverable and the workflow emails it as an attachment.
+            print(
+                "WARNING: GOOGLE_OAUTH_TOKEN_JSON is not configured and no fresh "
+                "service-account Google Doc is available; using DOCX attachment fallback."
+            )
+            url = _write_docx_attachment_fallback(service_doc_error, docx_path)
 
     suppress_notification = os.environ.get("SUPPRESS_REPORT_NOTIFICATION_EMAIL", "").strip() == "1"
     defer_docx_email = os.environ.get("DEFER_DOCX_EMAIL", "").strip() == "1"
