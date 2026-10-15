@@ -9,8 +9,10 @@ on:
       - "enhance_client_report.py"
       - "email_client_docx.py"
       - "report_builder.py"
+      - "market_analysis.py"
       - "mailjet_sender.py"
       - "tests/test_client_doc_report.py"
+      - "tests/test_rent_periods.py"
 
 permissions:
   contents: read
