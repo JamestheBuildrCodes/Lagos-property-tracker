@@ -1126,7 +1126,19 @@ def build_docx(
         f"{datetime.now(timezone.utc):%Y-%m-%d}.docx"
     )
 
-    doc = Document()
+    template_path = Path("templates/Nigeria_Market_Snapshot_Template.docx")
+    if template_path.is_file():
+        doc = Document(str(template_path))
+        # Keep section geometry, theme, fonts and named styles, replacing
+        # sample content with current report content.
+        body = doc._element.body
+        for child in list(body):
+            if not child.tag.endswith("}sectPr"):
+                body.remove(child)
+        print(f"Using client-approved DOCX template: {template_path}")
+    else:
+        doc = Document()
+        print("Client-approved DOCX template not found; using the built-in report layout.")
 
     section = doc.sections[0]
     section.top_margin = section.bottom_margin = Pt(48)
