@@ -49,8 +49,9 @@ MANIFEST = Path("data/source_manifest.json")
 
 FIELDNAMES = [
     "record_id", "date_scraped", "city", "market_node", "transaction",
-    "property_type", "bedrooms", "title", "asking_price_ngn", "size_sqm",
-    "price_per_sqm_ngn", "location", "listing_date", "listing_age_days",
+    "property_type", "bedrooms", "title", "asking_price_ngn",
+    "source_asking_price_ngn", "price_period", "annualized_asking_price_ngn",
+    "size_sqm", "price_per_sqm_ngn", "location", "listing_date", "listing_age_days",
     "listing_date_type", "freshness_band", "is_within_max_age",
     "source", "source_url", "source_excerpt",
 ]
