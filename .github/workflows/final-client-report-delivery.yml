@@ -58,7 +58,6 @@ jobs:
 
           test -n "$CURR" || { echo "No committed property snapshot found."; exit 1; }
           test -s "$CURR"
-          test -n "$GOOGLE_OAUTH_TOKEN_JSON" || { echo "GOOGLE_OAUTH_TOKEN_JSON is required."; exit 1; }
           test -n "$REPORT_CLIENT_EMAIL" || { echo "REPORT_CLIENT_EMAIL is required."; exit 1; }
 
           CURRENT="$CURR" python - <<'PY'
