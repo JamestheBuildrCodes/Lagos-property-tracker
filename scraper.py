@@ -595,6 +595,29 @@ def transaction_consistent_with_evidence(transaction: str, listing_url: str, car
     return True, ""
 
 
+def detect_price_period(text: str, transaction: str) -> str:
+    """Return a period only when the listing card explicitly states it."""
+    txn = str(transaction or "").strip().lower()
+    if not ("rent" in txn or "let" in txn):
+        return "not_applicable"
+    text = clean_text(text).lower()
+    annual = bool(re.search(
+        r"\\b(?:annual(?:ly)?|per\\s+annum|per\\s+year|yearly|p\\.?a\\.?|/\\s*(?:annum|year)|a\\s+year)\\b",
+        text,
+    ))
+    monthly = bool(re.search(
+        r"\\b(?:monthly|per\\s+month|p\\.?m\\.?|/\\s*month|a\\s+month)\\b",
+        text,
+    ))
+    if annual and monthly:
+        return "conflicting"
+    if annual:
+        return "annual"
+    if monthly:
+        return "monthly"
+    return "unspecified"
+
+
 def parse_card(card_text: str, listing_url: str, target: dict) -> Optional[dict]:
     text = clean_text(card_text)
     if len(text) < 20:
@@ -633,6 +656,10 @@ def parse_card(card_text: str, listing_url: str, target: dict) -> Optional[dict]
     bedrooms = parse_bedrooms(text)
     size = parse_size_sqm(text)
     price = parse_naira(text)
+    price_period = detect_price_period(text, target.get("transaction", ""))
+    annualized_price = (price * 12 if price and price_period == "monthly"
+                        else price if price and price_period == "annual"
+                        else None)
     explicit_ppsqm = parse_price_per_sqm(text)
 
     # Keep only the requested apartment bedroom bands. Land has no bedroom
@@ -661,6 +688,9 @@ def parse_card(card_text: str, listing_url: str, target: dict) -> Optional[dict]
         "bedrooms": bedrooms if bedrooms is not None else target.get("bedrooms"),
         "title": title,
         "asking_price_ngn": price,
+        "source_asking_price_ngn": price,
+        "price_period": price_period,
+        "annualized_asking_price_ngn": annualized_price,
         "size_sqm": size,
         "price_per_sqm_ngn": calculate_price_per_sqm(price, size, explicit_ppsqm),
         "location": location,
