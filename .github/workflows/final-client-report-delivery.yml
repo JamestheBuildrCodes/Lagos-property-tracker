@@ -9,6 +9,7 @@ on:
       - "enhance_client_report.py"
       - "email_client_docx.py"
       - "report_builder.py"
+      - "docs_writer.py"
       - "market_analysis.py"
       - "mailjet_sender.py"
       - "tests/test_client_doc_report.py"
@@ -113,6 +114,19 @@ jobs:
           # This report-only workflow must not compete with the scheduled scan
           # for live Sheet writes. weekly-scan.yml owns the live Sheet refresh.
           printf '{"status":"not_attempted","note":"The scheduled weekly scan is the authoritative live Google Sheet updater; the attached XLSX is the current report workbook."}\n' > google_sheet_update_status.json
+          # OAuth refresh tokens can expire or be revoked. Create a fresh
+          # service-account document first as a verified fallback; publication
+          # is best-effort so the final DOCX/email can still be delivered.
+          if [ -n "$GOOGLE_SERVICE_ACCOUNT_JSON" ]; then
+            if GOOGLE_CREATE_WEEKLY_DOC="true" python docs_writer.py market_intelligence.json; then
+              echo "Fresh service-account Google Doc created for OAuth fallback."
+            else
+              echo "::warning::Service-account Google Doc fallback could not be created; the workflow will use the enhanced DOCX attachment fallback if OAuth also fails."
+              rm -f google_doc_url.txt google_doc_publication.json
+            fi
+          else
+            echo "::warning::GOOGLE_SERVICE_ACCOUNT_JSON is not configured; Google Docs publication depends on OAuth or DOCX fallback."
+          fi
           python client_doc_report.py "$CURR" "${RESEARCH:-none}" "${CHANGES:-none}"
           DOCX=$(ls -t Lagos_Property_Market_Snapshot_*.docx | head -n 1)
           test -n "$DOCX" && test -s "$DOCX"
