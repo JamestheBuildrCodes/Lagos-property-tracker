@@ -64,7 +64,7 @@ class SheetReadbackTests(unittest.TestCase):
             ["Weekly property market report"],
             ["12 October 2026"],
             ["Metric", "Current", "Week-on-week"],
-            ["Listings tracked", "120", "—"],
+            ["Listings tracked", 120.0, "—"],
         ]
         _verify_sheet_readback("Executive Summary", expected, returned)
 
@@ -75,13 +75,25 @@ class SheetReadbackTests(unittest.TestCase):
         ]
         returned = [
             ["Metric", "Current", "Week-on-week"],
-            ["Listings tracked", "121", "—"],
+            ["Listings tracked", 121.0, "—"],
         ]
         with self.assertRaisesRegex(
             RuntimeError,
             r"worksheet 'Executive Summary' at B2",
         ):
             _verify_sheet_readback("Executive Summary", expected, returned)
+
+    def test_accepts_equivalent_integer_and_float_numeric_values(self):
+        _verify_sheet_readback(
+            "Area Scorecard",
+            [["Area", "Count", "Price"], ["Lekki", 12, 1250000]],
+            [["Area", "Count", "Price"], ["Lekki", 12.0, 1250000.0]],
+        )
+
+    def test_does_not_confuse_numeric_value_with_numeric_text(self):
+        with self.assertRaisesRegex(RuntimeError, r"at B2"):
+            _verify_sheet_readback("Summary", [["Metric", "Count"], ["Open", 12]],
+                                   [["Metric", "Count"], ["Open", "12"]])
 
     def test_preserves_zero_instead_of_treating_it_as_blank(self):
         _verify_sheet_readback("Summary", [["Metric", "Count"], ["Open listings", 0]],
