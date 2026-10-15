@@ -348,7 +348,7 @@ jobs:
         run: |
           for attempt in 1 2 3; do
             git fetch origin main
-            if git rebase origin/main; then
+            if git rebase -X ours origin/main; then
               if git push origin HEAD:main; then
                 exit 0
               fi
