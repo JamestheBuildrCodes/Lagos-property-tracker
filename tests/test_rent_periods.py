@@ -1,7 +1,7 @@
 import unittest
 
 from scraper import detect_price_period
-from market_analysis import clean_rows
+from market_analysis import clean_rows, infer_rent_period
 from enhance_client_report import data_quality_audit
 
 
@@ -11,6 +11,12 @@ class RentPeriodTests(unittest.TestCase):
 
     def test_explicit_annual_period_is_detected(self):
         self.assertEqual(detect_price_period("₦12,000,000 per annum", "rent"), "annual")
+
+    def test_source_excerpt_can_prove_annual_period(self):
+        self.assertEqual(infer_rent_period({"source_excerpt": "Rent ₦12,000,000 per annum"}), "annual")
+
+    def test_source_excerpt_can_prove_monthly_period(self):
+        self.assertEqual(infer_rent_period({"source_excerpt": "Rent ₦1,000,000 monthly"}), "monthly")
 
     def test_unspecified_period_is_not_guessed(self):
         self.assertEqual(detect_price_period("₦12,000,000", "rent"), "unspecified")
