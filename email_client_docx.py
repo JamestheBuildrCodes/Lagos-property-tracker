@@ -24,6 +24,14 @@ def main():
         raise SystemExit("GOOGLE_SHEET_ID is required to include the spreadsheet link.")
     mime = mimetypes.guess_type(path.name)[0] or "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     sheet_url = "https://docs.google.com/spreadsheets/d/" + sheet_id + "/edit"
+    sheet_status = {"status": "not_verified"}
+    status_path = Path("google_sheet_update_status.json")
+    if status_path.is_file():
+        try:
+            import json
+            sheet_status = json.loads(status_path.read_text(encoding="utf-8"))
+        except Exception:
+            sheet_status = {"status": "unknown"}
     workbook_candidates = list(Path(".").glob("market_intelligence_*.xlsx")) + list(Path("data").glob("market_intelligence_*.xlsx"))
     workbook = max(workbook_candidates, key=lambda item: (item.name, item.parent == Path("."))) if workbook_candidates else None
     attachments = [{
@@ -49,7 +57,8 @@ def main():
             "Attached are the final enhanced Word report and, when generated, the market-intelligence Excel workbook with charts and source-level data. "
             "The Word report includes sample-size notes, land plot-size/price-per-sqm analysis where available, and a data-quality exception review. "
             "Asking prices are not completed transaction prices. Please use original listing links to verify material figures.\n\n"
-            f"Live spreadsheet and dashboard: {sheet_url}\n"
+            f"Spreadsheet/dashboard ({sheet_status.get('status', 'not_verified')} this run): {sheet_url}\n"
+            "The attached Excel workbook is the authoritative snapshot if the live sheet update was not verified.\n"
             "Reporting schedule: Monday at 08:00 Africa/Lagos. Provider acceptance is recorded "
             "in the run audit; it does not prove inbox placement or reading."
         ),
@@ -58,7 +67,8 @@ def main():
             "The Word report includes sample-size notes, land plot-size/price-per-sqm analysis where available, and a data-quality exception review.</p>"
             "<p><b>Important:</b> asking prices are not completed transaction prices. Verify "
             "material figures against original listing links.</p>"
-            f'<p><a href="{sheet_url}">Open the live spreadsheet and dashboard</a></p>'
+            f'<p><a href="{sheet_url}">Open the spreadsheet and dashboard (update status: {sheet_status.get("status", "not_verified")})</a></p>'
+            "<p>The attached Excel workbook is the authoritative snapshot if the live sheet update was not verified this run.</p>"
             "<p>Reporting schedule: Monday at 08:00 Africa/Lagos. Provider acceptance is recorded "
             "in the run audit; it does not prove inbox placement or reading.</p>"
         ),
