@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-10-15T16:43:42.799645+00:00",
+  "generated_at": "2026-10-15T17:02:48.007099+00:00",
   "summary": {
-    "listings_tracked": 336,
+    "listings_tracked": 354,
     "areas_monitored": 9,
     "sources": 3,
     "source_names": [
@@ -10,75 +10,75 @@
       "PropertyPro.ng"
     ],
     "median_apartment_sale": 450000000.0,
-    "median_annual_rent": 20000000.0,
-    "median_land_ppsqm": 1515027.3199999998,
+    "median_annual_rent": 25000000.0,
+    "median_land_ppsqm": 1945179.585,
     "changes": {
-      "new_listings": 23,
+      "new_listings": 53,
       "price_reductions": 0,
       "price_increases": 0,
-      "not_observed": 51,
+      "not_observed": 35,
       "delisted": 0
     },
     "scorecard": [
       {
         "market_node": "Banana Island",
-        "listing_count": 36,
+        "listing_count": 68,
         "sale_3br_median": 900000000.0,
-        "rent_3br_median": 50000000.0,
+        "rent_3br_median": 55000000.0,
         "sale_ppsqm_median": null,
         "rent_ppsqm_median": null,
-        "land_ppsqm_median": 5250000.0,
-        "gross_rent_yield_proxy_pct": 5.56,
+        "land_ppsqm_median": 4500000.0,
+        "gross_rent_yield_proxy_pct": 6.11,
         "sale_count": 17,
-        "rent_count": 9,
-        "land_count": 10,
+        "rent_count": 28,
+        "land_count": 23,
         "sale_3br_count": 6,
-        "rent_3br_count": 7
+        "rent_3br_count": 13
       },
       {
         "market_node": "Old Ikoyi",
-        "listing_count": 50,
-        "sale_3br_median": 750000000.0,
+        "listing_count": 57,
+        "sale_3br_median": 700000000.0,
         "rent_3br_median": 40000000.0,
         "sale_ppsqm_median": 8060606.0600000005,
         "rent_ppsqm_median": null,
-        "land_ppsqm_median": 4500000.0,
-        "gross_rent_yield_proxy_pct": 5.33,
-        "sale_count": 27,
+        "land_ppsqm_median": 4150000.0,
+        "gross_rent_yield_proxy_pct": 5.71,
+        "sale_count": 24,
         "rent_count": 7,
-        "land_count": 16,
-        "sale_3br_count": 10,
+        "land_count": 26,
+        "sale_3br_count": 7,
         "rent_3br_count": 4
       },
       {
         "market_node": "Lekki Phase 1",
-        "listing_count": 93,
+        "listing_count": 91,
         "sale_3br_median": 410000000.0,
         "rent_3br_median": 21000000.0,
         "sale_ppsqm_median": null,
         "rent_ppsqm_median": null,
         "land_ppsqm_median": 850000.0,
         "gross_rent_yield_proxy_pct": 5.12,
-        "sale_count": 37,
+        "sale_count": 35,
         "rent_count": 32,
         "land_count": 24,
         "sale_3br_count": 14,
-        "rent_3br_count": 10
+        "rent_3br_count": 6
       },
       {
         "market_node": "Victoria Island",
-        "listing_count": 60,
-        "sale_3br_median": 460000000.0,
-        "rent_3br_median": 20000000.0,
+        "listing_count": 45,
+        "sale_3br_median": 340000000.0,
+        "rent_3br_median": 25000000.0,
         "sale_ppsqm_median": 3829787.23,
         "rent_ppsqm_median": null,
         "land_ppsqm_median": 2307894.7350000003,
-        "gross_rent_yield_proxy_pct": 4.35,
-        "sale_count": 32,
+        "gross_rent_yield_proxy_pct": 7.35,
+        "sale_count": 17,
         "rent_count": 17,
         "land_count": 11,
-        "sale_3br_count": 9,
-        "rent_3br_count": 5
+        "sale_3br_count": 2,
+        "rent_3br_count": 3
       },
       {
         "market_node": "Eko Atlantic",
@@ -127,18 +127,18 @@
       },
       {
         "market_node": "Maitama",
-        "listing_count": 19,
+        "listing_count": 15,
         "sale_3br_median": 348000000.0,
-        "rent_3br_median": 30000000.0,
+        "rent_3br_median": 50000000.0,
         "sale_ppsqm_median": null,
         "rent_ppsqm_median": 161694.56,
         "land_ppsqm_median": 1833333.33,
-        "gross_rent_yield_proxy_pct": 8.62,
+        "gross_rent_yield_proxy_pct": 14.37,
         "sale_count": 1,
-        "rent_count": 11,
+        "rent_count": 7,
         "land_count": 7,
         "sale_3br_count": 1,
-        "rent_3br_count": 3
+        "rent_3br_count": 1
       },
       {
         "market_node": "Wuse",
@@ -159,48 +159,48 @@
     "signals": {
       "most_expensive": {
         "market_node": "Banana Island",
-        "listing_count": 36,
+        "listing_count": 68,
         "sale_3br_median": 900000000.0,
-        "rent_3br_median": 50000000.0,
+        "rent_3br_median": 55000000.0,
         "sale_ppsqm_median": null,
         "rent_ppsqm_median": null,
-        "land_ppsqm_median": 5250000.0,
-        "gross_rent_yield_proxy_pct": 5.56,
+        "land_ppsqm_median": 4500000.0,
+        "gross_rent_yield_proxy_pct": 6.11,
         "sale_count": 17,
-        "rent_count": 9,
-        "land_count": 10,
+        "rent_count": 28,
+        "land_count": 23,
         "sale_3br_count": 6,
-        "rent_3br_count": 7
+        "rent_3br_count": 13
       },
       "strongest_rental": {
-        "market_node": "Asokoro",
-        "listing_count": 50,
-        "sale_3br_median": 195000000.0,
-        "rent_3br_median": 20000000.0,
+        "market_node": "Maitama",
+        "listing_count": 15,
+        "sale_3br_median": 348000000.0,
+        "rent_3br_median": 50000000.0,
         "sale_ppsqm_median": null,
-        "rent_ppsqm_median": null,
-        "land_ppsqm_median": 441666.67,
-        "gross_rent_yield_proxy_pct": 10.26,
-        "sale_count": 9,
-        "rent_count": 15,
-        "land_count": 26,
-        "sale_3br_count": 8,
-        "rent_3br_count": 3
+        "rent_ppsqm_median": 161694.56,
+        "land_ppsqm_median": 1833333.33,
+        "gross_rent_yield_proxy_pct": 14.37,
+        "sale_count": 1,
+        "rent_count": 7,
+        "land_count": 7,
+        "sale_3br_count": 1,
+        "rent_3br_count": 1
       },
       "best_relative_value": {
         "market_node": "Victoria Island",
-        "listing_count": 60,
-        "sale_3br_median": 460000000.0,
-        "rent_3br_median": 20000000.0,
+        "listing_count": 45,
+        "sale_3br_median": 340000000.0,
+        "rent_3br_median": 25000000.0,
         "sale_ppsqm_median": 3829787.23,
         "rent_ppsqm_median": null,
         "land_ppsqm_median": 2307894.7350000003,
-        "gross_rent_yield_proxy_pct": 4.35,
-        "sale_count": 32,
+        "gross_rent_yield_proxy_pct": 7.35,
+        "sale_count": 17,
         "rent_count": 17,
         "land_count": 11,
-        "sale_3br_count": 9,
-        "rent_3br_count": 5
+        "sale_3br_count": 2,
+        "rent_3br_count": 3
       },
       "land_opportunity": {
         "market_node": "Asokoro",
@@ -219,34 +219,34 @@
       },
       "strongest_rental_activity": {
         "market_node": "Lekki Phase 1",
-        "listing_count": 93,
+        "listing_count": 91,
         "sale_3br_median": 410000000.0,
         "rent_3br_median": 21000000.0,
         "sale_ppsqm_median": null,
         "rent_ppsqm_median": null,
         "land_ppsqm_median": 850000.0,
         "gross_rent_yield_proxy_pct": 5.12,
-        "sale_count": 37,
+        "sale_count": 35,
         "rent_count": 32,
         "land_count": 24,
         "sale_3br_count": 14,
-        "rent_3br_count": 10
+        "rent_3br_count": 6
       },
       "monitoring": [
         {
           "market_node": "Maitama",
-          "listing_count": 19,
+          "listing_count": 15,
           "sale_3br_median": 348000000.0,
-          "rent_3br_median": 30000000.0,
+          "rent_3br_median": 50000000.0,
           "sale_ppsqm_median": null,
           "rent_ppsqm_median": 161694.56,
           "land_ppsqm_median": 1833333.33,
-          "gross_rent_yield_proxy_pct": 8.62,
+          "gross_rent_yield_proxy_pct": 14.37,
           "sale_count": 1,
-          "rent_count": 11,
+          "rent_count": 7,
           "land_count": 7,
           "sale_3br_count": 1,
-          "rent_3br_count": 3
+          "rent_3br_count": 1
         },
         {
           "market_node": "Ikeja GRA",
@@ -264,19 +264,19 @@
           "rent_3br_count": 3
         },
         {
-          "market_node": "Banana Island",
-          "listing_count": 36,
-          "sale_3br_median": 900000000.0,
-          "rent_3br_median": 50000000.0,
-          "sale_ppsqm_median": null,
+          "market_node": "Victoria Island",
+          "listing_count": 45,
+          "sale_3br_median": 340000000.0,
+          "rent_3br_median": 25000000.0,
+          "sale_ppsqm_median": 3829787.23,
           "rent_ppsqm_median": null,
-          "land_ppsqm_median": 5250000.0,
-          "gross_rent_yield_proxy_pct": 5.56,
+          "land_ppsqm_median": 2307894.7350000003,
+          "gross_rent_yield_proxy_pct": 7.35,
           "sale_count": 17,
-          "rent_count": 9,
-          "land_count": 10,
-          "sale_3br_count": 6,
-          "rent_3br_count": 7
+          "rent_count": 17,
+          "land_count": 11,
+          "sale_3br_count": 2,
+          "rent_3br_count": 3
         }
       ],
       "investment": {
@@ -296,18 +296,18 @@
       },
       "buyer_value": {
         "market_node": "Victoria Island",
-        "listing_count": 60,
-        "sale_3br_median": 460000000.0,
-        "rent_3br_median": 20000000.0,
+        "listing_count": 45,
+        "sale_3br_median": 340000000.0,
+        "rent_3br_median": 25000000.0,
         "sale_ppsqm_median": 3829787.23,
         "rent_ppsqm_median": null,
         "land_ppsqm_median": 2307894.7350000003,
-        "gross_rent_yield_proxy_pct": 4.35,
-        "sale_count": 32,
+        "gross_rent_yield_proxy_pct": 7.35,
+        "sale_count": 17,
         "rent_count": 17,
         "land_count": 11,
-        "sale_3br_count": 9,
-        "rent_3br_count": 5
+        "sale_3br_count": 2,
+        "rent_3br_count": 3
       },
       "seller_momentum": null
     },
@@ -319,7 +319,7 @@
         "full_six_month": false,
         "coverage": "available_period",
         "sale_pct": 25.0,
-        "rent_pct": 42.9,
+        "rent_pct": null,
         "land_ppsqm_pct": -99.9,
         "snapshots": 8
       },
@@ -329,9 +329,9 @@
         "period_days": 36,
         "full_six_month": false,
         "coverage": "available_period",
-        "sale_pct": -25.0,
-        "rent_pct": 14.3,
-        "land_ppsqm_pct": 2.3,
+        "sale_pct": -30.0,
+        "rent_pct": 471.4,
+        "land_ppsqm_pct": -5.7,
         "snapshots": 8
       },
       "Lekki Phase 1": {
@@ -341,7 +341,7 @@
         "full_six_month": false,
         "coverage": "available_period",
         "sale_pct": -25.5,
-        "rent_pct": 13.5,
+        "rent_pct": null,
         "land_ppsqm_pct": -57.5,
         "snapshots": 8
       },
@@ -374,7 +374,7 @@
         "full_six_month": false,
         "coverage": "available_period",
         "sale_pct": -27.3,
-        "rent_pct": 75.0,
+        "rent_pct": null,
         "land_ppsqm_pct": 51.6,
         "snapshots": 8
       },
@@ -424,49 +424,49 @@
         },
         "rent": {
           "label": "median annual apartment rent",
-          "current": 20000000.0,
-          "previous": 25000000.0,
-          "pct_change": -20.0
+          "current": 25000000.0,
+          "previous": 30000000.0,
+          "pct_change": -16.7
         },
         "land_ppsqm": {
           "label": "median land asking price per sqm",
-          "current": 1515027.3199999998,
+          "current": 1945179.585,
           "previous": 4000000.0,
-          "pct_change": -62.1
+          "pct_change": -51.4
         },
         "listings": {
           "label": "validated comparable listings tracked",
-          "current": 336,
+          "current": 354,
           "previous": 155,
-          "pct_change": 116.8
+          "pct_change": 128.4
         }
       },
       "narrative": [
         "Median apartment asking sale price increased 12.5% week on week.",
-        "Median annual apartment rent decreased 20.0% week on week.",
-        "Median land asking price per sqm decreased 62.1% week on week.",
-        "The scan captured 181 more validated comparable listings than the previous snapshot."
+        "Median annual apartment rent decreased 16.7% week on week.",
+        "Median land asking price per sqm decreased 51.4% week on week.",
+        "The scan captured 199 more validated comparable listings than the previous snapshot."
       ]
     },
     "quality": {
-      "validated_rows": 336
+      "validated_rows": 354
     },
     "analysis_notes": [
       "Median apartment asking sale price increased 12.5% week on week.",
-      "Median annual apartment rent decreased 20.0% week on week.",
-      "Median land asking price per sqm decreased 62.1% week on week.",
-      "The scan captured 181 more validated comparable listings than the previous snapshot.",
-      "The deepest validated comparable coverage this week is in Lekki Phase 1, Victoria Island, Old Ikoyi.",
-      "Thin coverage in Maitama, Ikeja GRA, Banana Island means those areas should be treated as watchlist signals rather than firm pricing conclusions.",
-      "Asokoro currently shows the strongest rental pricing/yield proxy among areas with usable observations.",
+      "Median annual apartment rent decreased 16.7% week on week.",
+      "Median land asking price per sqm decreased 51.4% week on week.",
+      "The scan captured 199 more validated comparable listings than the previous snapshot.",
+      "The deepest validated comparable coverage this week is in Lekki Phase 1, Banana Island, Old Ikoyi.",
+      "Thin coverage in Maitama, Ikeja GRA, Victoria Island means those areas should be treated as watchlist signals rather than firm pricing conclusions.",
+      "Maitama currently shows the strongest rental pricing/yield proxy among areas with usable observations.",
       "Victoria Island currently screens as the lowest observed apartment sale ₦/sqm among areas with usable data.",
       "Asokoro currently screens strongest on the rental-yield proxy, subject to the available comparable sample.",
       "Historical snapshots currently cover about 36 days; this is an available-period directional view, not yet a complete six-month history."
     ],
     "data_quality": {
-      "input_rows": 366,
-      "evidence_verified_rows": 336,
-      "quarantined_for_review": 30,
+      "input_rows": 390,
+      "evidence_verified_rows": 354,
+      "quarantined_for_review": 36,
       "duplicates_removed": 0
     }
   },
