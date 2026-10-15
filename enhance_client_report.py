@@ -317,16 +317,30 @@ def append_section(docx_path, rows, findings, charts, commentary, audit_path):
         doc.add_picture(str(path), width=Inches(6.2))
     doc.add_heading("Data quality exceptions requiring source review", level=2)
     if findings:
+        counts = {}
+        for item in findings:
+            issue = item.get("type", "other")
+            counts[issue] = counts.get(issue, 0) + 1
         doc.add_paragraph(
             f"{len(findings)} potential issue(s) were flagged. These are review prompts, not automatic deletions; "
             "confirm the original listing, property type, location, price period, currency, plot size and unit before use."
         )
+        unknown_rent_periods = counts.get("rent_period_unspecified", 0)
+        if unknown_rent_periods:
+            doc.add_paragraph(
+                f"Rent comparability warning: {unknown_rent_periods} rental listings do not explicitly state monthly or annual rent. "
+                "Their prices were excluded from annual rent medians and charts. No annual rent benchmark is published from those records."
+            )
+        breakdown = "; ".join(f"{key}: {value}" for key, value in sorted(counts.items()))
+        doc.add_paragraph("Exception counts — " + breakdown)
         table = doc.add_table(rows=1, cols=5)
         table.style = "Light Shading Accent 1"
         headers = ["Priority / issue", "Area / category", "Observed value", "Reason", "Source"]
         for cell, text in zip(table.rows[0].cells, headers):
             cell.text = text
-        for item in findings[:40]:
+        rank = {"wide_price_spread_review": 0, "price_outlier_review": 1, "land_unit_price_mismatch": 2, "rent_period_unspecified": 3}
+        prioritized = sorted(findings, key=lambda item: (rank.get(item.get("type"), 9), item.get("market_node", ""), item.get("type", "")))
+        for item in prioritized[:40]:
             row = table.add_row().cells
             row[0].text = f"{item.get('priority','review').upper()}\n{item.get('type','')}"
             row[1].text = f"{item.get('market_node','Unknown')} / {item.get('transaction','')}"
