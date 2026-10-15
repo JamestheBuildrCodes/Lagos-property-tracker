@@ -18,6 +18,12 @@ on:
 permissions:
   contents: read
 
+# Code pushes during a repair can otherwise start several identical client sends.
+# Keep only the newest report-delivery run active.
+concurrency:
+  group: final-client-report-delivery
+  cancel-in-progress: true
+
 jobs:
   deliver:
     runs-on: ubuntu-latest
