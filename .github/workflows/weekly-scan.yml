@@ -220,6 +220,10 @@ jobs:
           CHANGES=$(ls -t changes_*.csv 2>/dev/null | head -n 1)
           HTML=$(ls -t executive_brief_*.html | head -n 1)
           DOC_URL=$(cat client_doc_url.txt)
+          if [ "$DOC_URL" = "ATTACHED_DOCX_FALLBACK" ]; then
+            DOC_URL=""
+            echo "Google Doc unavailable; full report is delivered as a Word attachment in the client report email. Omitting the placeholder from the executive email."
+          fi
           SHEET_URL="https://docs.google.com/spreadsheets/d/$GOOGLE_SHEET_ID/edit"
           python email_report.py "$CURR" "${CHANGES:-none}" "$REPORT_CLIENT_EMAIL" "$HTML" "$DOC_URL" "$SHEET_URL"
 
