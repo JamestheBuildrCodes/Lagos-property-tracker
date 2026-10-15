@@ -2,19 +2,6 @@ name: Final Client Report Delivery
 
 on:
   workflow_dispatch: {}
-  push:
-    paths:
-      - ".github/workflows/final-client-report-delivery.yml"
-      - "client_doc_report.py"
-      - "enhance_client_report.py"
-      - "email_client_docx.py"
-      - "report_builder.py"
-      - "docs_writer.py"
-      - "market_analysis.py"
-      - "mailjet_sender.py"
-      - "tests/test_client_doc_report.py"
-      - "tests/test_rent_periods.py"
-
 permissions:
   contents: read
 
