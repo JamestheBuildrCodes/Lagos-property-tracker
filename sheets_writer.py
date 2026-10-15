@@ -216,12 +216,27 @@ def _verify_sheet_readback(name, expected_values, written_values):
     row_count = len(expected_values)
     width = max((len(row) for row in expected_values), default=0)
 
+    def normalize(value):
+        # Compare underlying values, not display formatting. Google Sheets can
+        # return numbers as floats while Excel stores the same values as ints;
+        # its formatted-value mode can also add commas, currency symbols, or
+        # rounding based on stale formatting on an existing worksheet.
+        if value is None:
+            return ("blank", "")
+        if isinstance(value, bool):
+            return ("bool", value)
+        if isinstance(value, (int, float)):
+            return ("number", float(value))
+        if isinstance(value, str):
+            return ("string", value)
+        return ("string", str(value))
+
     def rectangular_grid(grid):
         normalized = []
         for row_index in range(row_count):
             row = grid[row_index] if row_index < len(grid) else []
             normalized.append([
-                str(row[col_index] if col_index < len(row) and row[col_index] is not None else "")
+                normalize(row[col_index] if col_index < len(row) else None)
                 for col_index in range(width)
             ])
         return normalized
@@ -230,11 +245,16 @@ def _verify_sheet_readback(name, expected_values, written_values):
     actual = rectangular_grid(written_values)
     for row_index, (expected_row, actual_row) in enumerate(zip(expected, actual), start=1):
         for col_index, (expected_cell, actual_cell) in enumerate(zip(expected_row, actual_row), start=1):
-            if expected_cell != actual_cell:
+            equal = expected_cell == actual_cell
+            if expected_cell[0] == actual_cell[0] == "number":
+                equal = abs(expected_cell[1] - actual_cell[1]) <= max(
+                    1e-9, abs(expected_cell[1]) * 1e-12
+                )
+            if not equal:
                 cell = gspread.utils.rowcol_to_a1(row_index, col_index)
                 raise RuntimeError(
                     f"Google Sheet readback mismatch in worksheet '{name}' at {cell}; "
-                    "cell values differ (values omitted from log)."
+                    f"value types {expected_cell[0]} vs {actual_cell[0]} (values omitted from log)."
                 )
 
 
@@ -269,7 +289,10 @@ def run():
         # it with the exact workbook values. This catches partial writes,
         # row/column drift, and stale-tab updates before the run is reported
         # as successful.
-        written = ws.get(f"A1:{gspread.utils.rowcol_to_a1(len(values), max(len(r) for r in values))}")
+        written = ws.get(
+            f"A1:{gspread.utils.rowcol_to_a1(len(values), max(len(r) for r in values))}",
+            value_render_option="UNFORMATTED_VALUE",
+        )
         _verify_sheet_readback(name, values, written)
         style(ws,name,rows,cols)
         if name in {"Current Listings","Weekly Changes","Estate Intel Public"}: ws.freeze(rows=1)
