@@ -38,6 +38,11 @@ jobs:
           MAILJET_FROM_NAME: ${{ secrets.MAILJET_FROM_NAME }}
           REPORT_CLIENT_EMAIL: ${{ secrets.REPORT_CLIENT_EMAIL }}
           REPORT_TO_EMAIL: ${{ secrets.REPORT_TO_EMAIL }}
+          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_MODEL: "claude-haiku-4-5-20251001"
+          SUPPRESS_REPORT_NOTIFICATION_EMAIL: "1"
+          DEFER_DOCX_EMAIL: "1"
           GITHUB_RUN_ID: ${{ github.run_id }}
         run: |
           CURR=$(find data -maxdepth 1 -name 'property_listings_*.csv' -type f -print | sort | tail -n 1)
@@ -94,25 +99,28 @@ jobs:
           PY
 
           python client_doc_report.py "$CURR" "${RESEARCH:-none}" "${CHANGES:-none}"
-
-          test -s Lagos_Property_Market_Snapshot_*.docx
+          DOCX=$(ls -t Lagos_Property_Market_Snapshot_*.docx | head -n 1)
+          test -n "$DOCX" && test -s "$DOCX"
+          python enhance_client_report.py "$CURR" "$DOCX"
+          test -s client_report_quality_audit.json
+          python email_client_docx.py "$DOCX"
           test -s client_doc_url.txt
-          test -s mailjet_client-doc_receipt.json
+          test -s mailjet_client_docx_receipt.json
           test -s google_doc_verification.json
 
           python - <<'PY'
           import json
-          receipt = json.load(open("mailjet_client-doc_receipt.json", encoding="utf-8"))
+          receipt = json.load(open("mailjet_client_docx_receipt.json", encoding="utf-8"))
           statuses = [x.get("status") for x in receipt.get("message_results", [])]
           assert statuses and all(s == "success" for s in statuses), receipt
-          print("Client email accepted by Mailjet with message-level success.")
+          print("Final enhanced DOCX accepted by Mailjet with message-level success.")
           verification = json.load(open("google_doc_verification.json", encoding="utf-8"))
           status = verification.get("publication_status", "")
           if status == "docx_attachment_fallback_no_google_doc":
-              print("Google Doc: NOT PUBLISHED; the generated DOCX was emailed as an attachment.")
-              print("ACTION REQUIRED: update GOOGLE_OAUTH_TOKEN_JSON with a complete authorized-user token JSON containing refresh_token, client_id, client_secret, and token_uri.")
+              print("Google Doc: NOT PUBLISHED; the final enhanced DOCX was emailed as an attachment.")
           else:
-              print("Google Doc:", open("client_doc_url.txt", encoding="utf-8").read().strip())
+              print("Google Doc publication record:", status)
+          print("The enhanced Word attachment is the authoritative final document.")
           PY
 
       - name: Upload final client deliverables
@@ -122,6 +130,9 @@ jobs:
           path: |
             Lagos_Property_Market_Snapshot_*.docx
             client_doc_url.txt
-            mailjet_client-doc_receipt.json
+            mailjet_client_docx_receipt.json
+            client_report_quality_audit.json
+            market_output_quality.json
+            market_output_review.csv
             google_doc_verification.json
           if-no-files-found: error
