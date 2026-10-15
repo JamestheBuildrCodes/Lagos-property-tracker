@@ -151,6 +151,7 @@ jobs:
           RESEARCH=$(ls -t estateintel_public_research_*.csv 2>/dev/null | head -n 1)
           XLSX=$(ls -t market_intelligence_*.xlsx | head -n 1)
           python sheets_writer.py "$CURR" "${CHANGES:-none}" "${RESEARCH:-none}" "$XLSX"
+          printf '{"status":"success","workbook":"%s","updated_at_utc":"%s"}\n' "$XLSX" "$(date -u +%FT%TZ)" > google_sheet_update_status.json
 
       - name: Publish Layer 3 as Google Doc (best-effort)
         env:
@@ -276,6 +277,7 @@ jobs:
             market_intelligence_*.xlsx
             executive_brief_*.html
             market_intelligence.json
+            google_sheet_update_status.json
             client_report_quality_audit.json
             market_output_quality.json
             market_output_review.csv
