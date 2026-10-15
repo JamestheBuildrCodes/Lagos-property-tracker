@@ -2,3 +2,4 @@ Controlled one-off live scan after mapping Mailjet secrets into the client DOCX 
 Implementation run: chart enhancement, duplicate-key fix, DOCX attachment delivery, and QA audit — 2026-10-15T17:00:00Z.
 Run latest rent-period normalization and final report-delivery code — 2026-10-15T16:45:00Z.
 Run latest final-report pipeline after template and source-audit updates — 2026-10-15T16:50:00Z.
+Run latest rent-period inference, workbook attachment, and live-sheet update status — 2026-10-15T16:50:00Z.
