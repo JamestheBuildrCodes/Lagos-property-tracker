@@ -110,17 +110,9 @@ jobs:
           XLSX=$(ls -t market_intelligence_*.xlsx | head -n 1)
           test -n "$XLSX" && test -s "$XLSX"
           test -s market_intelligence.json
-          if [ -n "$GOOGLE_SERVICE_ACCOUNT_JSON" ] && [ -n "$GOOGLE_SHEET_ID" ]; then
-            if python sheets_writer.py "$CURR" "${CHANGES:-none}" "${RESEARCH:-none}" "$XLSX"; then
-              printf '{"status":"success","workbook":"%s","updated_at_utc":"%s"}\n' "$XLSX" "$(date -u +%FT%TZ)" > google_sheet_update_status.json
-            else
-              printf '{"status":"failed","workbook":"%s","updated_at_utc":"%s","note":"Sheet update failed; attached XLSX remains the authoritative workbook."}\n' "$XLSX" "$(date -u +%FT%TZ)" > google_sheet_update_status.json
-              echo "::warning::Google Sheet update failed; continuing with the attached Excel workbook."
-            fi
-          else
-            printf '{"status":"skipped","note":"Google service account or sheet ID secret is missing; attached XLSX remains the authoritative workbook."}\n' > google_sheet_update_status.json
-            echo "::warning::Google Sheet update skipped because service account or sheet ID is missing."
-          fi
+          # This report-only workflow must not compete with the scheduled scan
+          # for live Sheet writes. weekly-scan.yml owns the live Sheet refresh.
+          printf '{"status":"not_attempted","note":"The scheduled weekly scan is the authoritative live Google Sheet updater; the attached XLSX is the current report workbook."}\n' > google_sheet_update_status.json
           python client_doc_report.py "$CURR" "${RESEARCH:-none}" "${CHANGES:-none}"
           DOCX=$(ls -t Lagos_Property_Market_Snapshot_*.docx | head -n 1)
           test -n "$DOCX" && test -s "$DOCX"
