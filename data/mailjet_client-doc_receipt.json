@@ -1,0 +1,26 @@
+{
+  "accepted_at_utc": "2026-10-15T16:28:31.630794+00:00",
+  "http_status": 200,
+  "custom_id": "lagos-property-client-doc-38767078370-20261015T162830Z",
+  "subject": "Your Weekly Lagos & Abuja Property Market Snapshot",
+  "layer": "client-doc",
+  "message_results": [
+    {
+      "status": "success",
+      "recipients": [
+        {
+          "field": "To",
+          "email": "H***@yahoo.co.uk",
+          "message_id": 1152921545627171554,
+          "message_uuid": "ff053f97-f866-4693-a27f-969f7cd82d26"
+        },
+        {
+          "field": "To",
+          "email": "t***@gmail.com",
+          "message_id": 1152921545627171555,
+          "message_uuid": "f9e9acff-70df-4a37-8098-cdc66704a54b"
+        }
+      ]
+    }
+  ]
+}

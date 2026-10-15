@@ -1,7 +1,7 @@
 {
-  "file": "/for-sale/land/residential-land/abuja/wuse/zone-1/3722154-1400-sqm-residential-c-of-o-tarred-road",
-  "rows": 155,
-  "validated_at": "2026-10-12T21:16:23.604736+00:00",
+  "file": "/for-sale/land/residential-land/abuja/maitama-district/3726062-residential-land",
+  "rows": 364,
+  "validated_at": "2026-10-15T16:25:31.726327+00:00",
   "sources": [
     "Nigeria Property Centre",
     "PropertyPro.ng"
@@ -13,7 +13,6 @@
     "Lekki Phase 1",
     "Maitama",
     "Old Ikoyi",
-    "Victoria Island",
-    "Wuse"
+    "Victoria Island"
   ]
 }
