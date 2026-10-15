@@ -96,8 +96,10 @@ class SheetReadbackTests(unittest.TestCase):
                                    [["Metric", "Count"], ["Open", "12"]])
 
     def test_preserves_zero_instead_of_treating_it_as_blank(self):
+        # Zero is a real numeric value, not an empty cell. Google Sheets returns
+        # it as a number when UNFORMATTED_VALUE is requested.
         _verify_sheet_readback("Summary", [["Metric", "Count"], ["Open listings", 0]],
-                               [["Metric", "Count"], ["Open listings", "0"]])
+                               [["Metric", "Count"], ["Open listings", 0.0]])
 
     def test_pads_missing_trailing_rows_but_not_missing_values(self):
         _verify_sheet_readback("Summary", [["Title", None], [None, None]],
