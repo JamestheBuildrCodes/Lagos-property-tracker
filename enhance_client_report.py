@@ -84,6 +84,24 @@ def data_quality_audit(rows):
     for (node, txn, beds), values in sorted(buckets.items()):
         prices = [x[0] for x in values]
         median = statistics.median(prices)
+        if len(prices) >= 2 and min(prices) > 0:
+            spread = max(prices) / min(prices)
+            if spread >= 10:
+                low_price, low_row = min(values, key=lambda item: item[0])
+                high_price, high_row = max(values, key=lambda item: item[0])
+                findings.append({
+                    "priority": "high",
+                    "type": "wide_price_spread_review",
+                    "market_node": node,
+                    "transaction": txn,
+                    "bedrooms": beds,
+                    "min_asking_price_ngn": low_price,
+                    "max_asking_price_ngn": high_price,
+                    "spread_ratio": round(spread, 2),
+                    "source_url": high_row.get("source_url", ""),
+                    "source": high_row.get("source", "Unknown"),
+                    "reason": "Segment maximum is at least 10x its minimum. Check rent period, sale/rent classification, bedroom count, bulk listing, location and possible extraction/price-unit error. Do not delete solely because it is an outlier.",
+                })
         if len(prices) >= 3 and median > 0:
             outliers = [(p, r) for p, r in values if p >= median * 10 or p <= median / 10]
             for price, row in outliers:
