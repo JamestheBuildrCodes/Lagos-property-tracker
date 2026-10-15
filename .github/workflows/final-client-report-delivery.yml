@@ -8,8 +8,6 @@ on:
       - "client_doc_report.py"
       - "enhance_client_report.py"
       - "email_client_docx.py"
-      - "market_analysis.py"
-      - "scraper.py"
       - "mailjet_sender.py"
       - "tests/test_client_doc_report.py"
 
