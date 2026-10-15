@@ -339,7 +339,7 @@ jobs:
         run: |
           git config user.name "property-market-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/ tests/ discover_sources.py scraper.py market_analysis.py report_builder.py sheets_writer.py email_report.py docs_writer.py client_doc_report.py mailjet_sender.py validate_market_output.py quality_gate.py ai_listing_verifier.py ai_market_interpreter.py workflow_failure_alert.py requirements.txt DEPLOYMENT_GUIDE.md README_APPLY_FIX.md .github/workflows/weekly-scan.yml .github/workflows/email-delivery-diagnostic.yml mailjet_delivery_diagnostic.py
+          git add data/ tests/ discover_sources.py scraper.py market_analysis.py report_builder.py sheets_writer.py email_report.py docs_writer.py client_doc_report.py enhance_client_report.py email_client_docx.py mailjet_sender.py validate_market_output.py quality_gate.py ai_listing_verifier.py ai_market_interpreter.py workflow_failure_alert.py requirements.txt DEPLOYMENT_GUIDE.md README_APPLY_FIX.md .github/workflows/weekly-scan.yml .github/workflows/email-delivery-diagnostic.yml mailjet_delivery_diagnostic.py
           git commit -m "Property market snapshot $(date -u +%Y-%m-%d)" || echo "Nothing to commit"
 
       - name: Rebase and push results safely
