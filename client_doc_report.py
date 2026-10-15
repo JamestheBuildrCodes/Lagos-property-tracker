@@ -689,7 +689,7 @@ def _narrative_lines(listings, summary, research=None):
         ),
         (
             "bullet",
-            "Transaction types: annual rent, sale, and land sale.",
+            "Transaction types: sale and land sale, plus rental observations only when the source explicitly identifies monthly or annual rent. Monthly rent is annualized for comparison; rental amounts with an unspecified or conflicting period are excluded from rent medians and charts rather than guessed.",
         ),
         (
             "bullet",
