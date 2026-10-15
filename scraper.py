@@ -602,11 +602,11 @@ def detect_price_period(text: str, transaction: str) -> str:
         return "not_applicable"
     text = clean_text(text).lower()
     annual = bool(re.search(
-        r"\\b(?:annual(?:ly)?|per\\s+annum|per\\s+year|yearly|p\\.?a\\.?|/\\s*(?:annum|year)|a\\s+year)\\b",
+        r"\b(?:annual(?:ly)?|per\s+annum|per\s+year|yearly|p\.?a\.?|/\s*(?:annum|year)|a\s+year)\b",
         text,
     ))
     monthly = bool(re.search(
-        r"\\b(?:monthly|per\\s+month|p\\.?m\\.?|/\\s*month|a\\s+month)\\b",
+        r"\b(?:monthly|per\s+month|p\.?m\.?|/\s*month|a\s+month)\b",
         text,
     ))
     if annual and monthly:
