@@ -189,6 +189,8 @@ jobs:
           MAILJET_FROM_NAME: "Master Builder Inc."
           REPORT_CLIENT_EMAIL: ${{ secrets.REPORT_CLIENT_EMAIL }}
           REPORT_TO_EMAIL: ${{ secrets.REPORT_TO_EMAIL }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_MODEL: "claude-haiku-4-5-20251001"
           SUPPRESS_REPORT_NOTIFICATION_EMAIL: "1"
         run: |
           CURR=$(ls -t property_listings_*.csv | head -n 1)
@@ -197,7 +199,11 @@ jobs:
           test -s "$CURR"
           test -n "$GOOGLE_WEEKLY_REPORT_FOLDER_ID" || { echo "GOOGLE_WEEKLY_REPORT_FOLDER_ID is required."; exit 1; }
           python client_doc_report.py "$CURR" "${RESEARCH:-none}" "${CHANGES:-none}"
-          test -s Lagos_Property_Market_Snapshot_*.docx
+          DOCX=$(ls -t Lagos_Property_Market_Snapshot_*.docx | head -n 1)
+          test -n "$DOCX" && test -s "$DOCX"
+          python enhance_client_report.py "$CURR" "$DOCX"
+          test -s client_report_quality_audit.json
+          test -s "$DOCX"
           test -s client_doc_url.txt
           test -s google_doc_verification.json
 
@@ -235,6 +241,25 @@ jobs:
           fi
           SHEET_URL="https://docs.google.com/spreadsheets/d/$GOOGLE_SHEET_ID/edit"
           python email_report.py "$CURR" "${CHANGES:-none}" "$REPORT_CLIENT_EMAIL" "$HTML" "$DOC_URL" "$SHEET_URL"
+
+      - name: Upload final client deliverables and audit trail
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nigeria-property-client-deliverables
+          if-no-files-found: warn
+          retention-days: 30
+          path: |
+            Lagos_Property_Market_Snapshot_*.docx
+            market_intelligence_*.xlsx
+            executive_brief_*.html
+            market_intelligence.json
+            client_report_quality_audit.json
+            market_output_quality.json
+            market_output_review.csv
+            mailjet_layer1_receipt.json
+            google_doc_verification.json
+            client_doc_url.txt
 
       - name: Verify Mailjet send receipts
         shell: bash
