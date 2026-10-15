@@ -192,6 +192,7 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           ANTHROPIC_MODEL: "claude-haiku-4-5-20251001"
           SUPPRESS_REPORT_NOTIFICATION_EMAIL: "1"
+          DEFER_DOCX_EMAIL: "1"
         run: |
           CURR=$(ls -t property_listings_*.csv | head -n 1)
           RESEARCH=$(ls -t estateintel_public_research_*.csv 2>/dev/null | head -n 1)
@@ -206,6 +207,29 @@ jobs:
           test -s "$DOCX"
           test -s client_doc_url.txt
           test -s google_doc_verification.json
+
+      - name: Email final enhanced Word report as attachment
+        env:
+          MAILJET_API_KEY: ${{ secrets.MAILJET_API_KEY }}
+          MAILJET_SECRET_KEY: ${{ secrets.MAILJET_SECRET_KEY }}
+          MAILJET_FROM_EMAIL: ${{ secrets.MAILJET_FROM_EMAIL }}
+          MAILJET_FROM_NAME: "Master Builder Inc."
+          REPORT_CLIENT_EMAIL: ${{ secrets.REPORT_CLIENT_EMAIL }}
+          REPORT_TO_EMAIL: ${{ secrets.REPORT_TO_EMAIL }}
+          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+        run: |
+          DOCX=$(ls -t Lagos_Property_Market_Snapshot_*.docx | head -n 1)
+          test -s "$DOCX"
+          python email_client_docx.py "$DOCX"
+          test -s mailjet_client_docx_receipt.json
+          python - <<'PY'
+          import json
+          receipt = json.load(open("mailjet_client_docx_receipt.json", encoding="utf-8"))
+          statuses = [x.get("status") for x in receipt.get("message_results", [])]
+          if not statuses or any(x != "success" for x in statuses):
+              raise SystemExit("Final DOCX email did not receive a successful Mailjet message result.")
+          print("Final enhanced DOCX email accepted by Mailjet with message-level success.")
+          PY
 
       - name: Send final executive email with report links
         env:
@@ -234,11 +258,9 @@ jobs:
           CURR=$(ls -t property_listings_*.csv | head -n 1)
           CHANGES=$(ls -t changes_*.csv 2>/dev/null | head -n 1)
           HTML=$(ls -t executive_brief_*.html | head -n 1)
-          DOC_URL=$(cat client_doc_url.txt)
-          if [ "$DOC_URL" = "ATTACHED_DOCX_FALLBACK" ]; then
-            DOC_URL=""
-            echo "Google Doc unavailable; full report is delivered as a Word attachment in the client report email. Omitting the placeholder from the executive email."
-          fi
+          # The enhanced Word attachment is the authoritative client report.
+          # The earlier Google Doc is a separate rendering and is not linked as the final artifact.
+          DOC_URL=""
           SHEET_URL="https://docs.google.com/spreadsheets/d/$GOOGLE_SHEET_ID/edit"
           python email_report.py "$CURR" "${CHANGES:-none}" "$REPORT_CLIENT_EMAIL" "$HTML" "$DOC_URL" "$SHEET_URL"
 
@@ -258,6 +280,7 @@ jobs:
             market_output_quality.json
             market_output_review.csv
             mailjet_layer1_receipt.json
+            mailjet_client_docx_receipt.json
             google_doc_verification.json
             client_doc_url.txt
 
