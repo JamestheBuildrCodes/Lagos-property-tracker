@@ -143,6 +143,26 @@ def clean_rows(rows):
         r["market_node"] = normalize_node(r.get("market_node") or r.get("location"))
         ok, _ = node_evidence_ok(r)
         if ok:
+            # Rent comparisons require an explicit period and an annual basis.
+            # Preserve the original asking amount for source auditing; never guess.
+            if transaction_label(r) == "rent":
+                source_price = fnum(r.get("source_asking_price_ngn"))
+                if source_price is None:
+                    source_price = fnum(r.get("asking_price_ngn"))
+                period = str(r.get("price_period") or "unspecified").strip().lower()
+                annualized = fnum(r.get("annualized_asking_price_ngn"))
+                if annualized is None and source_price is not None:
+                    if period == "annual":
+                        annualized = source_price
+                    elif period == "monthly":
+                        annualized = source_price * 12
+                r["source_asking_price_ngn"] = source_price
+                r["annualized_asking_price_ngn"] = annualized
+                if annualized is not None and annualized > 0 and period in {"annual", "monthly"}:
+                    r["asking_price_ngn"] = annualized
+                else:
+                    r["price_period"] = period or "unspecified"
+                    r["asking_price_ngn"] = ""
             valid.append(r)
     return valid
 
