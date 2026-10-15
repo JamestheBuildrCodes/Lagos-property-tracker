@@ -221,7 +221,7 @@ def _verify_sheet_readback(name, expected_values, written_values):
         # return numbers as floats while Excel stores the same values as ints;
         # its formatted-value mode can also add commas, currency symbols, or
         # rounding based on stale formatting on an existing worksheet.
-        if value is None:
+        if value is None or value == "":
             return ("blank", "")
         if isinstance(value, bool):
             return ("bool", value)
