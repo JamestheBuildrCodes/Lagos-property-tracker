@@ -24,23 +24,38 @@ def main():
         raise SystemExit("GOOGLE_SHEET_ID is required to include the spreadsheet link.")
     mime = mimetypes.guess_type(path.name)[0] or "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     sheet_url = "https://docs.google.com/spreadsheets/d/" + sheet_id + "/edit"
+    workbook_candidates = list(Path(".").glob("market_intelligence_*.xlsx")) + list(Path("data").glob("market_intelligence_*.xlsx"))
+    workbook = max(workbook_candidates, key=lambda item: (item.name, item.parent == Path("."))) if workbook_candidates else None
+    attachments = [{
+        "ContentType": mime,
+        "Filename": path.name,
+        "Base64Content": base64.b64encode(path.read_bytes()).decode("ascii"),
+    }]
+    if workbook and workbook.is_file() and workbook.stat().st_size > 0:
+        workbook_mime = mimetypes.guess_type(workbook.name)[0] or "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        attachments.append({
+            "ContentType": workbook_mime,
+            "Filename": workbook.name,
+            "Base64Content": base64.b64encode(workbook.read_bytes()).decode("ascii"),
+        })
+        print(f"Attaching client XLSX workbook: {workbook}")
+    else:
+        print("No generated market intelligence XLSX found; sending the enhanced DOCX only.")
     send_message(
         to=[client],
         cc=[internal],
         subject="Final Weekly Nigeria Property Market Snapshot — Word Report Attached",
         text_body=(
-            "Attached is the final enhanced weekly property market report, including charts, "
-            "sample-size notes, land plot-size/price-per-sqm analysis where available, and a "
-            "data-quality exception review. Asking prices are not completed transaction prices. "
-            "Please use original listing links to verify material figures.\n\n"
+            "Attached are the final enhanced Word report and, when generated, the market-intelligence Excel workbook with charts and source-level data. "
+            "The Word report includes sample-size notes, land plot-size/price-per-sqm analysis where available, and a data-quality exception review. "
+            "Asking prices are not completed transaction prices. Please use original listing links to verify material figures.\n\n"
             f"Live spreadsheet and dashboard: {sheet_url}\n"
             "Reporting schedule: Monday at 08:00 Africa/Lagos. Provider acceptance is recorded "
             "in the run audit; it does not prove inbox placement or reading."
         ),
         html_body=(
-            "<p>Attached is the final enhanced weekly property market report, including charts, "
-            "sample-size notes, land plot-size/price-per-sqm analysis where available, and a "
-            "data-quality exception review.</p>"
+            "<p>Attached are the final enhanced Word report and, when generated, the market-intelligence Excel workbook with charts and source-level data. "
+            "The Word report includes sample-size notes, land plot-size/price-per-sqm analysis where available, and a data-quality exception review.</p>"
             "<p><b>Important:</b> asking prices are not completed transaction prices. Verify "
             "material figures against original listing links.</p>"
             f'<p><a href="{sheet_url}">Open the live spreadsheet and dashboard</a></p>'
@@ -48,11 +63,7 @@ def main():
             "in the run audit; it does not prove inbox placement or reading.</p>"
         ),
         layer="client_docx",
-        attachments=[{
-            "ContentType": mime,
-            "Filename": path.name,
-            "Base64Content": base64.b64encode(path.read_bytes()).decode("ascii"),
-        }],
+        attachments=attachments,
     )
 
 if __name__ == "__main__":
