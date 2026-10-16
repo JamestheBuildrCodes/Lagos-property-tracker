@@ -49,7 +49,7 @@ analyst report is published by `docs_writer.py`; `GOOGLE_DOC_ID` optionally lets
 that existing analyst document be updated in place.
 
 Separately, `client_doc_report.py` creates a **brand-new Google Doc every run**
-for the client-preferred market snapshot. It never reads or reuses `GOOGLE_DOC_ID`.
+for the client-preferred market snapshot using a human user's OAuth token. It never reads or reuses `GOOGLE_DOC_ID`. If OAuth publication fails, the report-only workflow can email the enhanced DOCX attachment; that is a successful email fallback, not successful Google Doc publication.
 The document uses Times New Roman, a black 28pt title, blue #2E74B5 city/area
 headings, gray #D9D9D9 table headers, and clickable `View source` links. The
 final executive email is sent only after the new Doc and verified Sheet are ready,
@@ -99,7 +99,7 @@ Set these GitHub Actions repository secrets:
 | `GOOGLE_DOC_ID` | Optional existing analyst Google Doc to update in place |
 | `GOOGLE_SERVICE_ACCOUNT_JSON` | Google Sheets service-account credentials (Editor access to the existing Sheet required) |
 | `GOOGLE_SHEET_ID` | Existing client data Sheet ID |
-| `GOOGLE_OAUTH_TOKEN_JSON` | Optional legacy OAuth path; the current workflow creates and shares a fresh weekly Google Doc using the service account, so report delivery does not depend on this token |
+| `GOOGLE_OAUTH_TOKEN_JSON` | Required authorized-user OAuth token for the client-preferred weekly Google Doc in the consumer Gmail Drive folder. Must contain `refresh_token`, `client_id`, `client_secret`, and `token_uri`. The downloaded OAuth client-credentials JSON alone is insufficient. |
 | `GROQ_API_KEY` | Optional key for AI interpretation of aggregate metrics only; omit it to use free deterministic analysis |
 | `GROQ_MODEL` | Explicit compatible model name required only when enabling the optional paid API |
 
@@ -127,7 +127,7 @@ Termux. It then:
 5. builds the executive email, workbook and analyst report from the same aggregate analysis; optional Groq commentary is produced only when `GROQ_API_KEY` is configured;
 6. mirrors the workbook into the existing Google Sheet and verifies its cells by readback;
 7. publishes the analyst Google Doc and archives its DOCX;
-8. creates a new weekly Google Doc through the service account and verifies that the document was created in this run;
+8. creates a new client-preferred weekly Google Doc using `GOOGLE_OAUTH_TOKEN_JSON` and verifies its content; the service-account publisher is a separate best-effort analyst-document path;
 9. sends one final executive email to `REPORT_CLIENT_EMAIL`, copying `REPORT_TO_EMAIL`, with report and Sheet links;
 10. verifies Mailjet's message-level acceptance receipt, archives outputs and commits the result.
 
@@ -170,3 +170,12 @@ secrets above exist. Check that the log contains `New weekly Google Doc publishe
 and `Notification email accepted by Mailjet`, then open the new URL and visually
 confirm the table cells, gray header row, and clickable `View source` links. The
 workflow now fails rather than reporting success if publishing/sharing/email fails.
+
+
+## OAuth token and Drive folder troubleshooting
+
+The consumer Gmail Drive folder must be accessed by the same Google user who authorized `GOOGLE_OAUTH_TOKEN_JSON`. The service-account identity is separate and does not automatically inherit access to that folder. A Drive `404 File not found` for the folder and Docs API `403 The caller does not have permission` are not fixed by merely having a service-account JSON secret.
+
+To generate the authorized-user token using the existing Web application OAuth client, add `https://developers.google.com/oauthplayground` to its **Authorized redirect URIs**, then use Google's OAuth Playground with **Use your own OAuth credentials** enabled. Request `https://www.googleapis.com/auth/drive` and `https://www.googleapis.com/auth/documents`, authorize the Gmail account that can open the destination folder, and exchange the code for tokens. Save the resulting token JSON as the GitHub Actions secret `GOOGLE_OAUTH_TOKEN_JSON`, ensuring it includes a `refresh_token`, `client_id`, `client_secret`, and `token_uri`. Do not put the token or client secret in the repository.
+
+After updating the secret, manually run **Actions → Final Client Report Delivery → Run workflow**. This workflow uses the committed snapshot and does not run the paid live scraper. Confirm the verification output shows a published and verified Google Doc, not `docx_attachment_fallback_no_google_doc`.
