@@ -1059,13 +1059,23 @@ def _narrative_lines(listings, summary, research=None):
     )
 
     lines.append(("h2", "Supplementary Sources & Commercial Status"))
+    try:
+        knight_audit = json.loads(Path("knight_frank_research_status.json").read_text(encoding="utf-8"))
+        knight_status = (
+            f" Automated public-page audit: {knight_audit.get('status', 'not checked')}; "
+            f"HTTP status {knight_audit.get('http_status')}; "
+            f"latest publication: {knight_audit.get('latest_publication', 'not confirmed')}. "
+        )
+    except (OSError, json.JSONDecodeError):
+        knight_status = " Automated public-page audit did not produce a result in this run. "
     lines.append((
         "bullet",
-        "Knight Frank Nigeria: the official Lagos Market Update H1 2026 page was identified "
+        "Knight Frank Nigeria: official Lagos Market Update research "
         "(https://www.knightfrank.com.ng/research/lagos-market-update-13035.aspx). "
-        "The full report download requests contact details, so its published figures are not "
-        "yet mixed into current listing-level medians. Any future comparison must align dates, "
-        "asset class, geography, and methodology.",
+        + knight_status
+        + "This is market-level context, not a live listing feed. The report's downloadable figures "
+        "are not included unless accessible from a public, authorized source; no gated access is bypassed. "
+        "Any comparison must align dates, asset class, geography, and methodology.",
     ))
     lines.append((
         "bullet",
