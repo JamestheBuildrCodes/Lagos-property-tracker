@@ -1665,7 +1665,7 @@ def verify_google_doc(docs, drive, doc_id, listings, summary, research=None):
 
     required_sections = [
         "LAGOS PROPERTY MARKET INTELLIGENCE — ",
-        "Weekly Market Report — Lagos & Abuja",
+        "Weekly Market Report — Lagos, Abuja & Port Harcourt",
         "1. What This Report Is",
         "2. Coverage & Method",
         "3. Rental Market",
@@ -1911,7 +1911,7 @@ def publish_google_doc(
 
     lines = [
         title,
-        "Weekly Market Report — Lagos & Abuja",
+        "Weekly Market Report — Lagos, Abuja & Port Harcourt",
         (
             f"Collection date: {datetime.now(timezone.utc):%d %B %Y}  |  "
             f"Report version: Weekly-{datetime.now(timezone.utc):%Y-%m-%d}  |  "
