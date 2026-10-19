@@ -680,9 +680,10 @@ def _narrative_lines(listings, summary, research=None):
         ("h1", "2. Coverage & Method"),
         (
             "bullet",
-            "Locations: Banana Island, Old Ikoyi, Lekki Phase 1, "
-            "Victoria Island, Eko Atlantic, Ikeja GRA, Asokoro, Maitama, "
-            "and Wuse.",
+            "Locations: six Lagos nodes (Banana Island, Old Ikoyi, Lekki Phase 1, "
+            "Victoria Island, Eko Atlantic, Ikeja GRA); three Abuja nodes "
+            "(Asokoro, Maitama, Wuse); and city-wide Port Harcourt coverage. "
+            "Port Harcourt is not yet split into neighbourhood-level submarkets.",
         ),
         (
             "bullet",
@@ -1019,8 +1020,8 @@ def _narrative_lines(listings, summary, research=None):
         (
             "bullet",
             "Widen comparable samples, strengthen cross-source "
-            "deduplication, and expand city coverage only after source "
-            "accessibility and data quality are validated.",
+            "deduplication, and expand Port Harcourt into neighbourhood-level "
+            "submarkets only after source accessibility and data quality are validated.",
         )
     )
 
