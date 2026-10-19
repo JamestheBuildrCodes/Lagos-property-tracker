@@ -751,6 +751,7 @@ def _narrative_lines(listings, summary, research=None):
         ("Lagos", LAGOS_NODES),
         ("Abuja", ABUJA_NODES),
         ("Port Harcourt", PORT_HARCOURT_NODES),
+        ("Port Harcourt", PORT_HARCOURT_NODES),
     ):
         rentable = [
             node
@@ -784,6 +785,7 @@ def _narrative_lines(listings, summary, research=None):
     for city, nodes in (
         ("Lagos", LAGOS_NODES),
         ("Abuja", ABUJA_NODES),
+        ("Port Harcourt", PORT_HARCOURT_NODES),
     ):
         salable = [
             node
@@ -843,6 +845,7 @@ def _narrative_lines(listings, summary, research=None):
     for city, nodes in (
         ("Lagos", LAGOS_NODES),
         ("Abuja", ABUJA_NODES),
+        ("Port Harcourt", PORT_HARCOURT_NODES),
     ):
         land_nodes = [
             node
@@ -1453,6 +1456,7 @@ def _report_text(listings, summary):
     for city, nodes in (
         ("Lagos", LAGOS_NODES),
         ("Abuja", ABUJA_NODES),
+        ("Port Harcourt", PORT_HARCOURT_NODES),
     ):
         lines += ["", city]
 
