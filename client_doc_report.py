@@ -1301,7 +1301,7 @@ def build_docx(
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
     r = title.add_run(
-        "LAGOS PROPERTY MARKET INTELLIGENCE"
+        "NIGERIA PROPERTY MARKET INTELLIGENCE"
     )
     set_font(r, 20, DARK_BLUE)
     r.bold = True
