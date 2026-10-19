@@ -1,10 +1,10 @@
 {
-  "verified_at_utc": "2026-10-15T17:04:54.447951+00:00",
+  "verified_at_utc": "2026-10-19T14:18:06.096288+00:00",
   "publication_status": "docx_attachment_fallback_no_google_doc",
   "google_doc_created": false,
   "client_preferred_doc_created": false,
   "client_preferred_doc_content_verified": false,
-  "docx_attachment": "Lagos_Property_Market_Snapshot_2026-10-15.docx",
+  "docx_attachment": "Lagos_Property_Market_Snapshot_2026-10-19.docx",
   "oauth_error_type": "RuntimeError",
   "action_required": "Correct GOOGLE_OAUTH_TOKEN_JSON using a complete authorized-user token JSON containing refresh_token, client_id, client_secret, and token_uri. This run can deliver the generated DOCX by email, but cannot publish or verify a Google Doc."
 }

@@ -1,7 +1,7 @@
 {
-  "accepted_at_utc": "2026-10-15T17:04:57.799721+00:00",
+  "accepted_at_utc": "2026-10-19T14:18:09.148144+00:00",
   "http_status": 200,
-  "custom_id": "lagos-property-layer1-38772000907-20261015T170457Z",
+  "custom_id": "lagos-property-layer1-39266432261-20261019T141808Z",
   "subject": "Lagos & Abuja Property Market — Weekly Intelligence Brief",
   "layer": "layer1",
   "message_results": [
@@ -11,14 +11,14 @@
         {
           "field": "To",
           "email": "H***@yahoo.co.uk",
-          "message_id": 576460793350653952,
-          "message_uuid": "fa156c0f-710a-4118-99b5-1625b28bbf27"
+          "message_id": 576460793463189725,
+          "message_uuid": "e2cd8739-9339-4707-95ad-593ef353b4ee"
         },
         {
           "field": "Cc",
           "email": "t***@gmail.com",
-          "message_id": 576460793350653953,
-          "message_uuid": "17209ea9-5660-4997-9765-bd2ac3010129"
+          "message_id": 576460793463189726,
+          "message_uuid": "9dfa05e7-ea6e-4563-8475-588f93040804"
         }
       ]
     }

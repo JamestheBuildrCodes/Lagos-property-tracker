@@ -1,34 +1,10 @@
 {
-  "date": "2026-10-15",
+  "date": "2026-10-19",
   "manifest_entries": 207,
   "category_requests": 54,
-  "listing_rows": 390,
+  "listing_rows": 340,
   "estate_intel_rows": 9,
   "failures": [
-    {
-      "source": "PropertyPro.ng",
-      "node": "Eko Atlantic",
-      "category": "rent",
-      "url": "https://propertypro.ng/property-for-rent/flat-apartment/in/lagos/victoria-island/eko-atlantic",
-      "pages": 0,
-      "cards": 0,
-      "rows": 0,
-      "rejected_quality": 0,
-      "stale_rejected": 0,
-      "error": "All configured scraper transports failed for PropertyPro.ng. ZenRows: HTTPSConnectionPool(host='api.zenrows.com', port=443): Read timed out. (read timeout=90)"
-    },
-    {
-      "source": "PropertyPro.ng",
-      "node": "Wuse",
-      "category": "sale",
-      "url": "https://propertypro.ng/property-for-sale/flat-apartment/in/abuja/wuse",
-      "pages": 0,
-      "cards": 0,
-      "rows": 0,
-      "rejected_quality": 0,
-      "stale_rejected": 0,
-      "error": "All configured scraper transports failed for PropertyPro.ng. ZenRows: HTTPSConnectionPool(host='api.zenrows.com', port=443): Read timed out. (read timeout=90)"
-    },
     {
       "source": "Nigeria Property Centre",
       "node": "Eko Atlantic",
@@ -106,11 +82,11 @@
       "node": "Asokoro",
       "category": "sale",
       "url": "https://nigeriapropertycentre.com/for-sale/flats-apartments/abuja/asokoro-district/showtype?sort=2",
-      "pages": 1,
-      "cards": 36,
+      "pages": 2,
+      "cards": 59,
       "rows": 0,
       "rejected_quality": 21,
-      "stale_rejected": 14,
+      "stale_rejected": 17,
       "error": "All configured scraper transports failed for Nigeria Property Centre. ZenRows: HTTP 404: {\"code\":\"RESP002\",\"detail\":\"The requested URL page returned a 404 HTTP Status Code. Please make sure this URL exists and retry your request.\",\"instance\":\"/v1\",\"status\":404,\"title\":\"Page not found (RESP002)\",\"type\":\"https://docs.zenrows.com/"
     },
     {
@@ -119,10 +95,22 @@
       "category": "sale",
       "url": "https://nigeriapropertycentre.com/for-sale/flats-apartments/abuja/wuse/showtype?sort=2",
       "pages": 1,
-      "cards": 35,
+      "cards": 36,
       "rows": 0,
       "rejected_quality": 20,
-      "stale_rejected": 15,
+      "stale_rejected": 16,
+      "error": "All configured scraper transports failed for Nigeria Property Centre. ZenRows: HTTP 404: {\"code\":\"RESP002\",\"detail\":\"The requested URL page returned a 404 HTTP Status Code. Please make sure this URL exists and retry your request.\",\"instance\":\"/v1\",\"status\":404,\"title\":\"Page not found (RESP002)\",\"type\":\"https://docs.zenrows.com/"
+    },
+    {
+      "source": "Nigeria Property Centre",
+      "node": "Wuse",
+      "category": "rent",
+      "url": "https://nigeriapropertycentre.com/for-rent/flats-apartments/abuja/wuse/showtype?sort=2",
+      "pages": 2,
+      "cards": 64,
+      "rows": 0,
+      "rejected_quality": 19,
+      "stale_rejected": 28,
       "error": "All configured scraper transports failed for Nigeria Property Centre. ZenRows: HTTP 404: {\"code\":\"RESP002\",\"detail\":\"The requested URL page returned a 404 HTTP Status Code. Please make sure this URL exists and retry your request.\",\"instance\":\"/v1\",\"status\":404,\"title\":\"Page not found (RESP002)\",\"type\":\"https://docs.zenrows.com/"
     },
     {
@@ -131,26 +119,14 @@
       "category": "land_sale",
       "url": "https://nigeriapropertycentre.com/for-sale/land/residential-land/abuja/wuse/showtype",
       "pages": 1,
-      "cards": 25,
+      "cards": 27,
       "rows": 0,
       "rejected_quality": 16,
-      "stale_rejected": 9,
+      "stale_rejected": 11,
       "error": "All configured scraper transports failed for Nigeria Property Centre. ZenRows: HTTP 404: {\"code\":\"RESP002\",\"detail\":\"The requested URL page returned a 404 HTTP Status Code. Please make sure this URL exists and retry your request.\",\"instance\":\"/v1\",\"status\":404,\"title\":\"Page not found (RESP002)\",\"type\":\"https://docs.zenrows.com/"
-    },
-    {
-      "source": "Nigeria Property Centre",
-      "node": "Wuse",
-      "category": "rent",
-      "url": "https://nigeriapropertycentre.com/for-rent/flats-apartments/abuja/wuse/showtype?sort=2",
-      "pages": 0,
-      "cards": 0,
-      "rows": 0,
-      "rejected_quality": 0,
-      "stale_rejected": 0,
-      "error": "All configured scraper transports failed for Nigeria Property Centre. ZenRows: HTTPSConnectionPool(host='api.zenrows.com', port=443): Read timed out. (read timeout=90)"
     }
   ],
-  "quality_rejections": 822,
-  "stale_rejections": 500,
+  "quality_rejections": 938,
+  "stale_rejections": 634,
   "listing_quality_policy": "Only detail URLs whose canonical node slug matches the assigned node are admitted; explicit conflicting node evidence is rejected."
 }
