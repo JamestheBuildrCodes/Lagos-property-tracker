@@ -51,6 +51,9 @@ ABUJA_NODES = [
     "Wuse",
 ]
 
+PORT_HARCOURT_NODES = ["Port Harcourt"]
+ALL_NODES = LAGOS_NODES + ABUJA_NODES + PORT_HARCOURT_NODES
+
 BLUE = "2E74B5"
 DARK_BLUE = "1F3864"
 GRAY = "666666"
@@ -424,7 +427,7 @@ def _city_standout(listings, nodes, city):
 
 
 def _coverage_summary(listings):
-    all_nodes = LAGOS_NODES + ABUJA_NODES
+    all_nodes = ALL_NODES
     covered = set()
     beds_seen = set()
 
@@ -747,6 +750,7 @@ def _narrative_lines(listings, summary, research=None):
     for city, nodes in (
         ("Lagos", LAGOS_NODES),
         ("Abuja", ABUJA_NODES),
+        ("Port Harcourt", PORT_HARCOURT_NODES),
     ):
         rentable = [
             node
@@ -1021,10 +1025,7 @@ def _narrative_lines(listings, summary, research=None):
     lines.append(
         (
             "body",
-            "Port Harcourt is not currently tracked by the live "
-            "validated scraper, so this report makes no Port Harcourt "
-            "price claim. The system is structured so additional city/source "
-            "adapters can be added without changing the reporting model.",
+            "Port Harcourt is now included as a city-wide market node using public listing categories from Nigeria Property Centre and PropertyPro.ng. Port Harcourt figures appear only when listings pass the same freshness, source-evidence, and comparable-data quality checks used for Lagos and Abuja. The Port Harcourt sample is not yet split into neighbourhood-level submarkets, and thin samples must not be treated as city-wide valuation benchmarks.",
         )
     )
 
@@ -1307,7 +1308,7 @@ def build_docx(
     sub.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
     r = sub.add_run(
-        "Weekly Market Report — Lagos & Abuja"
+        "Weekly Market Report — Lagos, Abuja & Port Harcourt"
     )
     set_font(r, 13)
     r.bold = True
@@ -1442,7 +1443,7 @@ def _oauth_services():
 
 def _report_text(listings, summary):
     lines = [
-        "Lagos & Abuja Property Market Snapshot",
+        "Lagos, Abuja & Port Harcourt Property Market Snapshot",
         "Weekly Intelligence Report — Real Tracked Listings, Linked to Source",
         f"Data captured {datetime.now(timezone.utc):%d %B %Y}",
         "",
@@ -1703,7 +1704,7 @@ def verify_google_doc(docs, drive, doc_id, listings, summary, research=None):
         raise RuntimeError("Google Doc content is published, but client viewer access could not be verified.")
 
     expected_rows = []
-    for node in LAGOS_NODES + ABUJA_NODES:
+    for node in ALL_NODES:
         for txn in ("rent", "sale", "land"):
             expected_rows.extend(_node_transaction_rows(listings, node, txn))
     expected_rows.extend(_research_table_rows(research or []))
@@ -1985,6 +1986,7 @@ def publish_google_doc(
     heading2 = {
         "Lagos",
         "Abuja",
+        "Port Harcourt",
         "Estate Intel — Public Research Context",
     }
 
@@ -2640,7 +2642,7 @@ def send_notification_email(doc_url, attachment_path=None):
 
     send_message(
         to=recipients,
-        subject="Your Weekly Lagos & Abuja Property Market Snapshot",
+        subject="Your Weekly Lagos, Abuja & Port Harcourt Property Market Snapshot",
         text_body=text_body,
         html_body=html_body,
         layer="client-doc",
