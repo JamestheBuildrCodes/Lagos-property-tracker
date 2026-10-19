@@ -205,6 +205,7 @@ class EstateIntelSecurityTests(unittest.TestCase):
             "Asokoro",
             "Maitama",
             "Wuse",
+            "Port Harcourt",
         ]
         for node in expected:
             self.assertIn(f'"{node}"', validator)
