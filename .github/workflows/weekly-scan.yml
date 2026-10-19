@@ -127,7 +127,7 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           GROQ_MODEL: "qwen/qwen3.8-27b"
           GROQ_AI_COMMENTARY_ENABLED: "true"
-          GROQ_AI_COMMENTARY_REQUIRED: "false"
+          GROQ_AI_COMMENTARY_REQUIRED: "true"
         run: |
           CURR=$(ls -t property_listings_*.csv | head -n 1)
           CHANGES=$(ls -t changes_*.csv 2>/dev/null | head -n 1)
@@ -137,6 +137,12 @@ jobs:
           test -s market_intelligence_*.xlsx
           test -s Lagos_Abuja_Property_Market_Intelligence_*.docx
           test -s market_intelligence.json
+          python - <<'PY'
+          import json
+          ai = (json.load(open("market_intelligence.json", encoding="utf-8")).get("summary") or {}).get("ai_commentary") or {}
+          if not ai.get("executive_takeaway") or not ai.get("key_findings") or not ai.get("recommended_actions"):
+              raise SystemExit("Required AI market interpretation is missing or incomplete.")
+          PY
 
       - name: Write and verify Layer 2 in the existing Google Sheet
         env:
@@ -153,7 +159,7 @@ jobs:
           python sheets_writer.py "$CURR" "${CHANGES:-none}" "${RESEARCH:-none}" "$XLSX"
           printf '{"status":"success","workbook":"%s","updated_at_utc":"%s"}\n' "$XLSX" "$(date -u +%FT%TZ)" > google_sheet_update_status.json
 
-      - name: Publish Layer 3 as Google Doc (best-effort)
+      - name: Publish and verify Layer 3 as Google Doc
         env:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           GOOGLE_DOC_ID: ${{ secrets.GOOGLE_DOC_ID }}
@@ -162,18 +168,10 @@ jobs:
           REPORT_TO_EMAIL: ${{ secrets.REPORT_TO_EMAIL }}
           REPORT_CLIENT_EMAIL: ${{ secrets.REPORT_CLIENT_EMAIL }}
         run: |
-          # Service accounts may not have Drive quota or access to a consumer
-          # Gmail folder. This layer is best-effort; client publication below
-          # has an OAuth path and a verified DOCX-email fallback.
-          if [ -z "$GOOGLE_SERVICE_ACCOUNT_JSON" ]; then
-            echo "Google service account secret not configured; skipping analyst Google Doc."
-          elif python docs_writer.py market_intelligence.json &&
-               test -s google_doc_url.txt &&
-               test -s google_doc_publication.json &&
-               python -c 'import json; p=json.load(open("google_doc_publication.json", encoding="utf-8")); assert p.get("publication_status") == "new_weekly_document_created"; assert p.get("created_new_document") is True; assert str(p.get("url", "")).startswith("https://docs.google.com/document/d/"); print("Verified fresh weekly Google Doc:", p["url"]); print("Created in target folder:", p.get("created_in_target_folder"))'; then
-            echo "Analyst Google Doc publication verified."
+          if [ -n "$GOOGLE_SERVICE_ACCOUNT_JSON" ] && GOOGLE_CREATE_WEEKLY_DOC="true" python docs_writer.py market_intelligence.json; then
+            python -c 'import json; p=json.load(open("google_doc_publication.json", encoding="utf-8")); assert p.get("publication_status") == "new_weekly_document_created" and p.get("content_verified") and p.get("ai_commentary_verified") and p.get("client_access_granted"); print("Verified service-account fallback:", p["url"])'
           else
-            echo "::warning::Service-account Google Doc publication failed or could not be verified. Continuing to the client OAuth/DOCX fallback path."
+            echo "::warning::Service-account fallback unavailable; the client OAuth Docs publication must succeed."
             rm -f google_doc_url.txt google_doc_publication.json
           fi
 
@@ -208,6 +206,12 @@ jobs:
           test -s "$DOCX"
           test -s client_doc_url.txt
           test -s google_doc_verification.json
+          python - <<'PY'
+          import json
+          v=json.load(open("google_doc_verification.json",encoding="utf-8"))
+          assert v.get("content_verified") and v.get("ai_commentary_verified") and v.get("client_access_granted"), v
+          assert v.get("publication_status") != "docx_attachment_fallback_no_google_doc", v
+          PY
 
       - name: Email final enhanced Word report as attachment
         env:
@@ -259,9 +263,7 @@ jobs:
           CURR=$(ls -t property_listings_*.csv | head -n 1)
           CHANGES=$(ls -t changes_*.csv 2>/dev/null | head -n 1)
           HTML=$(ls -t executive_brief_*.html | head -n 1)
-          # The enhanced Word attachment is the authoritative client report.
-          # The earlier Google Doc is a separate rendering and is not linked as the final artifact.
-          DOC_URL=""
+          DOC_URL=$(cat client_doc_url.txt)
           SHEET_URL="https://docs.google.com/spreadsheets/d/$GOOGLE_SHEET_ID/edit"
           python email_report.py "$CURR" "${CHANGES:-none}" "$REPORT_CLIENT_EMAIL" "$HTML" "$DOC_URL" "$SHEET_URL"
 

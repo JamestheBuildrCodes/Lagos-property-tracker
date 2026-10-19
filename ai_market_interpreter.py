@@ -72,6 +72,8 @@ def interpret_summary(summary: dict[str, Any]) -> dict[str, Any] | None:
     api_key = os.environ.get("GROQ_API_KEY", "").strip()
     required = os.environ.get("GROQ_AI_COMMENTARY_REQUIRED", "false").strip().lower() == "true"
     if not api_key:
+        if required:
+            raise RuntimeError("GROQ_API_KEY is required for the configured AI market interpretation.")
         print("[Groq commentary] No GROQ_API_KEY; using deterministic report narrative.")
         return None
 

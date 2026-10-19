@@ -1,6 +1,7 @@
 import csv
 import tempfile
 import unittest
+from contextlib import contextmanager
 from pathlib import Path
 
 import client_doc_report
@@ -8,6 +9,20 @@ from report_builder import build_xlsx_from_data
 from market_analysis import build_summary
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+@contextmanager
+def temporary_working_directory():
+    """Restore cwd before TemporaryDirectory cleanup (required on Windows)."""
+    current_dir = Path.cwd()
+    with tempfile.TemporaryDirectory() as td:
+        try:
+            Path(td).resolve()
+            import os
+            os.chdir(td)
+            yield
+        finally:
+            os.chdir(current_dir)
 
 
 class ClientDocReportTests(unittest.TestCase):
@@ -185,15 +200,15 @@ class ClientDocReportTests(unittest.TestCase):
         import json
         import os
 
-        current_dir = Path.cwd()
-        try:
-            with tempfile.TemporaryDirectory() as td:
-                os.chdir(td)
+        with temporary_working_directory():
                 url = "https://docs.google.com/document/d/fresh-weekly-doc/edit"
                 Path("google_doc_url.txt").write_text(url + chr(10), encoding="utf-8")
                 Path("google_doc_publication.json").write_text(json.dumps({
                     "publication_status": "new_weekly_document_created",
                     "created_new_document": True,
+                    "content_verified": True,
+                    "client_access_granted": True,
+                    "ai_commentary_verified": True,
                     "url": url,
                 }), encoding="utf-8")
                 result = client_doc_report._use_fresh_service_account_doc()
@@ -202,8 +217,6 @@ class ClientDocReportTests(unittest.TestCase):
                 verification = json.loads(Path("google_doc_verification.json").read_text(encoding="utf-8"))
                 self.assertEqual(verification["publication_status"], "fresh_service_account_weekly_doc_used")
                 self.assertTrue(verification["document_is_current_run"])
-        finally:
-            os.chdir(current_dir)
 
     def test_revoked_oauth_token_falls_back_to_fresh_service_account_doc(self):
         import json
@@ -220,15 +233,15 @@ class ClientDocReportTests(unittest.TestCase):
             )
         )
 
-        current_dir = Path.cwd()
-        try:
-            with tempfile.TemporaryDirectory() as td:
-                os.chdir(td)
+        with temporary_working_directory():
                 fallback_url = "https://docs.google.com/document/d/layer3-report-id/edit"
                 Path("google_doc_url.txt").write_text(fallback_url + chr(10), encoding="utf-8")
                 Path("google_doc_publication.json").write_text(json.dumps({
                     "publication_status": "new_weekly_document_created",
                     "created_new_document": True,
+                    "content_verified": True,
+                    "client_access_granted": True,
+                    "ai_commentary_verified": True,
                     "url": fallback_url,
                 }), encoding="utf-8")
 
@@ -246,22 +259,15 @@ class ClientDocReportTests(unittest.TestCase):
                 self.assertFalse(verification["client_preferred_doc_created"])
                 self.assertFalse(verification["client_preferred_doc_content_verified"])
                 self.assertIn("GOOGLE_OAUTH_TOKEN_JSON", verification["action_required"])
-        finally:
-            os.chdir(current_dir)
 
     def test_revoked_oauth_token_without_fallback_doc_fails_with_clear_action(self):
         import os
         from google.auth.exceptions import RefreshError
 
-        current_dir = Path.cwd()
         error = RefreshError("invalid_grant: Token has been expired or revoked.")
-        try:
-            with tempfile.TemporaryDirectory() as td:
-                os.chdir(td)
-                with self.assertRaisesRegex(RuntimeError, "no verified service-account weekly document"):
-                    client_doc_report._fallback_to_fresh_service_account_doc(error)
-        finally:
-            os.chdir(current_dir)
+        with temporary_working_directory():
+            with self.assertRaisesRegex(RuntimeError, "no verified service-account weekly document"):
+                client_doc_report._fallback_to_fresh_service_account_doc(error)
 
 
     def test_revoked_oauth_without_fresh_doc_records_docx_attachment_fallback(self):
@@ -269,11 +275,8 @@ class ClientDocReportTests(unittest.TestCase):
         import os
         from google.auth.exceptions import RefreshError
 
-        current_dir = Path.cwd()
         error = RefreshError("invalid_grant: Token has been expired or revoked.")
-        try:
-            with tempfile.TemporaryDirectory() as td:
-                os.chdir(td)
+        with temporary_working_directory():
                 docx = Path("Lagos_Property_Market_Snapshot_2026-10-13.docx")
                 docx.write_bytes(b"test docx payload")
                 marker = client_doc_report._write_docx_attachment_fallback(error, docx)
@@ -291,17 +294,12 @@ class ClientDocReportTests(unittest.TestCase):
                 )
                 self.assertFalse(verification["google_doc_created"])
                 self.assertEqual(verification["docx_attachment"], docx.name)
-        finally:
-            os.chdir(current_dir)
 
     def test_incomplete_oauth_configuration_also_records_docx_fallback(self):
         import json
         import os
 
-        current_dir = Path.cwd()
-        try:
-            with tempfile.TemporaryDirectory() as td:
-                os.chdir(td)
+        with temporary_working_directory():
                 docx = Path("Lagos_Property_Market_Snapshot_2026-10-14.docx")
                 docx.write_bytes(b"test docx payload")
                 error = RuntimeError(
@@ -318,8 +316,6 @@ class ClientDocReportTests(unittest.TestCase):
                 )
                 self.assertEqual(verification["oauth_error_type"], "RuntimeError")
                 self.assertEqual(verification["docx_attachment"], docx.name)
-        finally:
-            os.chdir(current_dir)
 
 
 

@@ -33,6 +33,7 @@ math in _fill_table() is where to look.
 from __future__ import annotations
 import json, os, sys
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 from pathlib import Path
 
 from market_analysis import fmt_naira
@@ -71,7 +72,7 @@ def report_text(summary):
 
     lines = [
         "LAGOS & ABUJA PROPERTY MARKET — WEEKLY INTELLIGENCE REPORT",
-        datetime.now(timezone.utc).strftime("%d %B %Y"), "",
+        datetime.now(ZoneInfo("Africa/Lagos")).strftime("%d %B %Y"), "",
         "1. EXECUTIVE DECISION BRIEF",
         f"Listings tracked: {summary['listings_tracked']}",
         f"Areas monitored: {summary['areas_monitored']}",
@@ -114,6 +115,13 @@ def report_text(summary):
     lines += ["", "6. RECOMMENDED ACTIONS",
         "• Use relative pricing and weekly movement to prioritise negotiations and areas for deeper diligence. Thinly sampled areas should be treated as watchlist signals, not definitive market indices.",
         "• Prices are asking prices, not confirmed closed transactions. Estate Intel is public research only; premium/login-gated content is not collected or bypassed."]
+    ai = summary.get("ai_commentary") or {}
+    if ai:
+        lines += ["", "7. AI MARKET INTERPRETATION", ai.get("executive_takeaway", "")]
+        for section, label in (("key_findings", "Key findings"), ("business_implications", "Business implications"), ("recommended_actions", "Recommended actions"), ("limitations", "AI limitations")):
+            values = [str(x).strip() for x in ai.get(section, []) if str(x).strip()]
+            if values:
+                lines += [label + ":"] + ["• " + x for x in values]
     return "\n".join(lines)
 
 
@@ -188,8 +196,7 @@ def _fill_table(docs, doc_id, summary):
             break
 
     if placeholder_start is None:
-        print("Table placeholder not found — skipping table formatting (scorecard stays as plain text).")
-        return
+        raise RuntimeError("Area scorecard table placeholder was not found in the Google Doc.")
 
     scorecard = [x for x in summary["scorecard"] if x["listing_count"]]
     headers = ["Area", "Listings", "3BR Sale", "3BR Rent", "Sale ₦/sqm", "Land ₦/sqm"]
@@ -223,8 +230,7 @@ def _fill_table(docs, doc_id, summary):
     body = doc.get("body", {}).get("content", [])
     table_el = next((el for el in body if el.get("table") and el["startIndex"] >= placeholder_start - 5), None)
     if not table_el:
-        print("Could not locate the inserted table after creation — scorecard left without a table.")
-        return
+        raise RuntimeError("Google Docs API did not return the inserted scorecard table.")
 
     cell_starts = []  # list of (row, col, startIndex) — the index just inside each cell's first paragraph
     for r_idx, row in enumerate(table_el["table"]["tableRows"]):
@@ -301,24 +307,55 @@ def publish(summary, output_docx=None):
         requests += _format_requests(text)
         docs.documents().batchUpdate(documentId=doc_id, body={"requests": requests}).execute()
 
-    try:
-        _fill_table(docs, doc_id, summary)
-    except Exception as exc:
-        # Table formatting is a visual nicety, not core content — don't
-        # let it break the whole publish if something about the live
-        # document structure doesn't match what was expected here.
-        print(f"Table formatting failed, scorecard left as plain text: {exc}")
+    _fill_table(docs, doc_id, summary)
 
     recipients = []
     for key in ("REPORT_CLIENT_EMAIL", "REPORT_TO_EMAIL"):
         recipients += [x.strip() for x in os.environ.get(key, "").split(",") if "@" in x]
+    client_email = os.environ.get("REPORT_CLIENT_EMAIL", "").strip()
+    if not client_email:
+        raise RuntimeError("REPORT_CLIENT_EMAIL is required to grant the client access to the Google Doc.")
+    existing_permissions = drive.permissions().list(fileId=doc_id, fields="permissions(emailAddress,role,type)").execute().get("permissions", [])
+    already_shared = any(p.get("type") == "user" and p.get("role") in ("reader", "writer", "owner") and p.get("emailAddress", "").lower() == client_email.lower() for p in existing_permissions)
+    shared = {client_email.lower()} if already_shared else set()
     for email in dict.fromkeys(recipients):
+        if email.lower() in shared:
+            continue
         try:
             drive.permissions().create(fileId=doc_id, body={"type": "user", "role": "reader", "emailAddress": email}, sendNotificationEmail=True).execute()
+            shared.add(email.lower())
         except HttpError as exc:
             if email.lower() == os.environ.get("REPORT_CLIENT_EMAIL", "").strip().lower():
                 raise RuntimeError(f"Could not grant the client access to the fresh weekly Google Doc: {exc}") from exc
             print(f"Google Doc sharing skipped for {email}: {exc}")
+
+    if client_email.lower() not in shared:
+        # Existing viewer permission is an acceptable successful state; verify it explicitly.
+        permissions = drive.permissions().list(fileId=doc_id, fields="permissions(emailAddress,role,type)").execute().get("permissions", [])
+        if not any(p.get("type") == "user" and p.get("role") in ("reader", "writer", "owner") and p.get("emailAddress", "").lower() == client_email.lower() for p in permissions):
+            raise RuntimeError("Google Doc was published but client viewer access could not be verified.")
+
+    published = docs.documents().get(documentId=doc_id).execute()
+    def walk(elements):
+        out = []
+        for el in elements or []:
+            if "paragraph" in el:
+                out.extend(r.get("textRun", {}).get("content", "") for r in el["paragraph"].get("elements", []))
+            if "table" in el:
+                for row in el["table"].get("tableRows", []):
+                    for cell in row.get("tableCells", []):
+                        out.extend(walk(cell.get("content", [])))
+        return out
+    body_text = "".join(walk(published.get("body", {}).get("content", [])))
+    required_text = ["EXECUTIVE DECISION BRIEF", "AREA SCORECARD", "RECOMMENDED ACTIONS"]
+    if any(token not in body_text for token in required_text) or "[[TABLE:" in body_text:
+        raise RuntimeError("Google Doc read-back did not contain all required report sections or retained a placeholder.")
+    expected_ai = (summary.get("ai_commentary") or {}).get("executive_takeaway", "").strip()
+    if expected_ai and expected_ai not in body_text:
+        raise RuntimeError("Google Doc read-back is missing the AI executive interpretation.")
+    table_count = sum(1 for el in published.get("body", {}).get("content", []) if el.get("table"))
+    if table_count < 1:
+        raise RuntimeError("Google Doc read-back is missing the scorecard table.")
 
     url = f"https://docs.google.com/document/d/{doc_id}/edit"
     Path("google_doc_url.txt").write_text(url + "\n", encoding="utf-8")
@@ -331,6 +368,10 @@ def publish(summary, output_docx=None):
         "target_folder_id": folder_id or None,
         "created_in_target_folder": created_in_folder,
         "title": title,
+        "content_verified": True,
+        "ai_commentary_verified": bool(expected_ai),
+        "client_access_granted": True,
+        "verified_at_utc": datetime.now(timezone.utc).isoformat(),
     }
     Path("google_doc_publication.json").write_text(
         json.dumps(publication, indent=2, ensure_ascii=False) + "\n",

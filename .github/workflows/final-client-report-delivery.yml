@@ -33,14 +33,16 @@ jobs:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
           GOOGLE_WEEKLY_REPORT_FOLDER_ID: "1pwAwektfnA52XkHzTIDkLGLHG0q_R1t3"
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GROQ_MODEL: "qwen/qwen3.8-27b"
+          GROQ_AI_COMMENTARY_ENABLED: "true"
+          GROQ_AI_COMMENTARY_REQUIRED: "true"
           MAILJET_API_KEY: ${{ secrets.MAILJET_API_KEY }}
           MAILJET_SECRET_KEY: ${{ secrets.MAILJET_SECRET_KEY }}
           MAILJET_FROM_EMAIL: ${{ secrets.MAILJET_FROM_EMAIL }}
           MAILJET_FROM_NAME: ${{ secrets.MAILJET_FROM_NAME }}
           REPORT_CLIENT_EMAIL: ${{ secrets.REPORT_CLIENT_EMAIL }}
           REPORT_TO_EMAIL: ${{ secrets.REPORT_TO_EMAIL }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          ANTHROPIC_MODEL: "claude-haiku-4-5-20251001"
           SUPPRESS_REPORT_NOTIFICATION_EMAIL: "1"
           DEFER_DOCX_EMAIL: "1"
           GITHUB_RUN_ID: ${{ github.run_id }}
@@ -55,10 +57,11 @@ jobs:
 
           CURRENT="$CURR" python - <<'PY'
           import csv, os
-          from datetime import date, timedelta
+          from datetime import datetime, date
+          from zoneinfo import ZoneInfo
 
           current = os.environ["CURRENT"]
-          today = date.today()
+          today = datetime.now(ZoneInfo("Africa/Lagos")).date()
           with open(current, newline="", encoding="utf-8-sig") as f:
               rows = list(csv.DictReader(f))
           if not rows:
@@ -103,23 +106,41 @@ jobs:
           XLSX=$(ls -t market_intelligence_*.xlsx | head -n 1)
           test -n "$XLSX" && test -s "$XLSX"
           test -s market_intelligence.json
-          # This report-only workflow must not compete with the scheduled scan
-          # for live Sheet writes. weekly-scan.yml owns the live Sheet refresh.
-          printf '{"status":"not_attempted","note":"The scheduled weekly scan is the authoritative live Google Sheet updater; the attached XLSX is the current report workbook."}\n' > google_sheet_update_status.json
-          # OAuth refresh tokens can expire or be revoked. Create a fresh
-          # service-account document first as a verified fallback; publication
-          # is best-effort so the final DOCX/email can still be delivered.
+          python - <<'PY'
+          import json
+          data = json.load(open("market_intelligence.json", encoding="utf-8"))
+          ai = data.get("summary", {}).get("ai_commentary") or {}
+          if not ai.get("executive_takeaway") or not ai.get("key_findings") or not ai.get("recommended_actions"):
+              raise SystemExit("Required AI market interpretation is missing or incomplete.")
+          print("Required AI interpretation is embedded in the report data.")
+          PY
+          test -n "$GOOGLE_SERVICE_ACCOUNT_JSON" || { echo "GOOGLE_SERVICE_ACCOUNT_JSON is required."; exit 1; }
+          test -n "$GOOGLE_SHEET_ID" || { echo "GOOGLE_SHEET_ID is required."; exit 1; }
+          XLSX=$(ls -t market_intelligence_*.xlsx | head -n 1)
+          python sheets_writer.py "$CURR" "${CHANGES:-none}" "${RESEARCH:-none}" "$XLSX"
+          XLSX="$XLSX" python - <<'PY'
+          import json, os
+          from datetime import datetime, timezone
+          json.dump({"status":"success","workbook":os.environ["XLSX"],"updated_at_utc":datetime.now(timezone.utc).isoformat()}, open("google_sheet_update_status.json","w",encoding="utf-8"), indent=2)
+          PY
+          # OAuth is the primary human-owned Drive route. Prepare the verified
+          # service-account document only as fallback if OAuth publication fails.
           if [ -n "$GOOGLE_SERVICE_ACCOUNT_JSON" ]; then
             if GOOGLE_CREATE_WEEKLY_DOC="true" python docs_writer.py market_intelligence.json; then
-              echo "Fresh service-account Google Doc created for OAuth fallback."
+              echo "Verified service-account Google Doc fallback is ready."
             else
-              echo "::warning::Service-account Google Doc fallback could not be created; the workflow will use the enhanced DOCX attachment fallback if OAuth also fails."
+              echo "::warning::Service-account fallback unavailable; OAuth publication must succeed."
               rm -f google_doc_url.txt google_doc_publication.json
             fi
-          else
-            echo "::warning::GOOGLE_SERVICE_ACCOUNT_JSON is not configured; Google Docs publication depends on OAuth or DOCX fallback."
           fi
           python client_doc_report.py "$CURR" "${RESEARCH:-none}" "${CHANGES:-none}"
+          python - <<'PY'
+          import json
+          v=json.load(open("google_doc_verification.json",encoding="utf-8"))
+          assert v.get("content_verified") is True and v.get("ai_commentary_verified") is True and v.get("client_access_granted") is True, v
+          assert v.get("publication_status") != "docx_attachment_fallback_no_google_doc", v
+          print("Final client document verified before email delivery.")
+          PY
           DOCX=$(ls -t Lagos_Property_Market_Snapshot_*.docx | head -n 1)
           test -n "$DOCX" && test -s "$DOCX"
           python enhance_client_report.py "$CURR" "$DOCX"
@@ -137,11 +158,10 @@ jobs:
           print("Final enhanced DOCX accepted by Mailjet with message-level success.")
           verification = json.load(open("google_doc_verification.json", encoding="utf-8"))
           status = verification.get("publication_status", "")
-          if status == "docx_attachment_fallback_no_google_doc":
-              print("Google Doc: NOT PUBLISHED; the final enhanced DOCX was emailed as an attachment.")
-          else:
-              print("Google Doc publication record:", status)
-          print("The enhanced Word attachment is the authoritative final document.")
+          assert status != "docx_attachment_fallback_no_google_doc", verification
+          assert verification.get("content_verified") and verification.get("ai_commentary_verified") and verification.get("client_access_granted"), verification
+          print("Verified Google Doc publication:", status)
+          print("The live Google Sheet and verified Google Doc accompany the enhanced Word report.")
           PY
 
       - name: Upload final client deliverables

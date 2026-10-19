@@ -16,12 +16,18 @@ def main():
     client = os.environ.get("REPORT_CLIENT_EMAIL", "").strip()
     internal = os.environ.get("REPORT_TO_EMAIL", "").strip()
     sheet_id = os.environ.get("GOOGLE_SHEET_ID", "").strip()
+    doc_url_path = Path("client_doc_url.txt")
     if not valid_email(client):
         raise SystemExit("REPORT_CLIENT_EMAIL is missing or malformed.")
     if not valid_email(internal):
         raise SystemExit("REPORT_TO_EMAIL is missing or malformed.")
     if not sheet_id:
         raise SystemExit("GOOGLE_SHEET_ID is required to include the spreadsheet link.")
+    if not doc_url_path.is_file():
+        raise SystemExit("Verified client_doc_url.txt is required to include the Google Doc link.")
+    doc_url = doc_url_path.read_text(encoding="utf-8").strip()
+    if not doc_url.startswith("https://docs.google.com/document/d/"):
+        raise SystemExit("client_doc_url.txt does not contain a valid Google Doc URL.")
     mime = mimetypes.guess_type(path.name)[0] or "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     sheet_url = "https://docs.google.com/spreadsheets/d/" + sheet_id + "/edit"
     sheet_status = {"status": "not_verified"}
@@ -58,6 +64,7 @@ def main():
             "The Word report includes sample-size notes, land plot-size/price-per-sqm analysis where available, and a data-quality exception review. "
             "Asking prices are not completed transaction prices. Please use original listing links to verify material figures.\n\n"
             f"Spreadsheet/dashboard ({sheet_status.get('status', 'not_verified')} this run): {sheet_url}\n"
+            f"Google Doc: {doc_url}\n"
             "The attached Excel workbook is the authoritative snapshot if the live sheet update was not verified.\n"
             "Reporting schedule: Monday at 08:00 Africa/Lagos. Provider acceptance is recorded "
             "in the run audit; it does not prove inbox placement or reading."
@@ -68,6 +75,7 @@ def main():
             "<p><b>Important:</b> asking prices are not completed transaction prices. Verify "
             "material figures against original listing links.</p>"
             f'<p><a href="{sheet_url}">Open the spreadsheet and dashboard (update status: {sheet_status.get("status", "not_verified")})</a></p>'
+            f'<p><a href="{doc_url}">Open the client Google Doc</a></p>'
             "<p>The attached Excel workbook is the authoritative snapshot if the live sheet update was not verified this run.</p>"
             "<p>Reporting schedule: Monday at 08:00 Africa/Lagos. Provider acceptance is recorded "
             "in the run audit; it does not prove inbox placement or reading.</p>"

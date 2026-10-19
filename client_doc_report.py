@@ -1642,7 +1642,7 @@ def _google_doc_text_and_styles(document):
     return "".join(texts), styles
 
 
-def verify_google_doc(docs, doc_id, listings, summary, research=None):
+def verify_google_doc(docs, drive, doc_id, listings, summary, research=None):
     """Fail closed if the published Google Doc does not match the same
     validated snapshot used to build the report."""
     document = docs.documents().get(documentId=doc_id).execute()
@@ -1666,6 +1666,31 @@ def verify_google_doc(docs, doc_id, listings, summary, research=None):
         missing.append("unresolved table placeholder")
     if missing:
         raise RuntimeError("Google Doc content verification failed: " + "; ".join(missing))
+
+    ai = summary.get("ai_commentary") or {}
+    ai_takeaway = str(ai.get("executive_takeaway") or "").strip()
+    if not ai_takeaway or ai_takeaway not in text:
+        raise RuntimeError("Google Doc content verification failed: AI executive interpretation is missing.")
+    for section in ("key_findings", "business_implications", "recommended_actions"):
+        values = [str(value).strip() for value in ai.get(section, []) if str(value).strip()]
+        if not values or any(value not in text for value in values):
+            raise RuntimeError(f"Google Doc content verification failed: AI {section.replace('_', ' ')} are missing.")
+
+    client_email = os.environ.get("REPORT_CLIENT_EMAIL", "").strip()
+    if not client_email or "@" not in client_email:
+        raise RuntimeError("REPORT_CLIENT_EMAIL is required to verify client access to the Google Doc.")
+    permissions = drive.permissions().list(
+        fileId=doc_id,
+        fields="permissions(emailAddress,role,type)",
+    ).execute().get("permissions", [])
+    client_access = any(
+        permission.get("type") == "user"
+        and permission.get("role") in ("reader", "writer", "owner")
+        and permission.get("emailAddress", "").lower() == client_email.lower()
+        for permission in permissions
+    )
+    if not client_access:
+        raise RuntimeError("Google Doc content is published, but client viewer access could not be verified.")
 
     expected_rows = []
     for node in LAGOS_NODES + ABUJA_NODES:
@@ -1729,6 +1754,8 @@ def verify_google_doc(docs, doc_id, listings, summary, research=None):
                 "validated_listing_rows": len(clean_rows(listings)),
                 "expected_table_rows": len(expected_rows),
                 "content_verified": True,
+                "ai_commentary_verified": True,
+                "client_access_granted": True,
                 "typography_verified": True,
             },
             indent=2,
@@ -2494,14 +2521,6 @@ def publish_google_doc(
             },
         ).execute()
 
-    verify_google_doc(
-        docs,
-        doc_id,
-        listings,
-        summary,
-        research=research,
-    )
-
     recipients = []
 
     for key in (
@@ -2530,10 +2549,18 @@ def publish_google_doc(
             ).execute()
 
         except HttpError as exc:
-            print(
-                f"Warning: document created, but sharing "
-                f"with {email} failed: {exc}"
-            )
+            if email.lower() == os.environ.get("REPORT_CLIENT_EMAIL", "").strip().lower():
+                raise RuntimeError(f"Could not grant client access to the Google Doc: {exc}") from exc
+            print(f"Warning: document created, but sharing with {email} failed: {exc}")
+
+    verify_google_doc(
+        docs,
+        drive,
+        doc_id,
+        listings,
+        summary,
+        research=research,
+    )
 
     url = (
         created.get("webViewLink")
@@ -2630,6 +2657,8 @@ def _use_fresh_service_account_doc():
         raise RuntimeError("Refusing to use a stale Google Doc; this run did not create a new weekly document.")
     if url != str(publication.get("url") or "").strip() or not url.startswith("https://docs.google.com/document/d/"):
         raise RuntimeError("The service-account Google Doc URL does not match its publication record.")
+    if not publication.get("content_verified") or not publication.get("ai_commentary_verified") or not publication.get("client_access_granted"):
+        raise RuntimeError("The service-account Google Doc content, AI commentary, or client access was not verified.")
     Path("client_doc_url.txt").write_text(url + chr(10), encoding="utf-8")
     verification = {
         "verified_at_utc": datetime.now(timezone.utc).isoformat(),
@@ -2637,6 +2666,9 @@ def _use_fresh_service_account_doc():
         "document_is_current_run": True,
         "client_preferred_doc_created": False,
         "client_preferred_doc_content_verified": False,
+        "content_verified": True,
+        "ai_commentary_verified": bool(publication.get("ai_commentary_verified")),
+        "client_access_granted": True,
         "fallback_document_url": url,
         "fallback_source": "docs_writer.py (fresh weekly document created in this run)",
         "publication_record": "google_doc_publication.json",
@@ -2677,6 +2709,8 @@ def _fallback_to_fresh_service_account_doc(oauth_error):
         raise RuntimeError("The service-account weekly document publication record is invalid.") from exc
     if publication.get("publication_status") != "new_weekly_document_created" or not publication.get("created_new_document"):
         raise RuntimeError("Refusing to send a stale Google Doc: this run did not create a new weekly document.") from oauth_error
+    if not publication.get("content_verified") or not publication.get("ai_commentary_verified") or not publication.get("client_access_granted"):
+        raise RuntimeError("Refusing to use the service-account Google Doc because content, AI commentary, or client access was not verified.") from oauth_error
 
     url = source.read_text(encoding="utf-8").strip()
     if url != str(publication.get("url") or "").strip():
@@ -2697,6 +2731,9 @@ def _fallback_to_fresh_service_account_doc(oauth_error):
         "publication_record": "google_doc_publication.json",
         "client_preferred_doc_created": False,
         "client_preferred_doc_content_verified": False,
+        "content_verified": True,
+        "ai_commentary_verified": bool(publication.get("ai_commentary_verified")),
+        "client_access_granted": True,
         "fallback_document_url": url,
         "fallback_source": "docs_writer.py (fresh service-account document created in this workflow run)",
         "oauth_error": "invalid_grant: OAuth refresh token expired or revoked",
