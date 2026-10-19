@@ -58,6 +58,31 @@ def _load_inputs(listings_path,changes_path="none",research_path=None):
         }
     except (OSError, json.JSONDecodeError):
         summary["data_quality"] = {}
+    # Refresh the Knight Frank row from the current public-page audit, so this source
+    # never appears as a blank or silently "active" listing feed.
+    try:
+        audit = json.loads(Path("knight_frank_research_status.json").read_text(encoding="utf-8"))
+        for source_row in SUPPLEMENTAL_SOURCE_ASSESSMENTS:
+            if source_row.get("Source") == "Knight Frank Nigeria":
+                status = audit.get("status", "not_checked")
+                source_row["Assessment"] = (
+                    f"Public-page check: {status}; HTTP {audit.get('http_status')}; "
+                    f"latest publication: {audit.get('latest_publication', 'not confirmed')}."
+                )
+                source_row["Use in report"] = (
+                    "Contextual market research only. This is not a live listing feed and is never "
+                    "blended into listing-level asking-price medians."
+                )
+                source_row["Next step / limitation"] = audit.get(
+                    "limitations",
+                    "Download/report figures are not extracted unless publicly accessible without bypassing access controls."
+                )
+    except (OSError, json.JSONDecodeError):
+        # A missing audit is visible rather than represented as a successful check.
+        for source_row in SUPPLEMENTAL_SOURCE_ASSESSMENTS:
+            if source_row.get("Source") == "Knight Frank Nigeria":
+                source_row["Assessment"] = "Public-page check did not produce an audit file in this run."
+                source_row["Next step / limitation"] = "Run knight_frank_research.py; do not treat this source as an active listing feed."
     research_sources={"Estate Intel"} if research else set()
     if research_sources:
         summary["sources"]=len(set(summary.get("source_names",[])) | research_sources)
