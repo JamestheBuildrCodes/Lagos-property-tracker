@@ -107,7 +107,7 @@ def build_propertypro(rows: list[ManifestEntry]) -> None:
                     bedroom, transaction, url,
                     "One real category URL serves 1-5BR; bedroom is classified from listing text.",
                 ))
-        land = f"{PROPERTYPRO}/property-for-sale/land/residential-land/in/{market.lower()}/{pp_path}"
+        land = f"{PROPERTYPRO}/property-for-sale/land/residential-land/in/{region_slug}/{pp_path}"
         rows.append(entry(
             "PropertyPro.ng", market, node, "land_sale", "land", None, "land_sale",
             land, "Residential-land category; size and asking price are extracted from listing cards.",
