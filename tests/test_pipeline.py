@@ -19,11 +19,18 @@ class PipelineTests(unittest.TestCase):
             subprocess.run([sys.executable, "discover_sources.py"], cwd=ROOT, check=True)
         payload = json.loads((ROOT / "data" / "source_manifest.json").read_text())
         entries = payload["entries"]
-        self.assertEqual(len(entries), 207)
+        self.assertEqual(len(entries), 229)
         self.assertEqual({e["source"] for e in entries},
                          {"PropertyPro.ng", "Nigeria Property Centre", "Estate Intel"})
         self.assertTrue(all(e["verified"] for e in entries))
         self.assertTrue(all(e["url"].startswith("https://") for e in entries))
+
+    def test_port_harcourt_is_in_manifest_for_both_listing_sources(self):
+        payload = json.loads((ROOT / "data" / "source_manifest.json").read_text())
+        rows = [e for e in payload["entries"] if e["market"] == "Port Harcourt"]
+        self.assertEqual({e["source"] for e in rows}, {"PropertyPro.ng", "Nigeria Property Centre"})
+        self.assertTrue(all("port-harcourt" in e["url"].lower() for e in rows))
+        self.assertTrue(any(e["category"] == "land_sale" for e in rows))
 
     def test_no_bedroom_specific_urls(self):
         payload = json.loads((ROOT / "data" / "source_manifest.json").read_text())
@@ -186,7 +193,7 @@ class ReportingTests(unittest.TestCase):
 
 
 class EstateIntelSecurityTests(unittest.TestCase):
-    def test_all_nine_canonical_nodes_are_defined(self):
+    def test_all_ten_canonical_nodes_are_defined(self):
         validator = Path("validate_market_output.py").read_text()
         expected = [
             "Banana Island",
@@ -198,6 +205,7 @@ class EstateIntelSecurityTests(unittest.TestCase):
             "Asokoro",
             "Maitama",
             "Wuse",
+            "Port Harcourt",
         ]
         for node in expected:
             self.assertIn(f'"{node}"', validator)

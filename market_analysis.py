@@ -14,13 +14,14 @@ from urllib.parse import urlparse
 
 NODES = [
     "Banana Island", "Old Ikoyi", "Lekki Phase 1", "Victoria Island",
-    "Eko Atlantic", "Ikeja GRA", "Asokoro", "Maitama", "Wuse",
+    "Eko Atlantic", "Ikeja GRA", "Asokoro", "Maitama", "Wuse", "Port Harcourt",
 ]
 NODE_SLUGS = {
     "Banana Island": "banana-island", "Old Ikoyi": "old-ikoyi",
     "Lekki Phase 1": "lekki-phase-1", "Victoria Island": "victoria-island",
     "Eko Atlantic": "eko-atlantic", "Ikeja GRA": "ikeja-gra",
     "Asokoro": "asokoro", "Maitama": "maitama", "Wuse": "wuse",
+    "Port Harcourt": "port-harcourt",
 }
 NODE_URL_PATTERNS = {
     "Banana Island": ("banana-island",),
@@ -32,6 +33,7 @@ NODE_URL_PATTERNS = {
     "Asokoro": ("asokoro",),
     "Maitama": ("maitama",),
     "Wuse": ("wuse",),
+    "Port Harcourt": ("port-harcourt",),
 }
 
 
@@ -89,6 +91,7 @@ def normalize_node(value):
         "Ikoyi - Banana Island": "Banana Island", "Ikoyi - Old Ikoyi": "Old Ikoyi",
         "Lekki - Lekki Phase 1": "Lekki Phase 1", "Ikeja - Ikeja GRA": "Ikeja GRA",
         "Abuja - Asokoro": "Asokoro", "Abuja - Maitama": "Maitama", "Abuja - Wuse": "Wuse",
+        "Rivers - Port Harcourt": "Port Harcourt",
     }
     return aliases.get(value, value)
 

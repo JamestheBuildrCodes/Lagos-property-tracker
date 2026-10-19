@@ -76,6 +76,7 @@ NODE_SLUGS = {
     "Asokoro": "asokoro",
     "Maitama": "maitama",
     "Wuse": "wuse",
+    "Port Harcourt": "port-harcourt",
 }
 NODE_URL_PATTERNS = {
     "Banana Island": ("banana-island",),
@@ -87,6 +88,7 @@ NODE_URL_PATTERNS = {
     "Asokoro": ("asokoro",),
     "Maitama": ("maitama",),
     "Wuse": ("wuse",),
+    "Port Harcourt": ("port-harcourt",),
 }
 
 DEFINITIVE_NODE_CONFLICTS = {

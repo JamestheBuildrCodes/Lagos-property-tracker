@@ -166,7 +166,7 @@ class ClientDocReportTests(unittest.TestCase):
         self.assertIn('"Range"', source)
         self.assertIn('"Listings (n)"', source)
 
-    def test_narrative_discloses_missing_port_harcourt_and_estate_intel_context(self):
+    def test_narrative_discloses_port_harcourt_scope_and_estate_intel_context(self):
         from market_analysis import clean_rows
         rows = clean_rows(self.sample_rows())
         summary = build_summary(rows, [], None)
@@ -175,7 +175,8 @@ class ClientDocReportTests(unittest.TestCase):
              "url": "https://estateintel.com/insights/public-example",
              "date_scraped": "2026-09-29", "public_sale_price_ngn": ""}])
         rendered = "\n".join(value for kind, value in narrative if kind != "table")
-        self.assertIn("Port Harcourt is not currently tracked", rendered)
+        self.assertIn("Port Harcourt is now included as a city-wide market node", rendered)
+        self.assertIn("Port Harcourt", rendered)
         self.assertIn("Estate Intel", rendered)
         self.assertIn("commercial arrangement", rendered.lower())
         self.assertIn("08:00 Lagos time", rendered)

@@ -33,6 +33,8 @@ NODES = [
     ("Asokoro", "Abuja", "asokoro", "abuja/asokoro-district"),
     ("Maitama", "Abuja", "maitama", "abuja/maitama-district"),
     ("Wuse", "Abuja", "wuse", "abuja/wuse"),
+    # City-wide Port Harcourt category pages verified on both listing portals.
+    ("Port Harcourt", "Port Harcourt", "port-harcourt", "rivers/port-harcourt"),
 ]
 BEDROOMS = [1, 2, 3, 4, 5]
 
@@ -93,18 +95,19 @@ def entry(source: str, market: str, node: str, category: str,
 
 def build_propertypro(rows: list[ManifestEntry]) -> None:
     for node, market, pp_path, npc_path in NODES:
+        region_slug = "rivers" if market == "Port Harcourt" else market.lower()
         for transaction, tx_path in (
             ("sale", "property-for-sale"),
             ("rent", "property-for-rent"),
         ):
-            url = f"{PROPERTYPRO}/{tx_path}/flat-apartment/in/{market.lower()}/{pp_path}"
+            url = f"{PROPERTYPRO}/{tx_path}/flat-apartment/in/{region_slug}/{pp_path}"
             for bedroom in BEDROOMS:
                 rows.append(entry(
                     "PropertyPro.ng", market, node, transaction, "flat_apartment",
                     bedroom, transaction, url,
                     "One real category URL serves 1-5BR; bedroom is classified from listing text.",
                 ))
-        land = f"{PROPERTYPRO}/property-for-sale/land/residential-land/in/{market.lower()}/{pp_path}"
+        land = f"{PROPERTYPRO}/property-for-sale/land/residential-land/in/{region_slug}/{pp_path}"
         rows.append(entry(
             "PropertyPro.ng", market, node, "land_sale", "land", None, "land_sale",
             land, "Residential-land category; size and asking price are extracted from listing cards.",
@@ -185,8 +188,8 @@ def main() -> None:
     for source in ("PropertyPro.ng", "Nigeria Property Centre", "Estate Intel"):
         source_rows = [x for x in output if x["source"] == source]
         print(f"  {source}: {len(source_rows)} canonical entries")
-    if len(output) != 207:
-        raise SystemExit(f"Manifest invariant failed: expected 207 entries, got {len(output)}")
+    if len(output) != 229:
+        raise SystemExit(f"Manifest invariant failed: expected 229 entries, got {len(output)}")
 
 
 if __name__ == "__main__":

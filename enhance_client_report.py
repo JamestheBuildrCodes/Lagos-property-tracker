@@ -25,7 +25,7 @@ from market_analysis import clean_rows, fnum, normalize_node, transaction_label,
 
 NODES = [
     "Banana Island", "Old Ikoyi", "Lekki Phase 1", "Victoria Island",
-    "Eko Atlantic", "Ikeja GRA", "Asokoro", "Maitama", "Wuse",
+    "Eko Atlantic", "Ikeja GRA", "Asokoro", "Maitama", "Wuse", "Port Harcourt",
 ]
 MIN_CHART_SAMPLE = 3
 
@@ -263,7 +263,7 @@ def ai_commentary(summary):
         "category_samples": summary["category_samples"],
         "quality_findings": summary["quality_findings"][:25],
         "coverage_notes": [
-            "The tracker currently covers six Lagos nodes and three Abuja nodes.",
+            "The tracker covers six Lagos nodes, three Abuja nodes, and a city-wide Port Harcourt node.",
             "Institutional research is contextual and is not mixed into listing-level medians.",
             "Do not invent trends, closed prices, yields, forecasts, causes, or unprovided facts.",
             "State sample sizes and uncertainty; recommend checking original listing links.",
@@ -358,7 +358,7 @@ def append_section(docx_path, rows, findings, charts, commentary, audit_path):
         "Cushman & Wakefield Nigeria/Lagos residential comparable coverage has not been verified. Do not present unrelated global or data-centre research as residential evidence.",
         "The status of any Estate Intel paid/commercial arrangement is unconfirmed and must be confirmed directly with the account owner/vendor.",
         "Additional feeds to validate for a future release: PrivateProperty.ng, Jiji.ng, Apartments.ng, NaijaProperty.com and Land.ng. They are not counted as active sources or blended into statistics until listing URLs, transaction type, rent period, location evidence, freshness and duplicates pass the same quality gate.",
-        "Current tracked location coverage: six Lagos nodes (Banana Island, Old Ikoyi, Lekki Phase 1, Victoria Island, Eko Atlantic, Ikeja GRA) and three Abuja nodes (Asokoro, Maitama, Wuse). Port Harcourt is not yet included in this client report's equivalent node-level series.",
+        "Current tracked location coverage: six Lagos nodes (Banana Island, Old Ikoyi, Lekki Phase 1, Victoria Island, Eko Atlantic, Ikeja GRA), three Abuja nodes (Asokoro, Maitama, Wuse), and one city-wide Port Harcourt node. Port Harcourt is city-wide coverage, not yet split into neighbourhood-level submarkets.",
         "One listing is an observation, not a meaningful range or stable median. Samples below five should be treated as thin. Listing prices are asking prices, not completed transaction prices.",
         "Reporting schedule: Monday 08:00 Africa/Lagos. A configured schedule is not proof of inbox delivery; provider receipts and actual recipient confirmation must be checked after each run.",
     ]:

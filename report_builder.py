@@ -172,7 +172,7 @@ def build_executive_html_from_summary(s,date=None,doc_url="",sheet_url=""):
     land=sig.get("land_opportunity")
     html_parts=[
       "<!doctype html><html><body style=\"font-family:Arial,sans-serif;color:#172033;line-height:1.55;max-width:760px;margin:0 auto\">",
-      f"<header style=\"padding:24px;background:#0d2340;color:#fff\"><div style=\"font-size:11px;letter-spacing:1.5px\">MASTER BUILDER INC. | MARKET INTELLIGENCE</div><h1 style=\"font-size:26px;line-height:1.2;margin:10px 0 4px\">Lagos &amp; Abuja Property Market</h1><div style=\"font-size:17px\">Weekly Intelligence Brief</div><div style=\"margin-top:8px\">{esc(date)}</div></header>",
+      f"<header style=\"padding:24px;background:#0d2340;color:#fff\"><div style=\"font-size:11px;letter-spacing:1.5px\">MASTER BUILDER INC. | MARKET INTELLIGENCE</div><h1 style=\"font-size:26px;line-height:1.2;margin:10px 0 4px\">Lagos, Abuja &amp; Port Harcourt Property Market</h1><div style=\"font-size:17px\">Weekly Intelligence Brief</div><div style=\"margin-top:8px\">{esc(date)}</div></header>",
       "<main style=\"padding:18px 4px\">",
       "<h2 style=\"font-size:19px\">Executive takeaway</h2>",
       f"<p>{esc(ai_commentary.get('executive_takeaway') or 'This brief separates verified observations from tentative market signals. Use it to decide which listings and locations deserve follow-up, then use the linked property records to verify any material figure before committing funds.')}</p>",
@@ -270,7 +270,7 @@ def build_xlsx_from_data(listings,changes,research,s,output=None):
                 c.alignment=Alignment(vertical="top",wrap_text=True)
         sheet.sheet_view.showGridLines=False
     ws=wb.active; ws.title="Executive Summary"
-    title(ws,"Lagos & Abuja Property Market — Weekly Intelligence Brief")
+    title(ws,"Lagos, Abuja & Port Harcourt Property Market — Weekly Intelligence Brief")
     ws["A2"]=datetime.now(timezone.utc).strftime("%d %B %Y"); ws["A2"].font=Font(italic=True,color=grey)
     ws.append(["Metric","Current","Week-on-week"])
     rows=[("Listings tracked",s["listings_tracked"],"listings"),("Areas monitored",s["areas_monitored"],None),("Sources",s["sources"],None),
@@ -401,7 +401,7 @@ def build_xlsx_from_data(listings,changes,research,s,output=None):
 
     ws=wb.create_sheet("Methodology")
     for row in [["Purpose","Decision-ready property market intelligence"],["Comparable listing sources","Nigeria Property Centre; PropertyPro Nigeria"],["Research sources","Estate Intel public pages; Knight Frank Nigeria H1 2026 research reviewed as context; C&W Nigeria/Lagos-specific feed not yet verified"],
-                ["Freshness","Current listing data targeted to 7 days; weekly refresh"],["Reporting & distribution","Scheduled Mondays at 08:00 Lagos time (07:00 UTC); email is attempted only after quality gates and publication, with provider receipt checked but inbox placement not guaranteed"],["Estate Intel commercial access","Not verifiable from this repository; confirm current agreement/subscription directly with account owner/vendor. Public pages only are used by this pipeline."],["Coverage","9 nodes: Banana Island, Old Ikoyi, Lekki Phase 1, Victoria Island, Eko Atlantic, Ikeja GRA, Asokoro, Maitama, Wuse"],
+                ["Freshness","Current listing data targeted to 7 days; weekly refresh"],["Reporting & distribution","Scheduled Mondays at 08:00 Lagos time (07:00 UTC); email is attempted only after quality gates and publication, with provider receipt checked but inbox placement not guaranteed"],["Estate Intel commercial access","Not verifiable from this repository; confirm current agreement/subscription directly with account owner/vendor. Public pages only are used by this pipeline."],["Coverage","10 nodes: six Lagos, three Abuja, and city-wide Port Harcourt"],
                 ["Assets","Apartment sales/rentals 1–5BR; residential land; Estate Intel public research"],["Pricing","Asking prices; not confirmed closed transactions"],
                 ["Estate Intel","Public research only; premium/login-gated values excluded"],["Transport","NPC direct; PropertyPro and Estate Intel via Zyte browser HTML"],
                 ["History","Available-period directional comparison; labelled six-month only after at least 180 days of coverage"],["Decision use","Executive Summary for decisions; Area Scorecard for comparison; Current Listings for audit"]]: ws.append(row)
@@ -437,11 +437,11 @@ def build_docx_from_data(listings,changes,research,s,output=None):
         from docx.enum.text import WD_ALIGN_PARAGRAPH
         from docx.shared import Inches,Pt
     except ImportError as exc: raise RuntimeError("DOCX reporting requires python-docx.") from exc
-    output=output or f"Lagos_Abuja_Property_Market_Intelligence_{TODAY}.docx"
+    output=output or f"Nigeria_Property_Market_Intelligence_{TODAY}.docx"
     doc=Document(); sec=doc.sections[0]
     sec.top_margin=sec.bottom_margin=Inches(.6); sec.left_margin=sec.right_margin=Inches(.7)
     p=doc.add_paragraph(); p.alignment=WD_ALIGN_PARAGRAPH.CENTER
-    r=p.add_run("LAGOS & ABUJA PROPERTY MARKET\nWEEKLY INTELLIGENCE REPORT"); r.bold=True; r.font.size=Pt(20)
+    r=p.add_run("NIGERIA PROPERTY MARKET\nLAGOS, ABUJA & PORT HARCOURT"); r.bold=True; r.font.size=Pt(20)
     p=doc.add_paragraph(); p.alignment=WD_ALIGN_PARAGRAPH.CENTER; p.add_run(datetime.now(timezone.utc).strftime("%d %B %Y")).italic=True
     doc.add_heading("1. Executive Decision Brief",1)
     t=doc.add_table(rows=1,cols=3); t.style="Light Shading Accent 1"

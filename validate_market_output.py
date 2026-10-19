@@ -18,12 +18,14 @@ NODES = {
     "Asokoro",
     "Maitama",
     "Wuse",
+    "Port Harcourt",
 }
 NODE_SLUGS = {
     "Banana Island": "banana-island", "Old Ikoyi": "old-ikoyi",
     "Lekki Phase 1": "lekki-phase-1", "Victoria Island": "victoria-island",
     "Eko Atlantic": "eko-atlantic", "Ikeja GRA": "ikeja-gra",
     "Asokoro": "asokoro", "Maitama": "maitama", "Wuse": "wuse",
+    "Port Harcourt": "port-harcourt",
 }
 NODE_URL_PATTERNS = {
     "Banana Island": ("banana-island",),
@@ -35,6 +37,7 @@ NODE_URL_PATTERNS = {
     "Asokoro": ("asokoro",),
     "Maitama": ("maitama",),
     "Wuse": ("wuse",),
+    "Port Harcourt": ("port-harcourt",),
 }
 
 
