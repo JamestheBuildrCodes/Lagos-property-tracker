@@ -37,6 +37,9 @@ jobs:
       - name: Build deterministic source manifest
         run: python discover_sources.py
 
+      - name: Audit Knight Frank Nigeria public research page
+        run: python knight_frank_research.py
+
       - name: Validate Python syntax
         run: python -m compileall -q *.py tests
 
