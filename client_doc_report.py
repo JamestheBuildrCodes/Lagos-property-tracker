@@ -2850,35 +2850,37 @@ def main():
         f"DOCX created: {docx_path}"
     )
 
-    try:
-        # docs_writer.py has already created a fresh weekly Google Doc with the
-        # service account. Prefer that same document to avoid duplicate weekly
-        # documents and avoid making delivery depend on a revoked OAuth token.
-        url = _use_fresh_service_account_doc()
-    except Exception as service_doc_error:
-        if os.environ.get("GOOGLE_OAUTH_TOKEN_JSON", "").strip():
+    # The client-preferred document must be created under the human Google
+    # account. Try OAuth first; the service-account document is only a fallback.
+    # Previously this tried the service account first, so a successful analyst
+    # doc silently bypassed OAuth and the client's preferred Google Doc was
+    # never created.
+    oauth_error = None
+    if os.environ.get("GOOGLE_OAUTH_TOKEN_JSON", "").strip():
+        try:
+            _, url = publish_google_doc(
+                listings,
+                summary,
+                research=research,
+            )
+        except Exception as exc:
+            oauth_error = exc
+            print(
+                "WARNING: Human-account Google OAuth publication failed; "
+                f"trying the fresh service-account document fallback: {exc}"
+            )
             try:
-                _, url = publish_google_doc(
-                    listings,
-                    summary,
-                    research=research,
+                url = _fallback_to_fresh_service_account_doc(exc)
+            except RuntimeError as fallback_error:
+                print(
+                    "WARNING: No verified service-account Google Doc is available: "
+                    f"{fallback_error}"
                 )
-            except Exception as oauth_error:
-                try:
-                    url = _fallback_to_fresh_service_account_doc(oauth_error)
-                except RuntimeError as fallback_error:
-                    # This workflow may not have run docs_writer.py, so a fresh
-                    # service-account document is not guaranteed to exist.
-                    # Deliver the generated DOCX rather than fail the whole run.
-                    print(
-                        "WARNING: Could not use a fresh service-account Google Doc: "
-                        f"{fallback_error}"
-                    )
-                    url = _write_docx_attachment_fallback(oauth_error, docx_path)
-        else:
-            # Do not make delivery depend on a live OAuth refresh token. If both
-            # Google Docs publication paths are unavailable, the enhanced DOCX
-            # remains the deliverable and the workflow emails it as an attachment.
+                url = _write_docx_attachment_fallback(exc, docx_path)
+    else:
+        try:
+            url = _use_fresh_service_account_doc()
+        except Exception as service_doc_error:
             print(
                 "WARNING: GOOGLE_OAUTH_TOKEN_JSON is not configured and no fresh "
                 "service-account Google Doc is available; using DOCX attachment fallback."
