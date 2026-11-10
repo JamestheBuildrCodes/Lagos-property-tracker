@@ -45,7 +45,22 @@ ZYTE_BROWSER_HTML = os.environ.get("ZYTE_BROWSER_HTML", "true").lower() == "true
 PAID_SOURCE_FAILURE = threading.Event()
 PAID_SOURCE_BANS: set[str] = set()
 PAID_SOURCE_BANS_LOCK = threading.Lock()
+# Provider account failures are global to this process: once a provider
+# returns an authentication, billing or rate-limit response, stop spending
+# requests against it for the remainder of this scan.
+DISABLED_ALTERNATE_PROVIDERS: set[str] = set()
+DISABLED_ALTERNATE_PROVIDERS_LOCK = threading.Lock()
 MANIFEST = Path("data/source_manifest.json")
+
+
+def _alternate_provider_disabled(provider: str) -> bool:
+    with DISABLED_ALTERNATE_PROVIDERS_LOCK:
+        return provider in DISABLED_ALTERNATE_PROVIDERS
+
+
+def _disable_alternate_provider(provider: str) -> None:
+    with DISABLED_ALTERNATE_PROVIDERS_LOCK:
+        DISABLED_ALTERNATE_PROVIDERS.add(provider)
 
 FIELDNAMES = [
     "record_id", "date_scraped", "city", "market_node", "transaction",
@@ -361,6 +376,11 @@ def _fetch_alternate_providers(url: str, source: str) -> requests.Response:
     ]
     errors = []
     for provider, key in providers:
+        if _alternate_provider_disabled(provider):
+            message = "disabled after an authentication, billing or rate-limit failure earlier in this scan"
+            errors.append(f"{provider}: {message}")
+            print(f"[{provider}] {message}; skipping fallback.")
+            continue
         if not key:
             print(f"[{provider}] API key not configured; skipping fallback.")
             continue
@@ -384,9 +404,15 @@ def _fetch_alternate_providers(url: str, source: str) -> requests.Response:
                 detail = f"HTTP {response.status_code}: {response.text[:240]}"
                 errors.append(f"{provider}: {detail}")
                 print(f"[{provider}] fallback failed for {source}: {detail}")
-                # Do not repeatedly spend calls against invalid/suspended accounts.
-                if response.status_code in (401, 402, 403):
-                    print(f"[{provider}] authentication/billing failure; moving to next provider.")
+                # Do not repeatedly spend calls against invalid, quota-exhausted
+                # or rate-limited accounts. 404 remains URL-specific, so the
+                # provider stays eligible for the next canonical source URL.
+                if response.status_code in (401, 402, 403, 429):
+                    _disable_alternate_provider(provider)
+                    print(
+                        f"[{provider}] account/rate-limit failure; disabled for "
+                        "the remainder of this scan and moving to the next provider."
+                    )
                 continue
             html = response.text or ""
             if not html.strip() or "<html" not in html[:5000].lower():
