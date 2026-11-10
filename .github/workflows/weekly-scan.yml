@@ -130,7 +130,7 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           GROQ_MODEL: "qwen/qwen3.8-27b"
           GROQ_AI_COMMENTARY_ENABLED: "true"
-          GROQ_AI_COMMENTARY_REQUIRED: "true"
+          GROQ_AI_COMMENTARY_REQUIRED: "false"
         run: |
           CURR=$(ls -t property_listings_*.csv | head -n 1)
           CHANGES=$(ls -t changes_*.csv 2>/dev/null | head -n 1)
@@ -138,13 +138,15 @@ jobs:
           python report_builder.py "$CURR" "${CHANGES:-none}" "${RESEARCH:-none}"
           test -s executive_brief_*.html
           test -s market_intelligence_*.xlsx
-          test -s Lagos_Abuja_Property_Market_Intelligence_*.docx
+          test -s Nigeria_Property_Market_Intelligence_*.docx
           test -s market_intelligence.json
           python - <<'PY'
           import json
           ai = (json.load(open("market_intelligence.json", encoding="utf-8")).get("summary") or {}).get("ai_commentary") or {}
           if not ai.get("executive_takeaway") or not ai.get("key_findings") or not ai.get("recommended_actions"):
-              raise SystemExit("Required AI market interpretation is missing or incomplete.")
+              raise SystemExit("Market commentary fallback is missing required sections.")
+          if ai.get("commentary_mode") not in {"groq", "deterministic"}:
+              raise SystemExit("Market commentary mode is missing or invalid.")
           PY
 
       - name: Write and verify Layer 2 in the existing Google Sheet
@@ -279,6 +281,7 @@ jobs:
           retention-days: 30
           path: |
             Lagos_Property_Market_Snapshot_*.docx
+            Nigeria_Property_Market_Intelligence_*.docx
             market_intelligence_*.xlsx
             executive_brief_*.html
             market_intelligence.json
@@ -327,7 +330,7 @@ jobs:
           mv estateintel_public_research_*.csv data/ 2>/dev/null || true
           mv changes_*.csv data/ 2>/dev/null || true
           mv market_intelligence_*.xlsx data/ 2>/dev/null || true
-          mv Lagos_Abuja_Property_Market_Intelligence_*.docx data/ 2>/dev/null || true
+          mv Nigeria_Property_Market_Intelligence_*.docx data/ 2>/dev/null || true
           mv Lagos_Property_Market_Snapshot_*.docx data/ 2>/dev/null || true
           mv executive_brief_*.html data/ 2>/dev/null || true
           mv market_output_review.csv data/ 2>/dev/null || true
