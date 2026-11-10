@@ -139,22 +139,26 @@ class ClientAttachmentFallbackTests(unittest.TestCase):
             report = root / "client-report.docx"
             report.write_bytes(b"docx-test")
 
-            with patch("email_client_docx.Path", Path), patch(
+            with patch(
                 "email_client_docx.send_message"
-            ) as send, patch("email_client_docx.sys.argv", ["email_client_docx.py", str(report)]), patch.dict(
+            ) as send, patch(
+                "email_client_docx.sys.argv",
+                ["email_client_docx.py", str(report)],
+            ), patch.dict(
                 os.environ,
                 {
                     "REPORT_CLIENT_EMAIL": "client@example.com",
                     "REPORT_TO_EMAIL": "owner@example.com",
                     "GOOGLE_SHEET_ID": "sheet-id",
                 },
-            ), patch("email_client_docx.Path", side_effect=lambda value: root / value if not Path(value).is_absolute() else Path(value)):
+            ):
                 old_cwd = os.getcwd()
                 os.chdir(root)
                 try:
                     email_client_docx.main()
                 finally:
                     os.chdir(old_cwd)
+
 
             kwargs = send.call_args.kwargs
             self.assertEqual(len(kwargs["attachments"]), 2)
