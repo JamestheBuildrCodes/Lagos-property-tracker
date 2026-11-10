@@ -1,24 +1,48 @@
 {
-  "input_rows": 340,
-  "output_rows": 307,
-  "evidence_verified_rows": 307,
+  "input_rows": 347,
+  "output_rows": 316,
+  "evidence_verified_rows": 316,
   "verification_method": "deterministic_source_evidence",
-  "quarantined_for_review": 33,
+  "quarantined_for_review": 31,
   "removed_rows": 0,
-  "fixed_rows": 26,
+  "fixed_rows": 33,
   "duplicates_removed": 0,
   "removals": [],
   "fixes": [
     {
-      "row": 19,
+      "row": 37,
       "fix": "converted parsed land unit price into total asking price"
     },
     {
-      "row": 23,
+      "row": 38,
       "fix": "converted parsed land unit price into total asking price"
     },
     {
-      "row": 25,
+      "row": 39,
+      "fix": "converted parsed land unit price into total asking price"
+    },
+    {
+      "row": 40,
+      "fix": "converted parsed land unit price into total asking price"
+    },
+    {
+      "row": 41,
+      "fix": "converted parsed land unit price into total asking price"
+    },
+    {
+      "row": 43,
+      "fix": "converted parsed land unit price into total asking price"
+    },
+    {
+      "row": 44,
+      "fix": "converted parsed land unit price into total asking price"
+    },
+    {
+      "row": 45,
+      "fix": "converted parsed land unit price into total asking price"
+    },
+    {
+      "row": 46,
       "fix": "converted parsed land unit price into total asking price"
     },
     {
@@ -26,101 +50,99 @@
       "fix": "converted parsed land unit price into total asking price"
     },
     {
+      "row": 48,
+      "fix": "converted parsed land unit price into total asking price"
+    },
+    {
+      "row": 50,
+      "fix": "converted parsed land unit price into total asking price"
+    },
+    {
       "row": 51,
       "fix": "converted parsed land unit price into total asking price"
     },
     {
-      "row": 55,
+      "row": 53,
       "fix": "converted parsed land unit price into total asking price"
     },
     {
-      "row": 56,
+      "row": 54,
       "fix": "converted parsed land unit price into total asking price"
     },
     {
-      "row": 60,
+      "row": 114,
       "fix": "converted parsed land unit price into total asking price"
     },
     {
-      "row": 61,
+      "row": 117,
       "fix": "converted parsed land unit price into total asking price"
     },
     {
-      "row": 62,
+      "row": 120,
       "fix": "converted parsed land unit price into total asking price"
     },
     {
-      "row": 98,
+      "row": 123,
       "fix": "converted parsed land unit price into total asking price"
     },
     {
-      "row": 99,
+      "row": 125,
       "fix": "converted parsed land unit price into total asking price"
     },
     {
-      "row": 101,
+      "row": 127,
       "fix": "converted parsed land unit price into total asking price"
     },
     {
-      "row": 104,
+      "row": 128,
       "fix": "converted parsed land unit price into total asking price"
     },
     {
-      "row": 106,
+      "row": 132,
       "fix": "converted parsed land unit price into total asking price"
     },
     {
-      "row": 110,
+      "row": 136,
+      "fix": "converted parsed land unit price into total asking price"
+    },
+    {
+      "row": 153,
+      "fix": "converted parsed land unit price into total asking price"
+    },
+    {
+      "row": 156,
       "fix": "removed bedroom value from land record"
     },
     {
-      "row": 126,
-      "fix": "removed bedroom value from land record"
-    },
-    {
-      "row": 130,
+      "row": 225,
       "fix": "converted parsed land unit price into total asking price"
     },
     {
-      "row": 131,
-      "fix": "removed bedroom value from land record"
-    },
-    {
-      "row": 217,
+      "row": 234,
       "fix": "converted parsed land unit price into total asking price"
     },
     {
-      "row": 273,
+      "row": 304,
       "fix": "converted parsed land unit price into total asking price"
     },
     {
-      "row": 274,
+      "row": 321,
       "fix": "converted parsed land unit price into total asking price"
     },
     {
-      "row": 275,
+      "row": 323,
       "fix": "converted parsed land unit price into total asking price"
     },
     {
-      "row": 280,
+      "row": 324,
       "fix": "converted parsed land unit price into total asking price"
     },
     {
-      "row": 327,
-      "fix": "removed bedroom value from land record"
-    },
-    {
-      "row": 328,
+      "row": 330,
       "fix": "converted parsed land unit price into total asking price"
     }
   ],
   "review_sample": [
-    {
-      "record_id": "f56ec37509491a66",
-      "source": "PropertyPro.ng",
-      "source_url": "https://propertypro.ng/property/4-bedroom-flat-apartment-for-rent-banana-island-ikoyi-lagos-3MBQK",
-      "issues": "Bulk multi-unit block listing is not comparable to a single-apartment bedroom segment; manual classification required."
-    },
     {
       "record_id": "ffec9d76aea839d1",
       "source": "PropertyPro.ng",
@@ -128,111 +150,105 @@
       "issues": "Bulk multi-unit block listing is not comparable to a single-apartment bedroom segment; manual classification required."
     },
     {
-      "record_id": "662ad0a6f7b20f54",
+      "record_id": "f56ec37509491a66",
       "source": "PropertyPro.ng",
-      "source_url": "https://propertypro.ng/property/4-bedroom-flat-apartment-for-sale-old-ikoyi-ikoyi-lagos-9PBQN",
+      "source_url": "https://propertypro.ng/property/4-bedroom-flat-apartment-for-rent-banana-island-ikoyi-lagos-3MBQK",
       "issues": "Bulk multi-unit block listing is not comparable to a single-apartment bedroom segment; manual classification required."
     },
     {
-      "record_id": "498d0394021782f9",
+      "record_id": "3693a99ec00b9ca6",
       "source": "PropertyPro.ng",
-      "source_url": "https://propertypro.ng/property/3-bedroom-flat-apartment-for-sale-ikeja-gra-ikeja-gra-ikeja-lagos-6NJHA",
+      "source_url": "https://propertypro.ng/property/3-bedroom-flat-apartment-for-rent-old-ikoyi-ikoyi-lagos-3PBFA",
       "issues": "Bulk multi-unit block listing is not comparable to a single-apartment bedroom segment; manual classification required."
     },
     {
-      "record_id": "9a0d702f143fe75d",
+      "record_id": "2b02372b5d32d60c",
       "source": "PropertyPro.ng",
-      "source_url": "https://propertypro.ng/property/3-bedroom-flat-apartment-for-sale-ikeja-gra-ikeja-lagos-8PFZD",
+      "source_url": "https://propertypro.ng/property/3-bedroom-flat-apartment-for-rent-old-ikoyi-ikoyi-lagos-0QCYR",
       "issues": "Bulk multi-unit block listing is not comparable to a single-apartment bedroom segment; manual classification required."
     },
     {
-      "record_id": "a7ba364949b2075f",
+      "record_id": "d638b7d4d80e3b97",
       "source": "Nigeria Property Centre",
-      "source_url": "https://nigeriapropertycentre.com/for-sale/flats-apartments/lagos/ikoyi/banana-island/3733195-luxury-flats-mini-estate-25-units",
+      "source_url": "https://nigeriapropertycentre.com/for-rent/flats-apartments/lagos/lekki/lekki-phase-1/3766652-2-bedroom-apartment",
       "issues": "Bulk multi-unit block listing is not comparable to a single-apartment bedroom segment; manual classification required."
     },
     {
-      "record_id": "f9be6be50cf800fb",
+      "record_id": "75a61320244fb0aa",
       "source": "Nigeria Property Centre",
-      "source_url": "https://nigeriapropertycentre.com/for-rent/flats-apartments/lagos/ikoyi/old-ikoyi/3734245-luxury-3-bedroom-apartments-and-4-bedroom-penthouse",
+      "source_url": "https://nigeriapropertycentre.com/for-sale/flats-apartments/lagos/victoria-island/3766966-22-unit-block-of-3-bedroom-apartments",
       "issues": "Bulk multi-unit block listing is not comparable to a single-apartment bedroom segment; manual classification required."
     },
     {
-      "record_id": "b9e3a7aa32f4cc4e",
+      "record_id": "6987f841dfa464c7",
       "source": "Nigeria Property Centre",
-      "source_url": "https://nigeriapropertycentre.com/for-rent/flats-apartments/mini-flats/lagos/victoria-island/oniru/3733761-1-bedroom-apartment",
+      "source_url": "https://nigeriapropertycentre.com/for-rent/flats-apartments/lagos/victoria-island/3766922-3-bedroom-flat-with-bq-fully-furnished",
       "issues": "Bulk multi-unit block listing is not comparable to a single-apartment bedroom segment; manual classification required."
     },
     {
-      "record_id": "4379fcf960f8e791",
+      "record_id": "2b5afbc2600d183a",
       "source": "Nigeria Property Centre",
-      "source_url": "https://nigeriapropertycentre.com/for-rent/flats-apartments/lagos/victoria-island/3733877-3-bedroom-flat",
+      "source_url": "https://nigeriapropertycentre.com/for-sale/flats-apartments/abuja/asokoro-district/3605545-4-units-of-3-bedroom-flat-with-attached-bq",
       "issues": "Bulk multi-unit block listing is not comparable to a single-apartment bedroom segment; manual classification required."
     },
     {
-      "record_id": "d4a51cf6c5c1ded2",
+      "record_id": "fee4890ffb2fc4fa",
       "source": "Nigeria Property Centre",
-      "source_url": "https://nigeriapropertycentre.com/for-sale/flats-apartments/lagos/victoria-island/3733366-three-3-bedroom-apartment",
+      "source_url": "https://nigeriapropertycentre.com/for-sale/flats-apartments/abuja/maitama-district/3766953-decent-3-bedroom-spacious-apartment-on-the-ground-floor-in-an-estate",
       "issues": "Bulk multi-unit block listing is not comparable to a single-apartment bedroom segment; manual classification required."
     },
     {
-      "record_id": "3423a815394ede53",
-      "source": "Nigeria Property Centre",
-      "source_url": "https://nigeriapropertycentre.com/for-rent/flats-apartments/abuja/asokoro-district/3717735-luxury-3-bedroom-executive-accommodation",
-      "issues": "Bulk multi-unit block listing is not comparable to a single-apartment bedroom segment; manual classification required."
-    },
-    {
-      "record_id": "3f97ed7c94413462",
+      "record_id": "ea3eded791955a91",
       "source": "PropertyPro.ng",
-      "source_url": "https://propertypro.ng/property/3-bedroom-flat-apartment-for-rent-banana-island-ikoyi-banana-island-ikoyi-lagos-2PZVA",
+      "source_url": "https://propertypro.ng/property/5-bedroom-flat-apartment-for-sale-belle-vista-banana-island-ikoyi-lagos-2PDDN",
       "issues": "No valid extracted asking price"
     },
     {
-      "record_id": "b3e083d1e78b149c",
+      "record_id": "c8d41ecceba19762",
       "source": "PropertyPro.ng",
-      "source_url": "https://propertypro.ng/property/3-bedroom-flat-apartment-for-sale-old-ikoyi-ikoyi-lagos-2PSMS",
+      "source_url": "https://propertypro.ng/property/4-bedroom-flat-apartment-for-sale-banana-island-ikoyi-lagos-0NRZY",
       "issues": "No valid extracted asking price"
     },
     {
-      "record_id": "7d35981196044deb",
+      "record_id": "5fffcdaafc8a1c65",
       "source": "PropertyPro.ng",
-      "source_url": "https://propertypro.ng/property/4-bedroom-flat-apartment-for-sale-old-ikoyi-ikoyi-lagos-6QJMY",
+      "source_url": "https://propertypro.ng/property/4-bedroom-flat-apartment-for-sale-banana-island-ikoyi-lagos-6NRZY",
       "issues": "No valid extracted asking price"
     },
     {
-      "record_id": "47127a72867db0a7",
+      "record_id": "299d06c736c730ee",
       "source": "PropertyPro.ng",
-      "source_url": "https://propertypro.ng/property/3-bedroom-flat-apartment-for-sale-old-ikoyi-ikoyi-lagos-0PZNF",
+      "source_url": "https://propertypro.ng/property/4-bedroom-flat-apartment-for-sale-banana-island-ikoyi-lagos-4NRZY",
       "issues": "No valid extracted asking price"
     },
     {
-      "record_id": "1453152beba482b0",
+      "record_id": "1f49c1658fe087d2",
       "source": "PropertyPro.ng",
-      "source_url": "https://propertypro.ng/property/flat-apartment-for-sale-bankole-oki-street-ikoyi-old-ikoyi-ikoyi-lagos-4PXZA",
+      "source_url": "https://propertypro.ng/property/3-bedroom-flat-apartment-for-sale-banana-island-ikoyi-lagos-0NTTW",
       "issues": "No valid extracted asking price"
     },
     {
-      "record_id": "15c04ff3baafe8d7",
+      "record_id": "40c15ec2f247d917",
       "source": "PropertyPro.ng",
-      "source_url": "https://propertypro.ng/property/3-bedroom-flat-apartment-for-sale-5a-onilegbale-street-old-ikoyi-ikoyi-lagos-old-ikoyi-ikoyi-lagos-2QDFD",
+      "source_url": "https://propertypro.ng/property/4-bedroom-flat-apartment-for-sale-banana-island-ikoyi-lagos-8QGBR",
       "issues": "No valid extracted asking price"
     },
     {
-      "record_id": "461777823bd4fb32",
+      "record_id": "0d637587b28c52f6",
       "source": "PropertyPro.ng",
-      "source_url": "https://propertypro.ng/property/3-bedroom-land-for-sale-lekki-phase-1-lekki-lagos-5QBTY",
-      "issues": "Land record contains apartment/bedroom evidence"
+      "source_url": "https://propertypro.ng/property/4-bedroom-flat-apartment-for-sale-banana-island-ikoyi-lagos-9QGBQ",
+      "issues": "No valid extracted asking price"
     },
     {
-      "record_id": "fd13ef814f9e4acd",
+      "record_id": "8c092a84dabe672d",
       "source": "PropertyPro.ng",
-      "source_url": "https://propertypro.ng/property/2-bedroom-house-for-sale-oniru-victoria-island-lagos-8NZUD",
-      "issues": "Land record contains apartment/bedroom evidence"
+      "source_url": "https://propertypro.ng/property/2-bedroom-flat-apartment-for-rent-banana-island-ikoyi-lagos-9QLFV",
+      "issues": "No valid extracted asking price"
     },
     {
-      "record_id": "3a319dee04100834",
+      "record_id": "58bd61ef78d4c71e",
       "source": "PropertyPro.ng",
-      "source_url": "https://propertypro.ng/property/4-bedroom-land-for-sale-ademola-adetokunbo-victoria-island-lagos-8NXPK",
+      "source_url": "https://propertypro.ng/property/5-bedroom-land-for-sale-victoria-island-lagos-4QLEU",
       "issues": "Land record contains apartment/bedroom evidence"
     },
     {
@@ -248,58 +264,46 @@
       "issues": "No valid extracted asking price"
     },
     {
-      "record_id": "ecdb0f99ce8606b2",
+      "record_id": "55b5944afff25eb6",
       "source": "Nigeria Property Centre",
-      "source_url": "https://nigeriapropertycentre.com/for-sale/flats-apartments/lagos/ikoyi/banana-island/3733181-3-bedroom-apartment",
+      "source_url": "https://nigeriapropertycentre.com/for-sale/flats-apartments/lagos/ikoyi/banana-island/3753940-luxury-4-bedroom-apartment-with-swimming-pool-and-gym",
+      "issues": "Conflicting sale and rental markers in listing evidence; No valid extracted asking price"
+    },
+    {
+      "record_id": "91c32f90453f371f",
+      "source": "Nigeria Property Centre",
+      "source_url": "https://nigeriapropertycentre.com/for-sale/flats-apartments/lagos/ikoyi/banana-island/3765426-exclusive-4-bedroom-apartment-with-swimming-pool",
       "issues": "No valid extracted asking price"
     },
     {
-      "record_id": "e72c9fb67c5798e9",
+      "record_id": "5438f6884ff79197",
       "source": "Nigeria Property Centre",
-      "source_url": "https://nigeriapropertycentre.com/for-sale/flats-apartments/lagos/ikoyi/banana-island/3732379-an-exquisite-3-bedroom-apartment-with-elevator-and-swimming-pool",
+      "source_url": "https://nigeriapropertycentre.com/for-sale/flats-apartments/lagos/ikoyi/old-ikoyi/3755415-4-bedroom-maisonette-with-built-in-wardrobes",
       "issues": "No valid extracted asking price"
     },
     {
-      "record_id": "cf6f05a7a3d45603",
+      "record_id": "79937f1c43c60bd7",
       "source": "Nigeria Property Centre",
-      "source_url": "https://nigeriapropertycentre.com/for-sale/flats-apartments/lagos/ikoyi/banana-island/3733154-luxury-4-bedroom-penthouse-apartment",
+      "source_url": "https://nigeriapropertycentre.com/for-rent/flats-apartments/lagos/ikoyi/old-ikoyi/3765965-3-bedroom-flat-with-servant-quarters",
       "issues": "No valid extracted asking price"
     },
     {
-      "record_id": "7f2ae657f0b81153",
+      "record_id": "420ded53d15db5de",
       "source": "Nigeria Property Centre",
-      "source_url": "https://nigeriapropertycentre.com/for-sale/flats-apartments/lagos/ikoyi/banana-island/3732727-4-bedroom-luxury-flat",
+      "source_url": "https://nigeriapropertycentre.com/for-sale/land/residential-land/lagos/lekki/lekki-phase-1/3757146-prime-2200-sqms-land",
+      "issues": "Land record contains apartment/bedroom evidence; Extracted plot size is not evidenced in captured card text"
+    },
+    {
+      "record_id": "8f96d6d4d6efc77d",
+      "source": "Nigeria Property Centre",
+      "source_url": "https://nigeriapropertycentre.com/for-sale/land/residential-land/lagos/eko-atlantic-city/3741811-3711sqm-plot-of-land-available",
       "issues": "No valid extracted asking price"
     },
     {
-      "record_id": "73fe8c9180925be9",
+      "record_id": "4cb0360183eaf57c",
       "source": "Nigeria Property Centre",
-      "source_url": "https://nigeriapropertycentre.com/for-sale/land/residential-land/lagos/ikoyi/banana-island/3499293-waterfront-2245sqm-land-and-a-house-on-it",
+      "source_url": "https://nigeriapropertycentre.com/for-sale/land/residential-land/lagos/eko-atlantic-city/3741798-3392-sqm-plot-of-land-waterfront",
       "issues": "No valid extracted asking price"
-    },
-    {
-      "record_id": "4282dd054b148476",
-      "source": "Nigeria Property Centre",
-      "source_url": "https://nigeriapropertycentre.com/for-rent/flats-apartments/lagos/ikoyi/old-ikoyi/3733395-luxury-built-3-bedroom-apartment-with-bq",
-      "issues": "No valid extracted asking price"
-    },
-    {
-      "record_id": "3cd19b02d15519b3",
-      "source": "Nigeria Property Centre",
-      "source_url": "https://nigeriapropertycentre.com/for-rent/flats-apartments/lagos/ikoyi/old-ikoyi/3733404-luxury-finished-4-bedroom-flat-with-bq",
-      "issues": "No valid extracted asking price"
-    },
-    {
-      "record_id": "60f18b064c1f960f",
-      "source": "Nigeria Property Centre",
-      "source_url": "https://nigeriapropertycentre.com/for-sale/flats-apartments/lagos/ikoyi/old-ikoyi/3706634-luxury-5-bedroom-apartment-with-2-bq",
-      "issues": "No valid extracted asking price"
-    },
-    {
-      "record_id": "c5830fd167eba96a",
-      "source": "Nigeria Property Centre",
-      "source_url": "https://nigeriapropertycentre.com/for-sale/land/residential-land/abuja/asokoro-district/2709980-land-for-5-bedroom-detached-duplex-with-bq",
-      "issues": "Land record contains apartment/bedroom evidence"
     },
     {
       "record_id": "540e88dbd21d2051",
@@ -308,10 +312,22 @@
       "issues": "Land record contains apartment/bedroom evidence"
     },
     {
-      "record_id": "3e7419324effe9f0",
+      "record_id": "e232d3ad455ff245",
       "source": "Nigeria Property Centre",
-      "source_url": "https://nigeriapropertycentre.com/for-sale/land/residential-land/abuja/maitama-district/maitama-2/3712822-exclusive-300sqm-plot-of-land-in-an-estate-extendable",
-      "issues": "Land record contains apartment/bedroom evidence"
+      "source_url": "https://nigeriapropertycentre.com/for-sale/land/residential-land/rivers/port-harcourt/3338530-plot-of-land",
+      "issues": "Extracted plot size is not evidenced in captured card text"
+    },
+    {
+      "record_id": "5f221316366e6619",
+      "source": "Nigeria Property Centre",
+      "source_url": "https://nigeriapropertycentre.com/for-sale/land/residential-land/rivers/port-harcourt/3487947-land-with-c-of-o-suitable-for-residential",
+      "issues": "Extracted plot size is not evidenced in captured card text"
+    },
+    {
+      "record_id": "44a8efc914cf135b",
+      "source": "Nigeria Property Centre",
+      "source_url": "https://nigeriapropertycentre.com/for-sale/land/residential-land/rivers/port-harcourt/rukpokwu/3615226-land-with-c-of-o-suitable-for-residential",
+      "issues": "Extracted plot size is not evidenced in captured card text"
     }
   ]
 }

@@ -1,93 +1,21 @@
 {
-  "date": "2026-10-19",
-  "manifest_entries": 207,
-  "category_requests": 54,
-  "listing_rows": 340,
+  "date": "2026-11-10",
+  "manifest_entries": 229,
+  "category_requests": 60,
+  "listing_rows": 347,
   "estate_intel_rows": 9,
   "failures": [
     {
-      "source": "Nigeria Property Centre",
-      "node": "Eko Atlantic",
-      "category": "sale",
-      "url": "https://nigeriapropertycentre.com/for-sale/flats-apartments/lagos/victoria-island/eko-atlantic/showtype?sort=2",
-      "pages": 0,
-      "cards": 0,
-      "rows": 0,
-      "rejected_quality": 0,
-      "stale_rejected": 0,
-      "error": "All configured scraper transports failed for Nigeria Property Centre. ZenRows: HTTP 404: {\"code\":\"RESP002\",\"detail\":\"The requested URL page returned a 404 HTTP Status Code. Please make sure this URL exists and retry your request.\",\"instance\":\"/v1\",\"status\":404,\"title\":\"Page not found (RESP002)\",\"type\":\"https://docs.zenrows.com/"
-    },
-    {
-      "source": "Nigeria Property Centre",
-      "node": "Eko Atlantic",
-      "category": "rent",
-      "url": "https://nigeriapropertycentre.com/for-rent/flats-apartments/lagos/victoria-island/eko-atlantic/showtype?sort=2",
-      "pages": 0,
-      "cards": 0,
-      "rows": 0,
-      "rejected_quality": 0,
-      "stale_rejected": 0,
-      "error": "All configured scraper transports failed for Nigeria Property Centre. ZenRows: HTTP 404: {\"code\":\"RESP002\",\"detail\":\"The requested URL page returned a 404 HTTP Status Code. Please make sure this URL exists and retry your request.\",\"instance\":\"/v1\",\"status\":404,\"title\":\"Page not found (RESP002)\",\"type\":\"https://docs.zenrows.com/"
-    },
-    {
-      "source": "Nigeria Property Centre",
-      "node": "Eko Atlantic",
+      "source": "PropertyPro.ng",
+      "node": "Port Harcourt",
       "category": "land_sale",
-      "url": "https://nigeriapropertycentre.com/for-sale/land/residential-land/lagos/victoria-island/eko-atlantic/showtype",
+      "url": "https://propertypro.ng/property-for-sale/land/residential-land/in/rivers/port-harcourt",
       "pages": 0,
       "cards": 0,
       "rows": 0,
       "rejected_quality": 0,
       "stale_rejected": 0,
-      "error": "All configured scraper transports failed for Nigeria Property Centre. ZenRows: HTTP 404: {\"code\":\"RESP002\",\"detail\":\"The requested URL page returned a 404 HTTP Status Code. Please make sure this URL exists and retry your request.\",\"instance\":\"/v1\",\"status\":404,\"title\":\"Page not found (RESP002)\",\"type\":\"https://docs.zenrows.com/"
-    },
-    {
-      "source": "Nigeria Property Centre",
-      "node": "Ikeja GRA",
-      "category": "sale",
-      "url": "https://nigeriapropertycentre.com/for-sale/flats-apartments/lagos/ikeja/ikeja-gra/showtype?sort=2",
-      "pages": 0,
-      "cards": 0,
-      "rows": 0,
-      "rejected_quality": 0,
-      "stale_rejected": 0,
-      "error": "All configured scraper transports failed for Nigeria Property Centre. ZenRows: HTTP 404: {\"code\":\"RESP002\",\"detail\":\"The requested URL page returned a 404 HTTP Status Code. Please make sure this URL exists and retry your request.\",\"instance\":\"/v1\",\"status\":404,\"title\":\"Page not found (RESP002)\",\"type\":\"https://docs.zenrows.com/"
-    },
-    {
-      "source": "Nigeria Property Centre",
-      "node": "Ikeja GRA",
-      "category": "rent",
-      "url": "https://nigeriapropertycentre.com/for-rent/flats-apartments/lagos/ikeja/ikeja-gra/showtype?sort=2",
-      "pages": 0,
-      "cards": 0,
-      "rows": 0,
-      "rejected_quality": 0,
-      "stale_rejected": 0,
-      "error": "All configured scraper transports failed for Nigeria Property Centre. ZenRows: HTTP 404: {\"code\":\"RESP002\",\"detail\":\"The requested URL page returned a 404 HTTP Status Code. Please make sure this URL exists and retry your request.\",\"instance\":\"/v1\",\"status\":404,\"title\":\"Page not found (RESP002)\",\"type\":\"https://docs.zenrows.com/"
-    },
-    {
-      "source": "Nigeria Property Centre",
-      "node": "Ikeja GRA",
-      "category": "land_sale",
-      "url": "https://nigeriapropertycentre.com/for-sale/land/residential-land/lagos/ikeja/ikeja-gra/showtype",
-      "pages": 0,
-      "cards": 0,
-      "rows": 0,
-      "rejected_quality": 0,
-      "stale_rejected": 0,
-      "error": "All configured scraper transports failed for Nigeria Property Centre. ZenRows: HTTP 404: {\"code\":\"RESP002\",\"detail\":\"The requested URL page returned a 404 HTTP Status Code. Please make sure this URL exists and retry your request.\",\"instance\":\"/v1\",\"status\":404,\"title\":\"Page not found (RESP002)\",\"type\":\"https://docs.zenrows.com/"
-    },
-    {
-      "source": "Nigeria Property Centre",
-      "node": "Asokoro",
-      "category": "sale",
-      "url": "https://nigeriapropertycentre.com/for-sale/flats-apartments/abuja/asokoro-district/showtype?sort=2",
-      "pages": 2,
-      "cards": 59,
-      "rows": 0,
-      "rejected_quality": 21,
-      "stale_rejected": 17,
-      "error": "All configured scraper transports failed for Nigeria Property Centre. ZenRows: HTTP 404: {\"code\":\"RESP002\",\"detail\":\"The requested URL page returned a 404 HTTP Status Code. Please make sure this URL exists and retry your request.\",\"instance\":\"/v1\",\"status\":404,\"title\":\"Page not found (RESP002)\",\"type\":\"https://docs.zenrows.com/"
+      "error": "All configured scraper transports failed for PropertyPro.ng. ZenRows: HTTPSConnectionPool(host='api.zenrows.com', port=443): Read timed out. (read timeout=90)"
     },
     {
       "source": "Nigeria Property Centre",
@@ -95,10 +23,10 @@
       "category": "sale",
       "url": "https://nigeriapropertycentre.com/for-sale/flats-apartments/abuja/wuse/showtype?sort=2",
       "pages": 1,
-      "cards": 36,
+      "cards": 37,
       "rows": 0,
-      "rejected_quality": 20,
-      "stale_rejected": 16,
+      "rejected_quality": 21,
+      "stale_rejected": 14,
       "error": "All configured scraper transports failed for Nigeria Property Centre. ZenRows: HTTP 404: {\"code\":\"RESP002\",\"detail\":\"The requested URL page returned a 404 HTTP Status Code. Please make sure this URL exists and retry your request.\",\"instance\":\"/v1\",\"status\":404,\"title\":\"Page not found (RESP002)\",\"type\":\"https://docs.zenrows.com/"
     },
     {
@@ -107,10 +35,10 @@
       "category": "rent",
       "url": "https://nigeriapropertycentre.com/for-rent/flats-apartments/abuja/wuse/showtype?sort=2",
       "pages": 2,
-      "cards": 64,
+      "cards": 67,
       "rows": 0,
-      "rejected_quality": 19,
-      "stale_rejected": 28,
+      "rejected_quality": 23,
+      "stale_rejected": 27,
       "error": "All configured scraper transports failed for Nigeria Property Centre. ZenRows: HTTP 404: {\"code\":\"RESP002\",\"detail\":\"The requested URL page returned a 404 HTTP Status Code. Please make sure this URL exists and retry your request.\",\"instance\":\"/v1\",\"status\":404,\"title\":\"Page not found (RESP002)\",\"type\":\"https://docs.zenrows.com/"
     },
     {
@@ -119,14 +47,26 @@
       "category": "land_sale",
       "url": "https://nigeriapropertycentre.com/for-sale/land/residential-land/abuja/wuse/showtype",
       "pages": 1,
-      "cards": 27,
+      "cards": 29,
       "rows": 0,
       "rejected_quality": 16,
-      "stale_rejected": 11,
-      "error": "All configured scraper transports failed for Nigeria Property Centre. ZenRows: HTTP 404: {\"code\":\"RESP002\",\"detail\":\"The requested URL page returned a 404 HTTP Status Code. Please make sure this URL exists and retry your request.\",\"instance\":\"/v1\",\"status\":404,\"title\":\"Page not found (RESP002)\",\"type\":\"https://docs.zenrows.com/"
+      "stale_rejected": 13,
+      "error": "All configured scraper transports failed for Nigeria Property Centre. ZenRows: HTTP 500: {\"code\":\"ERR0001\",\"detail\":\"An internal error occurred. Please contact support if this problem persists.\",\"instance\":\"/v1\",\"status\":500,\"title\":\"An internal error occurred (ERR0001)\",\"type\":\"https://docs.zenrows.com/api-error-codes#ERR0001\""
+    },
+    {
+      "source": "Nigeria Property Centre",
+      "node": "Maitama",
+      "category": "land_sale",
+      "url": "https://nigeriapropertycentre.com/for-sale/land/residential-land/abuja/maitama-district/showtype",
+      "pages": 0,
+      "cards": 0,
+      "rows": 0,
+      "rejected_quality": 0,
+      "stale_rejected": 0,
+      "error": "All configured scraper transports failed for Nigeria Property Centre. ZenRows: HTTPSConnectionPool(host='api.zenrows.com', port=443): Read timed out. (read timeout=90)"
     }
   ],
-  "quality_rejections": 938,
-  "stale_rejections": 634,
+  "quality_rejections": 1212,
+  "stale_rejections": 1079,
   "listing_quality_policy": "Only detail URLs whose canonical node slug matches the assigned node are admitted; explicit conflicting node evidence is rejected."
 }
