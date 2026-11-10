@@ -293,7 +293,7 @@ def ai_commentary(summary):
                 "system": "You are a cautious Nigerian real-estate market research analyst. Write concise, actionable client commentary using only supplied evidence. Never calculate or invent numbers. Clearly separate observed listing data from interpretation. Mention material limitations.",
                 "messages": [{
                     "role": "user",
-                    "content": "Write 3-5 concise bullet points of market commentary based only on this JSON:\\n"
+                    "content": "Write 3-5 concise bullet points of market commentary based only on this JSON:\n"
                     + json.dumps(payload, ensure_ascii=False),
                 }],
             },
@@ -301,7 +301,7 @@ def ai_commentary(summary):
         )
         response.raise_for_status()
         body = response.json()
-        commentary = "\\n".join(
+        commentary = "\n".join(
             block.get("text", "")
             for block in body.get("content", [])
             if block.get("type") == "text"
