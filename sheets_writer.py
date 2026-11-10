@@ -4,7 +4,11 @@ import json, os, sys, time
 from pathlib import Path
 import gspread
 from google.oauth2.service_account import Credentials
+from google.oauth2.credentials import Credentials as OAuthCredentials
+from google.auth.transport.requests import Request
+
 SCOPES=["https://www.googleapis.com/auth/spreadsheets","https://www.googleapis.com/auth/drive"]
+OAUTH_SCOPES=["https://www.googleapis.com/auth/drive"]
 DESIRED=["Executive Summary","Area Scorecard","Current Listings","Weekly Changes","Estate Intel Public","Additional Sources","Source Health","Methodology"]
 NAVY={"red":0.05,"green":0.14,"blue":0.25}; LIGHT={"red":0.91,"green":0.94,"blue":0.97}; WHITE={"red":1,"green":1,"blue":1}; TEXT={"red":0.09,"green":0.13,"blue":0.20}
 def _retry_sheets_write(label, operation, *args, max_attempts=6, **kwargs):
@@ -37,20 +41,89 @@ def _retry_sheets_write(label, operation, *args, max_attempts=6, **kwargs):
             time.sleep(delay)
 
 
+def get_google_credentials():
+    """Prefer a real service-account key; fall back to the authorized-user OAuth token.
+
+    The OAuth token is also used by the client Google Docs publisher. This
+    allows the same authorized Google account to update/share the existing
+    spreadsheet when GOOGLE_SERVICE_ACCOUNT_JSON is actually an OAuth client
+    configuration or otherwise is not a service-account key.
+    """
+    service_raw = os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON", "").strip()
+    if service_raw:
+        try:
+            service_data = json.loads(service_raw)
+        except json.JSONDecodeError:
+            service_data = None
+        required_service_fields = {"client_email", "private_key", "token_uri"}
+        if (
+            isinstance(service_data, dict)
+            and service_data.get("type") == "service_account"
+            and required_service_fields.issubset(service_data)
+        ):
+            email = service_data.get("client_email", "service account")
+            print(f"Google service account: {email} | project: {service_data.get('project_id', 'unknown')}")
+            return Credentials.from_service_account_info(
+                service_data, scopes=SCOPES
+            ), email
+        print(
+            "[Google auth] GOOGLE_SERVICE_ACCOUNT_JSON is not a service-account "
+            "key (required fields are absent); trying authorized-user OAuth."
+        )
+
+    oauth_raw = os.environ.get("GOOGLE_OAUTH_TOKEN_JSON", "").strip()
+    if not oauth_raw:
+        raise RuntimeError(
+            "No usable Google credentials: GOOGLE_SERVICE_ACCOUNT_JSON is not "
+            "a service-account key and GOOGLE_OAUTH_TOKEN_JSON is missing."
+        )
+    try:
+        info = json.loads(oauth_raw)
+    except json.JSONDecodeError as exc:
+        raise RuntimeError("GOOGLE_OAUTH_TOKEN_JSON is not valid JSON.") from exc
+    if not isinstance(info, dict):
+        raise RuntimeError("GOOGLE_OAUTH_TOKEN_JSON must contain a JSON object.")
+
+    client_config = info.get("installed") or info.get("web") or {}
+    if isinstance(client_config, dict):
+        info = {**client_config, **info}
+
+    required_user_fields = ("refresh_token", "client_id", "client_secret", "token_uri")
+    missing = [field for field in required_user_fields if not str(info.get(field) or "").strip()]
+    if missing:
+        raise RuntimeError(
+            "GOOGLE_OAUTH_TOKEN_JSON is not a complete authorized-user token; "
+            "missing required fields: " + ", ".join(missing)
+        )
+
+    credentials = OAuthCredentials.from_authorized_user_info(
+        info, scopes=OAUTH_SCOPES
+    )
+    if not credentials.valid:
+        if not credentials.refresh_token:
+            raise RuntimeError(
+                "Google OAuth credentials are expired and contain no refresh token."
+            )
+        credentials.refresh(Request())
+
+    identity = str(
+        info.get("email")
+        or info.get("email_address")
+        or "authorized Google user"
+    )
+    print("Google Sheets authentication: authorized-user OAuth.")
+    return credentials, identity
+
+
 def get_client():
-    raw=os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON","").strip()
-    if not raw: raise RuntimeError("GOOGLE_SERVICE_ACCOUNT_JSON is missing")
-    data=json.loads(raw); email=data.get("client_email") or "unknown"; project=data.get("project_id") or "unknown"
-    print(f"Google service account: {email} | project: {project}")
-    return gspread.authorize(Credentials.from_service_account_info(data,scopes=SCOPES)),email
+    credentials, identity = get_google_credentials()
+    return gspread.authorize(credentials), identity
+
 def share_viewer(sheet_id,email):
     if not email or "@" not in email:
         raise RuntimeError("REPORT_CLIENT_EMAIL is missing or invalid; cannot verify client Sheet access.")
     from googleapiclient.discovery import build
-    raw=os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON","").strip()
-    if not raw:
-        raise RuntimeError("GOOGLE_SERVICE_ACCOUNT_JSON is missing")
-    credentials=Credentials.from_service_account_info(json.loads(raw),scopes=SCOPES)
+    credentials, _identity = get_google_credentials()
     drive=build("drive","v3",credentials=credentials,cache_discovery=False)
     def find_permission():
         permissions=drive.permissions().list(
