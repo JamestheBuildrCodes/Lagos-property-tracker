@@ -121,5 +121,49 @@ class ClientDocumentCommentaryFallbackTests(unittest.TestCase):
 
 
 
+class ClientAttachmentFallbackTests(unittest.TestCase):
+    def test_docx_and_xlsx_send_without_broken_google_links_when_publication_not_verified(self):
+        import json
+        import tempfile
+        from pathlib import Path
+        from unittest.mock import patch
+        import email_client_docx
+
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            (root / "client_doc_url.txt").write_text("ATTACHED_DOCX_FALLBACK", encoding="utf-8")
+            (root / "google_sheet_update_status.json").write_text(
+                json.dumps({"status": "not_updated"}), encoding="utf-8"
+            )
+            (root / "market_intelligence_2026-11-10.xlsx").write_bytes(b"xlsx-test")
+            report = root / "client-report.docx"
+            report.write_bytes(b"docx-test")
+
+            with patch("email_client_docx.Path", Path), patch(
+                "email_client_docx.send_message"
+            ) as send, patch("email_client_docx.sys.argv", ["email_client_docx.py", str(report)]), patch.dict(
+                os.environ,
+                {
+                    "REPORT_CLIENT_EMAIL": "client@example.com",
+                    "REPORT_TO_EMAIL": "owner@example.com",
+                    "GOOGLE_SHEET_ID": "sheet-id",
+                },
+            ), patch("email_client_docx.Path", side_effect=lambda value: root / value if not Path(value).is_absolute() else Path(value)):
+                old_cwd = os.getcwd()
+                os.chdir(root)
+                try:
+                    email_client_docx.main()
+                finally:
+                    os.chdir(old_cwd)
+
+            kwargs = send.call_args.kwargs
+            self.assertEqual(len(kwargs["attachments"]), 2)
+            self.assertNotIn("docs.google.com", kwargs["text_body"])
+            self.assertNotIn("spreadsheets/d/", kwargs["text_body"])
+            self.assertIn("was not updated and verified", kwargs["text_body"])
+            self.assertIn("attached Excel workbook", kwargs["text_body"])
+
+
+
 if __name__ == "__main__":
     unittest.main()
