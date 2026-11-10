@@ -88,13 +88,16 @@ class AIListingVerifierTests(unittest.TestCase):
         response = Mock(status_code=200)
         response.json.return_value = {"choices": [{"message": {"content": json.dumps({
             "executive_takeaway": "Limited sample; interpret cautiously.",
-            "key_findings": [], "business_implications": [],
-            "recommended_actions": [], "limitations": [],
+            "key_findings": ["Observed sample remains limited."],
+            "business_implications": ["Use the available sample for cautious screening."],
+            "recommended_actions": ["Verify listings before relying on them."],
+            "limitations": ["Asking prices are not confirmed transactions."],
         })}}]}
         with patch.object(ai_market_interpreter.requests, "post", return_value=response) as mocked:
             result = ai_market_interpreter.interpret_summary({"listings_tracked": 1, "scorecard": []})
         self.assertIsNotNone(result)
         self.assertEqual(result["model"], "qwen/qwen3.8-27b")
+        self.assertEqual(result["commentary_mode"], "groq")
         self.assertEqual(mocked.call_args.kwargs["json"]["response_format"]["type"], "json_object")
         self.assertNotIn("source_url", mocked.call_args.kwargs["json"]["messages"][1]["content"])
 
@@ -103,7 +106,9 @@ class AIListingVerifierTests(unittest.TestCase):
         os.environ["GROQ_AI_COMMENTARY_ENABLED"] = "true"
         response = Mock(status_code=429, text='{"error":{"message":"rate limit"}}')
         with patch.object(ai_market_interpreter.requests, "post", return_value=response):
-            self.assertIsNone(ai_market_interpreter.interpret_summary({"listings_tracked": 1}))
+            result = ai_market_interpreter.interpret_summary({"listings_tracked": 1})
+            self.assertEqual(result["commentary_mode"], "deterministic")
+            self.assertTrue(result["executive_takeaway"])
 
 
 if __name__ == "__main__":
