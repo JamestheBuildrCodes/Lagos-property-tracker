@@ -165,8 +165,13 @@ jobs:
           CHANGES=$(ls -t changes_*.csv 2>/dev/null | head -n 1)
           RESEARCH=$(ls -t estateintel_public_research_*.csv 2>/dev/null | head -n 1)
           XLSX=$(ls -t market_intelligence_*.xlsx | head -n 1)
-          python sheets_writer.py "$CURR" "${CHANGES:-none}" "${RESEARCH:-none}" "$XLSX"
-          printf '{"status":"success","workbook":"%s","updated_at_utc":"%s"}\n' "$XLSX" "$(date -u +%FT%TZ)" > google_sheet_update_status.json
+          if python sheets_writer.py "$CURR" "${CHANGES:-none}" "${RESEARCH:-none}" "$XLSX"; then
+            printf '{"status":"success","workbook":"%s","updated_at_utc":"%s"}\n' "$XLSX" "$(date -u +%FT%TZ)" > google_sheet_update_status.json
+            echo "Existing Google Sheet was updated and read-back verified."
+          else
+            printf '{"status":"not_updated","workbook":"%s","updated_at_utc":"%s","note":"Google Sheets credentials or sharing could not be verified; use the attached XLSX workbook."}\n' "$XLSX" "$(date -u +%FT%TZ)" > google_sheet_update_status.json
+            echo "::warning::Google Sheets sync failed. Continuing with the verified XLSX workbook as a client attachment; no live Sheet link will be advertised."
+          fi
 
       - name: Publish and verify Layer 3 as Google Doc
         env:
@@ -268,7 +273,6 @@ jobs:
           test -n "$MAILJET_FROM_EMAIL" || { echo "MAILJET_FROM_EMAIL is required and must be approved in Mailjet."; exit 1; }
           test -n "$REPORT_CLIENT_EMAIL" || { echo "REPORT_CLIENT_EMAIL must be the client recipient."; exit 1; }
           test -n "$REPORT_TO_EMAIL" || { echo "REPORT_TO_EMAIL must contain the internal report recipient."; exit 1; }
-          test -n "$GOOGLE_SHEET_ID" || { echo "GOOGLE_SHEET_ID is required for the report link."; exit 1; }
           python - <<'PY'
           import os
           from mailjet_sender import valid_email
@@ -285,7 +289,14 @@ jobs:
           if [ "$DOC_URL" = "ATTACHED_DOCX_FALLBACK" ]; then
             DOC_URL=""
           fi
-          SHEET_URL="https://docs.google.com/spreadsheets/d/$GOOGLE_SHEET_ID/edit"
+          SHEET_URL=""
+          if [ -s google_sheet_update_status.json ] && python -c 'import json; raise SystemExit(0 if json.load(open("google_sheet_update_status.json", encoding="utf-8")).get("status") == "success" else 1)'; then
+            test -n "$GOOGLE_SHEET_ID" || { echo "Verified sheet status exists but GOOGLE_SHEET_ID is missing."; exit 1; }
+            SHEET_URL="https://docs.google.com/spreadsheets/d/$GOOGLE_SHEET_ID/edit"
+          else
+            REPORT_EMAIL_NOTE="The existing live Google Sheet was not updated and verified in this run. The current Excel workbook is attached to the enhanced Word report email and should be used as the current data snapshot."
+            export REPORT_EMAIL_NOTE
+          fi
           python email_report.py "$CURR" "${CHANGES:-none}" "$REPORT_CLIENT_EMAIL" "$HTML" "$DOC_URL" "$SHEET_URL"
 
       - name: Upload final client deliverables and audit trail
