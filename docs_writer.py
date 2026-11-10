@@ -117,8 +117,19 @@ def report_text(summary):
         "• Prices are asking prices, not confirmed closed transactions. Estate Intel is public research only; premium/login-gated content is not collected or bypassed."]
     ai = summary.get("ai_commentary") or {}
     if ai:
-        lines += ["", "7. AI MARKET INTERPRETATION", ai.get("executive_takeaway", "")]
-        for section, label in (("key_findings", "Key findings"), ("business_implications", "Business implications"), ("recommended_actions", "Recommended actions"), ("limitations", "AI limitations")):
+        mode = str(ai.get("commentary_mode") or "deterministic").strip().lower()
+        heading = (
+            "7. AI MARKET INTERPRETATION"
+            if mode == "groq"
+            else "7. MARKET INTERPRETATION (DETERMINISTIC)"
+        )
+        lines += ["", heading, ai.get("executive_takeaway", "")]
+        for section, label in (
+            ("key_findings", "Key findings"),
+            ("business_implications", "Business implications"),
+            ("recommended_actions", "Recommended actions"),
+            ("limitations", "Interpretation limitations"),
+        ):
             values = [str(x).strip() for x in ai.get(section, []) if str(x).strip()]
             if values:
                 lines += [label + ":"] + ["• " + x for x in values]
