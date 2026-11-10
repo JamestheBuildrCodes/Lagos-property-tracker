@@ -1,8 +1,8 @@
-"""Optional Groq interpretation of aggregate property-market metrics.
+"""Optional Groq interpretation with a deterministic, publication-safe fallback.
 
-Only whitelisted aggregate statistics are sent to Groq. Raw listings, URLs,
-agent contacts and recipient addresses are never sent. If Groq is unavailable
-or unconfigured, deterministic report commentary remains available.
+Only aggregate metrics are sent to Groq. Raw listings, URLs, agent contacts and
+recipient addresses are never sent. Missing keys, rate limits and malformed
+responses fall back to deterministic commentary instead of blocking reporting.
 """
 from __future__ import annotations
 
@@ -65,37 +65,142 @@ def _safe_payload(summary: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def interpret_summary(summary: dict[str, Any]) -> dict[str, Any] | None:
-    enabled = os.environ.get("GROQ_AI_COMMENTARY_ENABLED", "false").strip().lower() == "true"
-    if not enabled:
-        return None
+def _deterministic_commentary(summary: dict[str, Any]) -> dict[str, Any]:
+    """Create report commentary from computed data without relying on an LLM."""
+    try:
+        listings = max(0, int(summary.get("listings_tracked") or 0))
+    except (TypeError, ValueError):
+        listings = 0
+    try:
+        areas = max(0, int(summary.get("areas_monitored") or 0))
+    except (TypeError, ValueError):
+        areas = 0
+    source_names = [
+        str(x).strip() for x in (summary.get("source_names") or [])
+        if str(x).strip()
+    ]
+    scorecard = [
+        x for x in (summary.get("scorecard") or [])
+        if isinstance(x, dict) and int(x.get("listing_count") or 0) > 0
+    ]
+    scorecard.sort(
+        key=lambda x: int(x.get("listing_count") or 0), reverse=True
+    )
+    analysis_notes = [
+        str(x).strip() for x in (summary.get("analysis_notes") or [])
+        if str(x).strip()
+    ]
+    populated_areas = len(scorecard)
+
+    if listings:
+        takeaway = (
+            f"The scan contains {listings:,} validated comparable asking-price "
+            f"observations across {populated_areas} of {areas or populated_areas} "
+            "monitored areas. These are advertised asking prices, not confirmed "
+            "completed transactions."
+        )
+    else:
+        takeaway = (
+            "The scan contains no validated comparable listings. It is not "
+            "possible to draw a reliable current pricing conclusion from this run."
+        )
+
+    findings = analysis_notes[:5]
+    if not findings:
+        findings = [
+            f"Validated comparable listings in this run: {listings:,}.",
+            f"Areas with usable comparable observations: {populated_areas}.",
+        ]
+
+    implications = []
+    if scorecard:
+        leaders = ", ".join(
+            f"{x.get('market_node', 'Unspecified area')} "
+            f"({int(x.get('listing_count') or 0)} listings)"
+            for x in scorecard[:3]
+        )
+        implications.append(
+            "The largest observed samples are in " + leaders +
+            "; comparisons in these areas have more listing coverage than "
+            "areas with smaller samples."
+        )
+    if populated_areas < areas:
+        implications.append(
+            f"{areas - populated_areas} monitored area(s) have no usable "
+            "comparable observations in this scan; do not infer their prices."
+        )
+    if not implications:
+        implications.append(
+            "Treat the available scan as a monitoring input, not a complete "
+            "market census or a substitute for property-level due diligence."
+        )
+
+    actions = [
+        "Verify the live listing, asking price, property details and availability with the advertiser before relying on an individual observation.",
+        "Treat segments with fewer than five comparable listings as thin evidence; avoid presenting them as stable market benchmarks.",
+        "Continue consistent weekly collection to build a comparable history and distinguish short-term noise from directional movement.",
+    ]
+    if not listings:
+        actions.insert(
+            0,
+            "Restore at least one approved listing source and rerun collection before issuing market-price conclusions.",
+        )
+
+    return {
+        "model": "deterministic-rules",
+        "commentary_mode": "deterministic",
+        "executive_takeaway": takeaway[:900],
+        "key_findings": findings,
+        "business_implications": implications[:4],
+        "recommended_actions": actions[:5],
+        "limitations": [
+            "All figures are advertised asking prices, not verified completed transaction prices.",
+            "Observed listings are not a complete census of the market; sample sizes vary by area and category.",
+            "A listing absent from a later scan is not proof that it was sold, withdrawn or rented.",
+            "Rental yield figures are gross asking-price proxies, not net investment returns.",
+            "Any trend is limited to the dates and snapshots actually present in the archive.",
+        ],
+    }
+
+
+def interpret_summary(summary: dict[str, Any]) -> dict[str, Any]:
+    """Return Groq commentary when available; otherwise return deterministic analysis."""
+    fallback = _deterministic_commentary(summary)
+    enabled = os.environ.get(
+        "GROQ_AI_COMMENTARY_ENABLED", "false"
+    ).strip().lower() == "true"
     api_key = os.environ.get("GROQ_API_KEY", "").strip()
-    required = os.environ.get("GROQ_AI_COMMENTARY_REQUIRED", "false").strip().lower() == "true"
-    if not api_key:
-        if required:
-            raise RuntimeError("GROQ_API_KEY is required for the configured AI market interpretation.")
-        print("[Groq commentary] No GROQ_API_KEY; using deterministic report narrative.")
-        return None
+    if not enabled or not api_key:
+        print(
+            "[Market commentary] Groq is disabled or not configured; "
+            "using deterministic report commentary."
+        )
+        return fallback
 
     model = os.environ.get("GROQ_MODEL", DEFAULT_MODEL).strip() or DEFAULT_MODEL
     instructions = (
         "Act as a cautious Nigerian property-market research analyst. Interpret only "
         "the aggregate JSON provided; do not invent events, causes, prices, comparables, "
         "or external facts. Monetary values are Nigerian naira. These are asking prices, "
-        "not confirmed transactions or a complete census of Lagos/Abuja. A missing URL "
-        "means not observed this scan, not sold or withdrawn. Mention sample sizes and "
+        "not confirmed transactions or a complete market census. A missing URL means "
+        "not observed this scan, not sold or withdrawn. Mention sample sizes and "
         "historical periods. Treat any segment with fewer than five comparables as thin "
         "evidence. The gross rent yield proxy is not net yield. If evidence is insufficient, "
         "say so. Return one JSON object with keys: executive_takeaway (string), "
         "key_findings (array of strings), business_implications (array of strings), "
-        "recommended_actions (array of strings), limitations (array of strings). "
-        "Keep advice concrete and decision-useful."
+        "recommended_actions (array of strings), limitations (array of strings)."
     )
     body = {
         "model": model,
         "messages": [
             {"role": "system", "content": instructions},
-            {"role": "user", "content": "Interpret this aggregate JSON and return only the required JSON object:\n" + json.dumps(_safe_payload(summary), ensure_ascii=False)},
+            {
+                "role": "user",
+                "content": (
+                    "Interpret this aggregate JSON and return only the required JSON object:\n"
+                    + json.dumps(_safe_payload(summary), ensure_ascii=False)
+                ),
+            },
         ],
         "temperature": 0,
         "response_format": {"type": "json_object"},
@@ -104,14 +209,20 @@ def interpret_summary(summary: dict[str, Any]) -> dict[str, Any] | None:
     try:
         response = requests.post(
             GROQ_URL,
-            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+            },
             json=body,
             timeout=(10, 50),
         )
         if response.status_code >= 300:
-            raise RuntimeError(f"Groq API HTTP {response.status_code}: {response.text[:400]}")
+            raise RuntimeError(f"Groq API HTTP {response.status_code}")
         choices = response.json().get("choices") or []
-        content = choices[0].get("message", {}).get("content") if choices else None
+        content = (
+            choices[0].get("message", {}).get("content")
+            if choices else None
+        )
         if not isinstance(content, str) or not content.strip():
             raise ValueError("Groq returned no assistant JSON content")
         parsed = json.loads(content)
@@ -125,16 +236,30 @@ def interpret_summary(summary: dict[str, Any]) -> dict[str, Any] | None:
         for key, kind in expected.items():
             if not isinstance(parsed.get(key), kind):
                 raise ValueError(f"Invalid Groq response field: {key}")
+        if not parsed["executive_takeaway"].strip():
+            raise ValueError("Groq returned an empty executive takeaway")
+        for key in ("key_findings", "recommended_actions"):
+            if not any(str(item).strip() for item in parsed[key]):
+                raise ValueError(f"Groq returned an empty {key} array")
+
         return {
             "model": model,
+            "commentary_mode": "groq",
             "executive_takeaway": parsed["executive_takeaway"][:900],
             "key_findings": [str(x)[:400] for x in parsed["key_findings"][:5]],
-            "business_implications": [str(x)[:400] for x in parsed["business_implications"][:4]],
-            "recommended_actions": [str(x)[:400] for x in parsed["recommended_actions"][:5]],
+            "business_implications": [
+                str(x)[:400] for x in parsed["business_implications"][:4]
+            ],
+            "recommended_actions": [
+                str(x)[:400] for x in parsed["recommended_actions"][:5]
+            ],
             "limitations": [str(x)[:400] for x in parsed["limitations"][:6]],
         }
     except Exception as exc:
-        if required:
-            raise RuntimeError(f"Required Groq market interpretation failed: {type(exc).__name__}: {exc}") from exc
-        print(f"[Groq analysis unavailable; using deterministic narrative] {type(exc).__name__}: {exc}")
-        return None
+        # Rate limits, provider outages and malformed model output must not
+        # prevent the deterministic reports from being created or delivered.
+        print(
+            "[Market commentary] Groq unavailable; using deterministic "
+            f"commentary ({type(exc).__name__})."
+        )
+        return fallback
