@@ -4,6 +4,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 import ai_market_interpreter
+import enhance_client_report
 import scraper
 
 
@@ -91,6 +92,33 @@ class AlternateTransportCircuitBreakerTests(unittest.TestCase):
         self.assertIs(result, second)
         self.assertEqual(get.call_count, 2)
         self.assertFalse(scraper._alternate_provider_disabled("ZenRows"))
+
+
+class ClientDocumentCommentaryFallbackTests(unittest.TestCase):
+    @patch.dict(
+        os.environ,
+        {
+            "ANTHROPIC_API_KEY": "test-only-not-a-real-key",
+            "ANTHROPIC_MODEL": "test-model",
+        },
+        clear=True,
+    )
+    @patch("enhance_client_report.requests.post")
+    def test_claude_rate_limit_does_not_block_client_report(self, post):
+        response = SimpleNamespace()
+        response.raise_for_status = lambda: (_ for _ in ()).throw(
+            RuntimeError("HTTP 429 rate limited")
+        )
+        post.return_value = response
+        result = enhance_client_report.ai_commentary({
+            "report_date": "2026-11-10",
+            "validated_listing_count": 4,
+            "category_samples": {},
+            "quality_findings": [],
+        })
+        self.assertEqual(result["provider"], "deterministic_fallback")
+        self.assertTrue(result["commentary"])
+
 
 
 if __name__ == "__main__":
