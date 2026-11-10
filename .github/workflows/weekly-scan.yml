@@ -212,10 +212,18 @@ jobs:
           test -s client_doc_url.txt
           test -s google_doc_verification.json
           python - <<'PY'
-          import json
+          import json, os
           v=json.load(open("google_doc_verification.json",encoding="utf-8"))
-          assert v.get("content_verified") and v.get("ai_commentary_verified") and v.get("client_access_granted"), v
-          assert v.get("publication_status") != "docx_attachment_fallback_no_google_doc", v
+          status = v.get("publication_status")
+          if status == "docx_attachment_fallback_no_google_doc":
+              attachment = v.get("docx_attachment")
+              if not attachment or not os.path.isfile(attachment) or os.path.getsize(attachment) == 0:
+                  raise SystemExit("Google Doc unavailable and the DOCX fallback attachment is missing.")
+              print("Google Docs unavailable; verified DOCX-only fallback will be emailed.")
+          else:
+              assert v.get("content_verified") and v.get("ai_commentary_verified") and v.get("client_access_granted"), v
+              assert status in {"new_weekly_document_created", "fallback_to_fresh_service_account_weekly_doc"}, v
+              print("Verified Google Doc publication and client access.")
           PY
 
       - name: Email final enhanced Word report as attachment
@@ -269,6 +277,10 @@ jobs:
           CHANGES=$(ls -t changes_*.csv 2>/dev/null | head -n 1)
           HTML=$(ls -t executive_brief_*.html | head -n 1)
           DOC_URL=$(cat client_doc_url.txt)
+          # An attachment-only fallback must not be rendered as a Google Docs URL.
+          if [ "$DOC_URL" = "ATTACHED_DOCX_FALLBACK" ]; then
+            DOC_URL=""
+          fi
           SHEET_URL="https://docs.google.com/spreadsheets/d/$GOOGLE_SHEET_ID/edit"
           python email_report.py "$CURR" "${CHANGES:-none}" "$REPORT_CLIENT_EMAIL" "$HTML" "$DOC_URL" "$SHEET_URL"
 
