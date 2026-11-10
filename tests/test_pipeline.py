@@ -363,3 +363,18 @@ class OptionalAIInterpreterTests(unittest.TestCase):
             else:
                 os.environ["GROQ_AI_COMMENTARY_ENABLED"] = old_enabled
 
+
+
+class ResilientReportAndTransportTests(unittest.TestCase):
+    def test_market_interpreter_has_deterministic_fallback(self):
+        text = (ROOT / "ai_market_interpreter.py").read_text(encoding="utf-8")
+        self.assertIn("def _deterministic_commentary", text)
+        self.assertIn("return fallback", text)
+        self.assertIn('"commentary_mode": "deterministic"', text)
+
+    def test_workflow_checks_the_actual_report_filename_and_optional_ai(self):
+        text = (ROOT / ".github/workflows/weekly-scan.yml").read_text(encoding="utf-8")
+        self.assertIn("Nigeria_Property_Market_Intelligence_*.docx", text)
+        self.assertNotIn("test -s Lagos_Abuja_Property_Market_Intelligence_*.docx", text)
+        self.assertIn('GROQ_AI_COMMENTARY_REQUIRED: "false"', text)
+        self.assertIn("ai_market_interpreter.py", text)
