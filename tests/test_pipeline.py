@@ -88,7 +88,7 @@ class PipelineTests(unittest.TestCase):
         self.assertIn("python client_doc_report.py", text)
         self.assertIn("MAILJET_SECRET_KEY: ${{ secrets.MAILJET_SECRET_KEY }}", text)
         self.assertIn('MAILJET_FROM_NAME: "Master Builder Inc."', text)
-        self.assertIn("GOOGLE_SERVICE_ACCOUNT_JSON is required; refusing to send an incomplete report.", text)
+        self.assertIn("A Google service-account key or authorized-user OAuth token is required.", text)
         self.assertIn("GOOGLE_SHEET_ID is required; refusing to send an invalid Sheet link.", text)
         self.assertLess(text.index("Write and verify Layer 2 in the existing Google Sheet"), text.index("Send final executive email with report links"))
         self.assertIn("from mailjet_sender import valid_email", text)
