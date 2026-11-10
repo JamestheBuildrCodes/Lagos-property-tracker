@@ -35,11 +35,9 @@ class SheetSharingTests(unittest.TestCase):
             }]
         }
         service_credentials = object()
-        with patch.dict(os.environ, {
-            "GOOGLE_SERVICE_ACCOUNT_JSON": json.dumps({"client_email": "svc@example.com"})
-        }), patch(
-            "sheets_writer.Credentials.from_service_account_info",
-            return_value=service_credentials,
+        with patch(
+            "sheets_writer.get_google_credentials",
+            return_value=(service_credentials, "svc@example.com"),
         ) as make_credentials, patch(
             "googleapiclient.discovery.build", return_value=drive
         ) as build:
@@ -49,6 +47,37 @@ class SheetSharingTests(unittest.TestCase):
             "drive", "v3", credentials=service_credentials, cache_discovery=False
         )
         drive.permissions.return_value.list.assert_called_once()
+
+
+class GoogleCredentialSelectionTests(unittest.TestCase):
+    def test_falls_back_to_authorized_user_oauth_when_service_account_json_is_wrong_type(self):
+        oauth_token = {
+            "refresh_token": "test-refresh-token",
+            "client_id": "test-client-id",
+            "client_secret": "test-client-secret",
+            "token_uri": "https://oauth2.googleapis.com/token",
+        }
+        oauth_credentials = Mock()
+        oauth_credentials.valid = True
+        with patch.dict(os.environ, {
+            "GOOGLE_SERVICE_ACCOUNT_JSON": json.dumps({
+                "web": {
+                    "client_id": "test-client-id",
+                    "client_secret": "test-client-secret",
+                    "token_uri": "https://oauth2.googleapis.com/token",
+                }
+            }),
+            "GOOGLE_OAUTH_TOKEN_JSON": json.dumps(oauth_token),
+        }, clear=True), patch(
+            "sheets_writer.OAuthCredentials.from_authorized_user_info",
+            return_value=oauth_credentials,
+        ) as make_oauth:
+            from sheets_writer import get_google_credentials
+            credentials, identity = get_google_credentials()
+        self.assertIs(credentials, oauth_credentials)
+        self.assertEqual(identity, "authorized Google user")
+        make_oauth.assert_called_once()
+
 
 class SheetReadbackTests(unittest.TestCase):
     def test_accepts_google_sheets_omitting_trailing_blanks(self):
