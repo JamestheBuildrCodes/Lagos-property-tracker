@@ -380,3 +380,5 @@ class ResilientReportAndTransportTests(unittest.TestCase):
         self.assertNotIn("test -s Lagos_Abuja_Property_Market_Intelligence_*.docx", text)
         self.assertIn('GROQ_AI_COMMENTARY_REQUIRED: "false"', text)
         self.assertIn("ai_market_interpreter.py", text)
+        self.assertIn("verified DOCX-only fallback will be emailed", text)
+        self.assertIn('if [ "$DOC_URL" = "ATTACHED_DOCX_FALLBACK" ]; then', text)
