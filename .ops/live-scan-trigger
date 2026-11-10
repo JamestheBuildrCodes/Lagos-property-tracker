@@ -7,3 +7,5 @@ Run latest rent-period inference, workbook attachment, and live-sheet update sta
 Run post-repair end-to-end market scan, validate all outputs, and deliver the verified client report — 2026-11-10T00:45:00Z.
 
 Run complete end-to-end scan after Sheets OAuth compatibility fix and report-delivery regression checks — 2026-11-10T01:02:00Z.
+
+Run final end-to-end scan with current OAuth fallback and verified XLSX/DOCX delivery logic — 2026-11-10T01:07:00Z.
