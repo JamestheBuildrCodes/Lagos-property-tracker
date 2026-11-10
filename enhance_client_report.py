@@ -250,13 +250,22 @@ def build_charts(rows, out_dir):
 
 
 def ai_commentary(summary):
-    """Optional Claude call; never use model output to calculate or overwrite figures."""
+    """Optional Claude commentary; calculated figures remain authoritative."""
+    fallback = {
+        "provider": "deterministic_fallback",
+        "commentary": (
+            "Use this snapshot as an asking-price and listing-availability signal, "
+            "not as a record of completed transactions. Give greatest weight to "
+            "categories with at least five comparable listings, inspect flagged "
+            "outliers against the original listing, and treat gaps as missing "
+            "coverage rather than evidence of no supply. Verify rent periods, "
+            "property locations, plot sizes and advertised prices with the source."
+        ),
+    }
     key = os.getenv("ANTHROPIC_API_KEY", "").strip()
     if not key:
-        return {
-            "provider": "deterministic_fallback",
-            "commentary": "Use this snapshot as an asking-price and listing-availability signal, not as a record of completed transactions. Give greatest weight to categories with at least five comparable listings, inspect flagged outliers against the original listing, and treat gaps as missing coverage rather than evidence of no supply."
-        }
+        return fallback
+
     payload = {
         "date": summary["report_date"],
         "validated_listing_count": summary["validated_listing_count"],
@@ -269,28 +278,49 @@ def ai_commentary(summary):
             "State sample sizes and uncertainty; recommend checking original listing links.",
         ],
     }
-    response = requests.post(
-        "https://api.anthropic.com/v1/messages",
-        headers={
-            "x-api-key": key,
-            "anthropic-version": "2023-06-01",
-            "content-type": "application/json",
-        },
-        json={
-            "model": os.getenv("ANTHROPIC_MODEL", "claude-3-5-haiku-latest"),
-            "max_tokens": 700,
-            "temperature": 0,
-            "system": "You are a cautious Nigerian real-estate market research analyst. Write concise, actionable client commentary using only supplied evidence. Never calculate or invent numbers. Clearly separate observed listing data from interpretation. Mention material limitations.",
-            "messages": [{"role": "user", "content": "Write 3-5 concise bullet points of market commentary based only on this JSON:\n" + json.dumps(payload, ensure_ascii=False)}],
-        },
-        timeout=45,
-    )
-    response.raise_for_status()
-    body = response.json()
-    text = "\n".join(block.get("text", "") for block in body.get("content", []) if block.get("type") == "text").strip()
-    if not text:
-        raise RuntimeError("Claude returned no text commentary")
-    return {"provider": "anthropic", "model": body.get("model"), "commentary": text}
+    try:
+        response = requests.post(
+            "https://api.anthropic.com/v1/messages",
+            headers={
+                "x-api-key": key,
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json",
+            },
+            json={
+                "model": os.getenv("ANTHROPIC_MODEL", "claude-3-5-haiku-latest"),
+                "max_tokens": 700,
+                "temperature": 0,
+                "system": "You are a cautious Nigerian real-estate market research analyst. Write concise, actionable client commentary using only supplied evidence. Never calculate or invent numbers. Clearly separate observed listing data from interpretation. Mention material limitations.",
+                "messages": [{
+                    "role": "user",
+                    "content": "Write 3-5 concise bullet points of market commentary based only on this JSON:\\n"
+                    + json.dumps(payload, ensure_ascii=False),
+                }],
+            },
+            timeout=45,
+        )
+        response.raise_for_status()
+        body = response.json()
+        commentary = "\\n".join(
+            block.get("text", "")
+            for block in body.get("content", [])
+            if block.get("type") == "text"
+        ).strip()
+        if not commentary:
+            raise RuntimeError("Claude returned no text commentary")
+        return {
+            "provider": "anthropic",
+            "model": body.get("model"),
+            "commentary": commentary,
+        }
+    except Exception as exc:
+        # The client report can still be built from verified, deterministic
+        # metrics when the optional LLM is rate-limited or unavailable.
+        print(
+            "[Client commentary] Claude unavailable; using deterministic "
+            f"fallback ({type(exc).__name__})."
+        )
+        return fallback
 
 
 def append_section(docx_path, rows, findings, charts, commentary, audit_path):
