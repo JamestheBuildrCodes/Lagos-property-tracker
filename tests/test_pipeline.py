@@ -354,7 +354,9 @@ class OptionalAIInterpreterTests(unittest.TestCase):
         old_enabled = os.environ.get("GROQ_AI_COMMENTARY_ENABLED")
         os.environ["GROQ_AI_COMMENTARY_ENABLED"] = "true"
         try:
-            self.assertIsNone(ai_market_interpreter.interpret_summary({"listings_tracked": 1}))
+            result = ai_market_interpreter.interpret_summary({"listings_tracked": 1})
+            self.assertEqual(result["commentary_mode"], "deterministic")
+            self.assertTrue(result["recommended_actions"])
         finally:
             if old_key is not None:
                 os.environ["GROQ_API_KEY"] = old_key
