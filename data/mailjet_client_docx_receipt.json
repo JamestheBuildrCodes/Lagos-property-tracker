@@ -1,7 +1,7 @@
 {
-  "accepted_at_utc": "2026-11-10T01:22:03.164597+00:00",
+  "accepted_at_utc": "2026-11-16T16:45:15.075952+00:00",
   "http_status": 200,
-  "custom_id": "lagos-property-client_docx-42733625406-20261110T012202Z",
+  "custom_id": "lagos-property-client_docx-43909415071-20261116T164514Z",
   "subject": "Final Weekly Nigeria Property Market Snapshot — Word Report Attached",
   "layer": "client_docx",
   "message_results": [
@@ -11,14 +11,14 @@
         {
           "field": "To",
           "email": "H***@yahoo.co.uk",
-          "message_id": 1152921546504788253,
-          "message_uuid": "a891a44a-7f43-4c67-b07e-384e50d2b36c"
+          "message_id": 576460794458757497,
+          "message_uuid": "7ed203ca-4ca9-42bd-816f-a3fb63cdf5a8"
         },
         {
           "field": "Cc",
           "email": "t***@gmail.com",
-          "message_id": 1152921546504788254,
-          "message_uuid": "7df35e58-0a77-48f8-83ff-cfbc0b8a2032"
+          "message_id": 576460794458757498,
+          "message_uuid": "8fec006f-fb89-45e1-bade-45a38b67c5e9"
         }
       ]
     }
